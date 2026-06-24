@@ -9,7 +9,7 @@ let currentTier = "free";
 let isLoggedIn = false;
 
 // PASTE YOUR WORKING GROQ KEY IN THE QUOTATION MARKS BELOW:
-const GROQ_API_KEY = "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"; 
+const GROQ_API_KEY = "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"; 
 const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
 const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GATEWAY_URL = window.location.protocol === "file:" ? API_ENDPOINT : PROXY_URL + API_ENDPOINT;
