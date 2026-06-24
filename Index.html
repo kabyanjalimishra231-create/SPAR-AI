@@ -1,0 +1,570 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spar AI Studio (Protected Admin Portal)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-main: #181825;
+            --bg-sidebar: #11111b;
+            --bg-card: #1e1e2e;
+            --bg-bubble: #313244;
+            --text-color: #cdd6f4;
+            --accent-color: #89b4fa;
+        }
+
+        .light-theme {
+            --bg-main: #f5f5f7;
+            --bg-sidebar: #e5e5ea;
+            --bg-card: #ffffff;
+            --bg-bubble: #e9e9eb;
+            --text-color: #1c1c1e;
+            --accent-color: #007aff;
+        }
+
+        .oled-theme {
+            --bg-main: #000000;
+            --bg-sidebar: #000000;
+            --bg-card: #111111;
+            --bg-bubble: #222222;
+            --text-color: #ffffff;
+            --accent-color: #ffffff;
+            border: 1px solid #333;
+        }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--text-color);
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-sidebar);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-right: 1px solid #313244;
+            transition: transform 0.3s ease, background 0.3s;
+            z-index: 100;
+        }
+
+        .new-chat-btn {
+            background-color: var(--accent-color);
+            color: #11111b;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .custom-select {
+            background-color: var(--bg-bubble);
+            color: var(--text-color);
+            border: 1px solid #45475a;
+            padding: 10px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .plan-badge-sidebar {
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            font-weight: bold;
+            background-color: var(--bg-bubble);
+        }
+
+        .plans-nav-btn {
+            background: linear-gradient(135deg, #b4befe 0%, #89b4fa 100%);
+            color: #11111b;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .chat-history {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 12px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+        }
+
+        .history-item:hover {
+            background-color: var(--bg-bubble);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-main);
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid #313244;
+            font-weight: bold;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            font-size: 12px;
+            background-color: var(--bg-bubble);
+            padding: 4px 8px;
+            border-radius: 20px;
+            color: #a6adc8;
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 15px;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        .user-message {
+            background-color: var(--accent-color);
+            color: #11111b;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .ai-message {
+            background-color: var(--bg-bubble);
+            color: var(--text-color);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .speak-btn {
+            background: none;
+            border: none;
+            color: #a6adc8;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+            text-align: left;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background-color: var(--bg-card);
+            border-top: 1px solid #313244;
+        }
+
+        .input-wrapper {
+            display: flex;
+            background-color: var(--bg-bubble);
+            border-radius: 8px;
+            padding: 8px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            padding: 8px;
+        }
+
+        .action-icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .send-btn {
+            background-color: var(--accent-color);
+            color: #11111b;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--bg-card);
+            border: 1px solid #45475a;
+            border-radius: 16px;
+            padding: 25px;
+            width: 95%;
+            max-width: 550px;
+            z-index: 1000;
+        }
+
+        .modal-title { text-align: center; color: #f9e2af; margin-bottom: 5px; font-size: 22px; }
+        .modal-tagline { text-align: center; color: #a6adc8; font-size: 13px; margin-bottom: 20px; }
+
+        .plans-grid {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .plan-card {
+            flex: 1;
+            background-color: var(--bg-bubble);
+            border: 2px solid #45475a;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .plan-card.active-plan { border-color: #a6e3a1; }
+        .plan-card.premium-plus { border-color: #89b4fa; }
+        .plan-card.premium-ultra { border-color: #fab387; }
+
+        .plan-name { font-weight: bold; font-size: 16px; margin-bottom: 5px; }
+        .plan-price { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .plan-features { font-size: 12px; text-align: left; color: #a6adc8; margin-bottom: 15px; line-height: 1.4; }
+        .plan-features li { list-style: none; margin-bottom: 4px; }
+
+        .select-plan-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .coupon-section {
+            border-top: 1px solid #313244;
+            padding-top: 15px;
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-bubble);
+            border: 1px solid #45475a;
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .coupon-input {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--bg-bubble);
+            border: 1px solid #45475a;
+            border-radius: 6px;
+            color: var(--text-color);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .coupon-apply-btn {
+            background-color: #a6e3a1;
+            color: #11111b;
+            border: none;
+            padding: 0 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .submit-login-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: #11111b;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .admin-btn {
+            background-color: #f38ba8;
+            color: #11111b;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .coupon-admin-btn {
+            background-color: #f9e2af;
+            color: #11111b;
+            border: none;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .close-modal-container { text-align: center; margin-top: 10px; }
+        .close-modal-btn { background: none; border: none; color: #a6adc8; font-size: 13px; cursor: pointer; text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .sidebar { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .plans-grid { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" onclick="location.reload()">+ New Chat</button>
+        
+        <div class="plan-badge-sidebar" id="sidebarPlanBadge">Plan: Loading...</div>
+
+        <div id="restrictedAdminPanel" style="border: 1px solid #313244; padding: 10px; border-radius: 8px; display: none; flex-direction: column; gap: 8px;">
+            <span style="font-size: 11px; color: #f38ba8; font-weight: bold; text-transform: uppercase;">🛡️ Restricted Settings</span>
+            
+            <label style="font-size:12px; color:#a6adc8;">Select AI Model</label>
+            <select class="custom-select" id="modelSelect" onchange="handleModelChange()">
+                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Basic Free)</option>
+                <option value="llama-3.3-70b-specdec">Llama 3.3 70B (Plus Plan)</option>
+                <option value="mixtral-8x7b-32768">Mixtral 8x7B (Ultra Plan)</option>
+            </select>
+
+            <label style="font-size:12px; color:#a6adc8;">Interface Layout</label>
+            <select class="custom-select" id="themeSelect" onchange="handleThemeChange()">
+                <option value="dark">Catppuccin Dark</option>
+                <option value="light">Classic Light</option>
+                <option value="oled">Pure OLED Black (Ultra)</option>
+            </select>
+        </div>
+
+        <button class="plans-nav-btn" onclick="openPlansModal()">💎 Premium Hub</button>
+        
+        <button class="coupon-admin-btn" id="adminCouponBtn" onclick="openCouponManagerModal()" style="display:none;">🎫 Manage Coupons</button>
+        <button class="admin-btn" id="adminLogoutBtn" onclick="logoutAdmin()" style="display:none;">🔒 Log Out Admin</button>
+        
+        <button class="close-modal-btn" id="adminGateLink" onclick="openAdminModal()" style="font-size: 11px; margin-top: auto; color:#585b70;">System Login Gateway</button>
+
+        <div class="chat-history">
+            <div class="history-item">Active Conversation</div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+
+    <div class="modal" id="adminModal" style="max-width:400px;">
+        <h2 class="modal-title" style="color:#89b4fa;">System Authorization Gate</h2>
+        <p class="modal-tagline">Enter the registered Administrator device configuration key credential to unlock developer options.</p>
+        <input type="text" id="adminPhoneInput" class="login-input" placeholder="Enter Admin Phone Key" maxlength="10">
+        <button class="submit-login-btn" style="background-color:#89b4fa;" onclick="verifyAdminPhone()">Verify Identity</button>
+        <div class="close-modal-container">
+            <button class="close-modal-btn" onclick="closeAllModals()">Cancel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="couponManagerModal" style="max-width:420px;">
+        <h2 class="modal-title" style="color:#f9e2af;">Coupon Factory Desk</h2>
+        <p class="modal-tagline">Create or update promo codes that users can submit to unlock premium status variables.</p>
+        
+        <label style="font-size: 12px; color: #a6adc8; display:block; text-align:left; margin-bottom:5px;">Define Secret Code String:</label>
+        <input type="text" id="newCouponCode" class="login-input" placeholder="e.g. FREEPLUS100" style="text-transform: uppercase;">
+        
+        <label style="font-size: 12px; color: #a6adc8; display:block; text-align:left; margin-bottom:5px;">Select Target Tier Payload:</label>
+        <select class="custom-select" id="newCouponTier" style="width:100%; margin-bottom:20px;">
+            <option value="plus">Spar Plus Tier ($4.99 value)</option>
+            <option value="ultra">Pro Ultra Tier ($14.99 value)</option>
+        </select>
+
+        <button class="submit-login-btn" style="background-color:#a6e3a1; color:#11111b;" onclick="saveAdminCoupon()">Save & Deploy Code</button>
+        
+        <div style="margin-top: 15px; font-size:12px; color:#6c7086; text-align:left; background:#11111b; padding:10px; border-radius:6px;" id="activeCouponList">
+            No active custom deployment code saved.
+        </div>
+
+        <div class="close-modal-container">
+            <button class="close-modal-btn" onclick="closeAllModals()">Close Panel</button>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal" style="max-width:400px;">
+        <h2 class="modal-title">Authentication Gate</h2>
+        <p class="modal-tagline">You have reached your 10 basic free trial chats. Provide an email to claim 10 more free credits!</p>
+        <input type="email" id="userEmailInput" class="login-input" placeholder="your-email@domain.com" required>
+        <button class="submit-login-btn" onclick="handleEmailLogin()">Unlock Free Credits</button>
+    </div>
+
+    <div class="modal" id="plansModal">
+        <h2 class="modal-title">Spar AI Memberships</h2>
+        <p class="modal-tagline">Upgrade to access state-of-the-art advanced processing engines</p>
+        
+        <div class="plans-grid">
+            <div class="plan-card" id="cardFree">
+                <div>
+                    <div class="plan-name" style="color:#a6e3a1;">Free Basic</div>
+                    <div class="plan-price">$0</div>
+                    <div class="plan-features">
+                        <li>• 10 daily base messages</li>
+                        <li>• 10 extra with Email login</li>
+                        <li>• Standard Llama 3.1 Speed</li>
+                    </div>
+                </div>
+                <button class="select-plan-btn" style="background-color:#45475a; color:#cdd6f4;" disabled>Current</button>
+            </div>
+            
+            <div class="plan-card premium-plus" id="cardPlus">
+                <div>
+                    <div class="plan-name" style="color:#89b4fa;">Spar Plus</div>
+                    <div class="plan-price">$4.99<span style="font-size:12px;">/mo</span></div>
+                    <div class="plan-features">
+                        <li>• <b>Unlimited</b> daily chats</li>
+                        <li>• Unlocks <b>Llama 3.3 70B</b></li>
+                        <li>• Higher prompt capacity</li>
+                    </div>
+                </div>
+                <button class="select-plan-btn" style="background-color:#89b4fa; color:#11111b;" onclick="purchaseTier('plus')">Activate Plus</button>
+            </div>
+
+            <div class="plan-card premium-ultra" id="cardUltra">
+                <div>
+                    <div class="plan-name" style="color:#fab387;">Pro Ultra</div>
+                    <div class="plan-price">$14.99<span style="font-size:12px;">/mo</span></div>
+                    <div class="plan-features">
+                        <li>• <b>Priority</b> ultra routing speed</li>
+                        <li>• Unlocks <b>Mixtral Deep-Reasoning</b></li>
+                        <li>• Unlocks <b>OLED Black Layout</b></li>
+                    </div>
+                </div>
+                <button class="select-plan-btn" style="background-color:#fab387; color:#11111b;" onclick="purchaseTier('ultra')">Go Ultra</button>
+            </div>
+        </div>
+
+        <div class="coupon-section">
+            <input type="text" id="userCouponInput" class="coupon-input" placeholder="Have a gift promo or access code?" style="text-transform: uppercase;">
+            <button class="coupon-apply-btn" onclick="redeemUserCoupon()">Redeem</button>
+        </div>
+
+        <div class="close-modal-container">
+            <button class="close-modal-btn" onclick="closeAllModals()">Back to Workspace</button>
+        </div>
+    </div>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="header-left">
+                <button class="menu-btn" onclick="toggleMenu()">☰</button>
+                <span>Spar AI Studio</span>
+            </div>
+            <div class="status-badge" id="tierBadge">Free Tier (10 left)</div>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai-message">
+                Welcome to Spar AI Studio! Type your request below to consult the model network.
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" class="chat-input" placeholder="Ask Spar AI anything..." autocomplete="off">
+                <button class="action-icon-btn" id="micBtn" onclick="startVoiceRecognition()" title="Voice Input">🎤</button>
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
