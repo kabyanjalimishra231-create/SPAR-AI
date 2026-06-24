@@ -9,7 +9,7 @@ let currentTier = "free";
 let isLoggedIn = false;
 
 // PASTE YOUR WORKING GROQ KEY IN THE QUOTATION MARKS BELOW:
-const GROQ_API_KEY = "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"; 
+const GROQ_API_KEY = "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"; 
 const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
 const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GATEWAY_URL = window.location.protocol === "file:" ? API_ENDPOINT : PROXY_URL + API_ENDPOINT;
@@ -273,6 +273,13 @@ function toggleMenu() { document.getElementById('sidebar').classList.toggle('act
 
 async function fetchAIResponse(userPrompt) {
     const selectedModel = document.getElementById('modelSelect').value;
+    
+    // LIVE DATA & TIMING INJECTION SECTION (Lines 201-210)
+    const now = new Date();
+    const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const timeString = now.toLocaleTimeString('en-US');
+    const contextPrompt = `You are SPAR-AI Studio, an advanced live chat assistant. Real-Time Tracking Data: Today is completely verified as ${dateString}. The current local live clock tracking time is exactly ${timeString}. Use this explicit timing parameter context if the user asks any temporal, schedule, current data, time, or date-related inquiries.`;
+
     try {
         const response = await fetch(GATEWAY_URL, {
             method: "POST",
@@ -282,7 +289,10 @@ async function fetchAIResponse(userPrompt) {
             },
             body: JSON.stringify({
                 model: selectedModel,
-                messages: [{ role: "user", content: userPrompt }]
+                messages: [
+                    { role: "system", content: contextPrompt },
+                    { role: "user", content: userPrompt }
+                ]
             })
         });
 
