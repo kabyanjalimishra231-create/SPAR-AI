@@ -274,11 +274,13 @@ function toggleMenu() { document.getElementById('sidebar').classList.toggle('act
 async function fetchAIResponse(userPrompt) {
     const selectedModel = document.getElementById('modelSelect').value;
     
-    // LIVE DATA & TIMING INJECTION SECTION (Lines 201-210)
+    // GENERATE LIVE REAL-TIME CLOCK PARAMETERS EVERY TIME
     const now = new Date();
     const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const timeString = now.toLocaleTimeString('en-US');
-    const contextPrompt = `You are SPAR-AI Studio, an advanced live chat assistant. Real-Time Tracking Data: Today is completely verified as ${dateString}. The current local live clock tracking time is exactly ${timeString}. Use this explicit timing parameter context if the user asks any temporal, schedule, current data, time, or date-related inquiries.`;
+    
+    // STRICT STRUCTURAL INJECTION PROMPT COMBINED WITH USER VALUE TO STOP 404 KNOWLEDGE DISCONNECTS
+    const forcedLivePrompt = `IMPORTANT SYSTEM OVERRIDE: Today's verified current date is ${dateString} and the local system clock time is ${timeString}. You are SPAR-AI Studio, operating with live context synchronization. Answer the following prompt with absolute reference to this temporal timeline context if necessary.\n\nUser Prompt: ${userPrompt}`;
 
     try {
         const response = await fetch(GATEWAY_URL, {
@@ -290,8 +292,7 @@ async function fetchAIResponse(userPrompt) {
             body: JSON.stringify({
                 model: selectedModel,
                 messages: [
-                    { role: "system", content: contextPrompt },
-                    { role: "user", content: userPrompt }
+                    { role: "user", content: forcedLivePrompt }
                 ]
             })
         });
