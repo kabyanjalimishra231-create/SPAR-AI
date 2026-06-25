@@ -1,4 +1,7 @@
-﻿// Hardcoded Exclusive Admin ID Key
+﻿// Global Razorpay Key Hook Vector Configuration
+const RAZORPAY_KEY_ID = "rzp_test_T5uOdu0zh2G02R"; 
+
+// Hardcoded Exclusive Admin ID Key
 const AUTHORIZED_ADMIN_PHONE = "9214605427"; 
 let isAdminAuthenticated = false;
 
@@ -8,7 +11,7 @@ let messageCount = 0;
 let currentTier = "free"; 
 let isLoggedIn = false;
 
-// PASTE YOUR WORKING GROQ KEY IN THE QUOTATION MARKS BELOW:
+// Groq Core System Key Structure Link
 const GROQ_API_KEY = "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"; 
 const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
 const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
@@ -174,7 +177,6 @@ function verifyAdminPhone() {
     if (inputKey === AUTHORIZED_ADMIN_PHONE) {
         isAdminAuthenticated = true;
         
-        document.getElementById('restrictedAdminPanel').style.display = 'flex';
         document.getElementById('adminLogoutBtn').style.display = 'block';
         document.getElementById('adminCouponBtn').style.display = 'block';
         document.getElementById('adminGateLink').style.display = 'none';
@@ -190,7 +192,6 @@ function verifyAdminPhone() {
 
 function logoutAdmin() {
     isAdminAuthenticated = false;
-    document.getElementById('restrictedAdminPanel').style.display = 'none';
     document.getElementById('adminLogoutBtn').style.display = 'none';
     document.getElementById('adminCouponBtn').style.display = 'none';
     document.getElementById('adminGateLink').style.display = 'block';
@@ -330,12 +331,63 @@ function closeAllModals() {
     }
 }
 
+// PRODUCTION RAZORPAY TRANSACTION MODULE HANDLER
 function purchaseTier(tier) {
-    currentTier = tier;
-    localStorage.setItem("spar_ai_subscription_tier", tier);
-    updateBadge();
-    closeAllModals();
-    printSystemLog(`🎉 System configurations successfully switched to **${tier.toUpperCase()}** metrics.`);
+    if (tier === 'free') {
+        currentTier = 'free';
+        localStorage.setItem("spar_ai_subscription_tier", 'free');
+        updateBadge();
+        closeAllModals();
+        return;
+    }
+
+    printSystemLog(`🔄 Initializing secure Razorpay gateway link for ${tier.toUpperCase()}...`);
+
+    let amountInPaise = 0;
+    let planName = "";
+
+    if (tier === 'plus') {
+        amountInPaise = 29900; // ₹299.00 INR
+        planName = "Spar Plus Tier ⚡";
+    } else if (tier === 'ultra') {
+        amountInPaise = 59900; // ₹599.00 INR
+        planName = "Pro Ultra Tier 🔥";
+    }
+
+    const options = {
+        "key": RAZORPAY_KEY_ID, 
+        "amount": amountInPaise, 
+        "currency": "INR",
+        "name": "SPAR AI Studio",
+        "description": `Subscription activation for ${planName}`,
+        "image": "https://image.pollinations.ai/p/abstract_digital_neon_logo?width=128&height=128", 
+        "handler": function (response) {
+            if (response.razorpay_payment_id) {
+                currentTier = tier;
+                localStorage.setItem("spar_ai_subscription_tier", tier);
+                
+                printSystemLog(`🎉 Payment Verified! ID: ${response.razorpay_payment_id}. Upgraded to ${tier.toUpperCase()}.`);
+                alert(`🎉 Payment Successful! Account assigned to ${tier.toUpperCase()} mode.`);
+                
+                updateBadge();
+                closeAllModals();
+            }
+        },
+        "prefill": {
+            "name": "Spar Studio User",
+            "email": localStorage.getItem("spar_ai_user_email") || "user@example.com"
+        },
+        "theme": {
+            "color": "#89b4fa"
+        }
+    };
+
+    try {
+        const rzp1 = new window.Razorpay(options);
+        rzp1.open();
+    } catch (err) {
+        alert("Razorpay structural frame failed to initialize: " + err.message);
+    }
 }
 
 function handleModelChange() {
@@ -373,8 +425,6 @@ function printSystemLog(text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
-
 async function fetchAIResponse(userPrompt) {
     const selectedModel = document.getElementById('modelSelect').value;
     
@@ -409,7 +459,7 @@ async function fetchAIResponse(userPrompt) {
             return data.choices[0].message.content.trim();
         }
         
-        return "The interface encountered an unreadable network data transmission. Response received: " + JSON.stringify(data);
+        return "The interface encountered an unreadable network data transmission.";
     } catch (error) {
         return "Network connection routing path exception: " + error.message;
     }
