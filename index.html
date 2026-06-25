@@ -46,7 +46,6 @@
             transition: background 0.3s ease;
         }
 
-        /* Sidebar Layout styling */
         #sidebar {
             width: 280px;
             background-color: var(--bg-sidebar);
@@ -98,7 +97,6 @@
             border-color: var(--accent-color);
         }
 
-        /* Feature Hardware Button Area */
         .hardware-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -117,7 +115,6 @@
             font-weight: bold;
         }
 
-        /* History Stream Container Styling */
         .history-pane {
             flex: 1;
             overflow-y: auto;
@@ -134,7 +131,6 @@
             margin-bottom: 10px;
         }
 
-        /* Chat Frame View Area */
         #mainChat {
             flex: 1;
             display: flex;
@@ -211,7 +207,6 @@
             border-radius: 4px;
         }
 
-        /* Interactive Footer Inputs Bar Layout */
         .chat-footer {
             padding: 20px 25px;
             display: flex;
@@ -270,7 +265,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
 
-        /* Modals and Overlay Frameworks */
         #overlay {
             position: fixed;
             top:0; left:0; width:100%; height:100%;
@@ -325,7 +319,6 @@
 </head>
 <body>
 
-    <!-- Sidebar Element View Pane -->
     <div id="sidebar">
         <div class="logo-area">SPAR AI Studio</div>
         <div id="sidebarPlanBadge" class="badge" style="background-color: var(--bg-bubble);">Plan: Free Basic</div>
@@ -335,24 +328,19 @@
         <button class="nav-btn" id="adminCouponBtn" style="display:none;" onclick="openCouponManagerModal()">🎫 Admin Coupon Rules</button>
         <button class="nav-btn" id="adminLogoutBtn" style="display:none;" onclick="logoutAdmin()">🔒 Close Admin Panel</button>
         
-        <!-- 5 & 6. HARDWARE ACCESS BUTTON TRIGGER BLOCKS -->
         <div class="hardware-grid">
             <button class="hw-btn" onclick="requestCameraAccess()">📷 Open Cam</button>
             <button class="hw-btn" onclick="requestLocationAccess()">📍 Pin GPS</button>
         </div>
 
-        <!-- 4. PERSISTENT LOCAL CHAT HISTORY INTERFACE CONTAINER -->
         <div class="history-pane">
             <div class="history-title">Saved Search History</div>
-            <div id="sidebarHistoryList">
-                <!-- Javascript fills these modules securely from memory logs -->
-            </div>
+            <div id="sidebarHistoryList"></div>
         </div>
 
         <a id="adminGateLink" href="#" onclick="openAdminModal()" style="color:rgba(255,255,255,0.2); font-size:11px; text-decoration:none; text-align:center; margin-top:20px;">System Login Gateway</a>
     </div>
 
-    <!-- Main Chat Core View Workspace -->
     <div id="mainChat">
         <div class="chat-header">
             <div style="font-weight: bold; font-size:16px;">Secure Pipeline Routing Active</div>
@@ -370,13 +358,10 @@
             </div>
         </div>
 
-        <!-- MAIN MESSAGES CONTAINER CORE (CRUCIAL ID RETAINED FOR RENDER PIPELINES) -->
         <div id="chatMessages"></div>
 
-        <!-- Footer Input Form Action Row Layout -->
         <div class="chat-footer">
             <div class="input-wrapper">
-                <!-- 3. VOICE RECORDING MICROPHONE HOOK TRIGGER BUTTON -->
                 <button id="micBtn" class="action-icon-btn" onclick="startVoiceRecognition()" title="Voice Input Mode">🎤</button>
                 <input type="text" id="userInput" placeholder="Ask Spar AI or type 'create image of...' anything...">
             </div>
@@ -384,17 +369,14 @@
         </div>
     </div>
 
-    <!-- Interface Modals System Blocks Layout Container -->
     <div id="overlay" onclick="closeAllModals()"></div>
 
-    <!-- Admin Authorization Verification Matrix Modal -->
     <div id="adminModal" class="modal">
         <div class="modal-title">Admin Credential Key Check</div>
         <input type="password" id="adminPhoneInput" placeholder="Enter secure host verification digits...">
         <button class="modal-btn" onclick="verifyAdminPhone()">Validate Authorization</button>
     </div>
 
-    <!-- Coupon System Promotion Manager Panel Modal -->
     <div id="couponManagerModal" class="modal">
         <div class="modal-title">Coupon Deployment Rules Engine</div>
         <div id="activeCouponList" style="font-size:12px; margin-bottom:15px; color:#a6adc8;"></div>
@@ -406,7 +388,6 @@
         <button class="modal-btn" onclick="saveAdminCoupon()">Commit New Rule Vector</button>
     </div>
 
-    <!-- User Subscription Purchase Plan Selection Panel Modal -->
     <div id="plansModal" class="modal">
         <div class="modal-title">Select Premium Account Suite</div>
         <input type="text" id="userCouponInput" placeholder="Have an admin promo sequence string? Enter here...">
@@ -425,7 +406,6 @@
         </div>
     </div>
 
-    <!-- Login Lock Restrictive Portal Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-title">Trial Quota Checkpoint Hit</div>
         <p style="font-size:13px; margin-bottom:15px; color:#a6adc8;">Your initial 10-message anonymous allocation has expired. Authenticate email tracking lines to unlock your 10 remaining complimentary daily allocations.</p>
@@ -433,7 +413,6 @@
         <button class="modal-btn" onclick="handleEmailLogin()">Extend Workspace Allocation</button>
     </div>
 
-    <!-- LOAD EXTERNAL APP SCRIPT FILE PIPELINES -->
     <script src="app.js"></script>
 </body>
 </html>

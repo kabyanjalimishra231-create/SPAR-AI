@@ -14,7 +14,6 @@ const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
 const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GATEWAY_URL = window.location.protocol === "file:" ? API_ENDPOINT : PROXY_URL + API_ENDPOINT;
 
-// Core Configuration Bootstrap
 function checkDailyLimit() {
     const savedTier = localStorage.getItem("spar_ai_subscription_tier");
     if (savedTier) currentTier = savedTier;
@@ -31,25 +30,18 @@ function checkDailyLimit() {
     }
     updateBadge();
     renderActiveCouponDescriptor();
-    
-    // 2. WELCOME INITIALIZATION
     initializeWelcomeGreeting();
-    
-    // 4. LOAD HISTORY FROM STORAGE
     renderSavedChatHistory();
 }
 
-// 2. WELCOME GREETING IMPLEMENTATION
 function initializeWelcomeGreeting() {
     const chatMessages = document.getElementById('chatMessages');
-    // Only inject if the screen area is empty to prevent duplicates on refreshes
     if (chatMessages && chatMessages.children.length === 0) {
         printSystemLog("Welcome to SPAR AI how I can assist you today.");
         speakText("Welcome to SPAR AI how I can assist you today.");
     }
 }
 
-// 4. CHAT HISTORY MANAGERS
 function saveMessageToHistory(role, text, isImage = false) {
     let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
     internalHistory.push({ role, text, isImage, timestamp: new Date().toISOString() });
@@ -58,15 +50,12 @@ function saveMessageToHistory(role, text, isImage = false) {
 }
 
 function renderSavedChatHistory() {
-    // Looks for a history list sidebar wrapper if you decide to add one to your HTML layouts,
-    // otherwise gracefully compiles metrics in local rules.
     const historyContainer = document.getElementById('sidebarHistoryList');
     if (!historyContainer) return;
     
     let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
     historyContainer.innerHTML = "";
     
-    // Reverse it to display the most recent queries at the top
     internalHistory.slice().reverse().forEach(item => {
         if(item.role === 'user') {
             const historyItem = document.createElement('div');
@@ -84,7 +73,6 @@ function renderSavedChatHistory() {
     });
 }
 
-// 5. CAMERA ACCESS VIA PERMISSION MATRIX
 async function requestCameraAccess() {
     const confirmChoice = confirm("SPAR AI Studio requires permission to access your device camera video stream. Do you want to allow access?");
     if (!confirmChoice) {
@@ -96,7 +84,6 @@ async function requestCameraAccess() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         printSystemLog("📸 Camera access successfully granted! Device hardware initialized.");
         
-        // Setup simple preview floating element if it doesn't exist
         let videoPreview = document.getElementById('sparCameraPreview');
         if (!videoPreview) {
             videoPreview = document.createElement('video');
@@ -118,7 +105,6 @@ async function requestCameraAccess() {
     }
 }
 
-// 6. LOCATION ACCESS CONTROLLER
 function requestLocationAccess() {
     if (!navigator.geolocation) {
         printSystemLog("❌ Geolocation routing vectors are not supported by this browser environment.");
@@ -140,7 +126,6 @@ function requestLocationAccess() {
     );
 }
 
-// 3. VOICE INPUT (SPEECH TO TEXT)
 function startVoiceRecognition() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
@@ -164,18 +149,15 @@ function startVoiceRecognition() {
     recognition.start();
 }
 
-// 3. VOICE OUTPUT (TEXT TO SPEECH ENGINE)
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        // Clean out markdown characters before speaking for clean voice delivery
         const cleanSpeechText = text.replace(/[\*\#\`\-\_]/g, '');
         const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
         window.speechSynthesis.speak(utterance);
     }
 }
 
-// Admin Panel Framework Utilities
 function openAdminModal() {
     document.getElementById('adminModal').style.display = 'block';
     document.getElementById('overlay').style.display = 'block';
@@ -393,7 +375,6 @@ function printSystemLog(text) {
 
 function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
 
-// Core Pipeline Network Dispatcher
 async function fetchAIResponse(userPrompt) {
     const selectedModel = document.getElementById('modelSelect').value;
     
@@ -434,7 +415,6 @@ async function fetchAIResponse(userPrompt) {
     }
 }
 
-// User Submission Interface Handling Engine
 async function sendMessage() {
     if (currentTier === "free") {
         if (!isLoggedIn && messageCount >= initialFreeLimit) { showLoginModal(); return; }
@@ -451,7 +431,6 @@ async function sendMessage() {
     userDiv.textContent = messageText;
     chatMessages.appendChild(userDiv);
 
-    // 4. LOG HISTORY TO USER PERSISTENCE STORAGE
     saveMessageToHistory('user', messageText);
 
     inputField.value = '';
@@ -463,7 +442,6 @@ async function sendMessage() {
         updateBadge();
     }
 
-    // 1. DYNAMIC IMAGE GENERATION PIPELINE DETECTOR
     const textLower = messageText.toLowerCase();
     if (textLower.includes("create image") || textLower.includes("generate image") || textLower.includes("draw") || textLower.includes("make an image")) {
         const imageDiv = document.createElement('div');
@@ -472,11 +450,9 @@ async function sendMessage() {
         chatMessages.appendChild(imageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // Strip trigger words to formulate a clean prompt string
         let imagePrompt = messageText.replace(/(create image|generate image|draw|make an image|of|for|a)/gi, "").trim();
         if(imagePrompt === "") imagePrompt = "abstract digital art neural network concept";
         
-        // Build the dynamic target source URL
         const encodedPrompt = encodeURIComponent(imagePrompt);
         const dynamicImageSrc = `https://image.pollinations.ai/p/${encodedPrompt}?width=512&height=512&seed=${Math.floor(Math.random() * 100000)}`;
 
@@ -484,6 +460,7 @@ async function sendMessage() {
             imageDiv.innerHTML = `
                 <div style="font-weight: bold; margin-bottom: 8px;">🎨 Generated Image Assets for: "${imagePrompt}"</div>
                 <img src="${dynamicImageSrc}" alt="${imagePrompt}" style="width: 100%; max-width: 320px; border-radius: 8px; margin-top: 5px; box-shadow: 0px 2px 8px rgba(0,0,0,0.3); display: block;" />
+                <a href="${dynamicImageSrc}" download="SPAR_AI_Image.jpg" target="_blank" style="display: inline-block; margin-top: 10px; padding: 6px 12px; background: var(--accent-gradient); color: #11111b; text-decoration: none; font-weight: bold; font-size: 13px; border-radius: 6px; text-align: center;">⬇️ Download Image</a>
             `;
             chatMessages.scrollTop = chatMessages.scrollHeight;
             saveMessageToHistory('ai', dynamicImageSrc, true);
@@ -491,14 +468,12 @@ async function sendMessage() {
         return;
     }
 
-    // Standard AI Text Pipeline Action Loop
     const aiDiv = document.createElement('div');
     aiDiv.className = 'message ai-message';
     aiDiv.textContent = "Spar AI is parsing query parameters...";
     chatMessages.appendChild(aiDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // Trigger helper conditions natively inside text matching inputs
     if (textLower === "open camera" || textLower === "camera capture") {
         aiDiv.textContent = "Initializing camera permission gateway parameters...";
         await requestCameraAccess();
@@ -513,10 +488,7 @@ async function sendMessage() {
     const realAIResponse = await fetchAIResponse(messageText);
     aiDiv.textContent = realAIResponse;
     
-    // Save AI output response parameters to local log stream
     saveMessageToHistory('ai', realAIResponse);
-
-    // 3. AUTOMATIC VOICE OUTPUT OVERRIDE TRIGGER
     speakText(realAIResponse);
     
     const audioBtn = document.createElement('button');
@@ -532,5 +504,4 @@ document.getElementById('userInput').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
-// Boot the Core Framework Engine
 checkDailyLimit();
