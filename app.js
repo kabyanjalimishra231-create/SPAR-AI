@@ -14,6 +14,7 @@ const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
 const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 const GATEWAY_URL = window.location.protocol === "file:" ? API_ENDPOINT : PROXY_URL + API_ENDPOINT;
 
+// Core Configuration Bootstrap
 function checkDailyLimit() {
     const savedTier = localStorage.getItem("spar_ai_subscription_tier");
     if (savedTier) currentTier = savedTier;
@@ -30,8 +31,151 @@ function checkDailyLimit() {
     }
     updateBadge();
     renderActiveCouponDescriptor();
+    
+    // 2. WELCOME INITIALIZATION
+    initializeWelcomeGreeting();
+    
+    // 4. LOAD HISTORY FROM STORAGE
+    renderSavedChatHistory();
 }
 
+// 2. WELCOME GREETING IMPLEMENTATION
+function initializeWelcomeGreeting() {
+    const chatMessages = document.getElementById('chatMessages');
+    // Only inject if the screen area is empty to prevent duplicates on refreshes
+    if (chatMessages && chatMessages.children.length === 0) {
+        printSystemLog("Welcome to SPAR AI how I can assist you today.");
+        speakText("Welcome to SPAR AI how I can assist you today.");
+    }
+}
+
+// 4. CHAT HISTORY MANAGERS
+function saveMessageToHistory(role, text, isImage = false) {
+    let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
+    internalHistory.push({ role, text, isImage, timestamp: new Date().toISOString() });
+    localStorage.setItem("spar_chat_history", JSON.stringify(internalHistory));
+    renderSavedChatHistory();
+}
+
+function renderSavedChatHistory() {
+    // Looks for a history list sidebar wrapper if you decide to add one to your HTML layouts,
+    // otherwise gracefully compiles metrics in local rules.
+    const historyContainer = document.getElementById('sidebarHistoryList');
+    if (!historyContainer) return;
+    
+    let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
+    historyContainer.innerHTML = "";
+    
+    // Reverse it to display the most recent queries at the top
+    internalHistory.slice().reverse().forEach(item => {
+        if(item.role === 'user') {
+            const historyItem = document.createElement('div');
+            historyItem.className = 'history-summary-item';
+            historyItem.style.padding = "8px";
+            historyItem.style.fontSize = "12px";
+            historyItem.style.borderBottom = "1px solid var(--bg-bubble)";
+            historyItem.style.cursor = "pointer";
+            historyItem.textContent = item.text.length > 25 ? item.text.substring(0, 25) + "..." : item.text;
+            historyItem.onclick = () => {
+                document.getElementById('userInput').value = item.text;
+            };
+            historyContainer.appendChild(historyItem);
+        }
+    });
+}
+
+// 5. CAMERA ACCESS VIA PERMISSION MATRIX
+async function requestCameraAccess() {
+    const confirmChoice = confirm("SPAR AI Studio requires permission to access your device camera video stream. Do you want to allow access?");
+    if (!confirmChoice) {
+        printSystemLog("❌ Camera request denied by the user workspace settings.");
+        return;
+    }
+    
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        printSystemLog("📸 Camera access successfully granted! Device hardware initialized.");
+        
+        // Setup simple preview floating element if it doesn't exist
+        let videoPreview = document.getElementById('sparCameraPreview');
+        if (!videoPreview) {
+            videoPreview = document.createElement('video');
+            videoPreview.id = 'sparCameraPreview';
+            videoPreview.autoplay = true;
+            videoPreview.playsInline = true;
+            videoPreview.style.position = 'fixed';
+            videoPreview.style.bottom = '80px';
+            videoPreview.style.right = '20px';
+            videoPreview.style.width = '160px';
+            videoPreview.style.borderRadius = '8px';
+            videoPreview.style.zIndex = '999';
+            videoPreview.style.boxShadow = '0px 4px 12px rgba(0,0,0,0.5)';
+            document.body.appendChild(videoPreview);
+        }
+        videoPreview.srcObject = stream;
+    } catch (err) {
+        printSystemLog(`⚠️ Camera stream initialization failed: ${err.message}`);
+    }
+}
+
+// 6. LOCATION ACCESS CONTROLLER
+function requestLocationAccess() {
+    if (!navigator.geolocation) {
+        printSystemLog("❌ Geolocation routing vectors are not supported by this browser environment.");
+        return;
+    }
+    
+    printSystemLog("📡 Querying device location parameters... waiting for local hardware permission dialog.");
+    
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const lat = position.coords.latitude.toFixed(4);
+            const lon = position.coords.longitude.toFixed(4);
+            printSystemLog(`📍 Location Synced Successfully! Coordinates verified: Latitude ${lat}, Longitude ${lon}.`);
+        },
+        (error) => {
+            printSystemLog(`❌ Location acquisition rejected: ${error.message}`);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+}
+
+// 3. VOICE INPUT (SPEECH TO TEXT)
+function startVoiceRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        alert("Voice recognition features are unsupported in this client browser sandbox.");
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    const micBtn = document.getElementById('micBtn');
+    if (micBtn) micBtn.textContent = "🛑 Listening...";
+    
+    recognition.onresult = function(event) {
+        const SpeechResult = event.results[0][0].transcript;
+        document.getElementById('userInput').value = SpeechResult;
+    };
+    recognition.onend = function() { 
+        if (micBtn) micBtn.textContent = "🎤"; 
+    };
+    recognition.onerror = function(e) {
+        printSystemLog(`🎤 Voice System Warning: ${e.error}`);
+    };
+    recognition.start();
+}
+
+// 3. VOICE OUTPUT (TEXT TO SPEECH ENGINE)
+function speakText(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        // Clean out markdown characters before speaking for clean voice delivery
+        const cleanSpeechText = text.replace(/[\*\#\`\-\_]/g, '');
+        const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
+        window.speechSynthesis.speak(utterance);
+    }
+}
+
+// Admin Panel Framework Utilities
 function openAdminModal() {
     document.getElementById('adminModal').style.display = 'block';
     document.getElementById('overlay').style.display = 'block';
@@ -98,10 +242,12 @@ function renderActiveCouponDescriptor() {
     const savedTier = localStorage.getItem("spar_admin_coupon_tier");
     const displayBlock = document.getElementById('activeCouponList');
 
-    if(savedCode && savedTier) {
-        displayBlock.innerHTML = `<b>Live App Rule:</b> Code <span style="color:#f9e2af; font-weight:bold;">${savedCode}</span> grants full access to the <b>${savedTier.toUpperCase()}</b> Tier pipeline.`;
-    } else {
-        displayBlock.textContent = "No active custom deployment code saved.";
+    if(displayBlock) {
+        if(savedCode && savedTier) {
+            displayBlock.innerHTML = `<b>Live App Rule:</b> Code <span style="color:#f9e2af; font-weight:bold;">${savedCode}</span> grants full access to the <b>${savedTier.toUpperCase()}</b> Tier pipeline.`;
+        } else {
+            displayBlock.textContent = "No active custom deployment code saved.";
+        }
     }
 }
 
@@ -127,6 +273,7 @@ function redeemUserCoupon() {
 function updateBadge() {
     const badge = document.getElementById('tierBadge');
     const sidebarBadge = document.getElementById('sidebarPlanBadge');
+    if(!badge || !sidebarBadge) return;
     
     document.getElementById('cardFree').classList.remove('active-plan');
     document.getElementById('cardPlus').classList.remove('active-plan');
@@ -192,12 +339,12 @@ function openPlansModal() {
 }
 
 function closeAllModals() { 
-    document.getElementById('plansModal').style.display = 'none'; 
-    document.getElementById('adminModal').style.display = 'none'; 
-    document.getElementById('couponManagerModal').style.display = 'none'; 
+    if(document.getElementById('plansModal')) document.getElementById('plansModal').style.display = 'none'; 
+    if(document.getElementById('adminModal')) document.getElementById('adminModal').style.display = 'none'; 
+    if(document.getElementById('couponManagerModal')) document.getElementById('couponManagerModal').style.display = 'none'; 
     if (currentTier !== "free" || isLoggedIn || messageCount < initialFreeLimit) {
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('overlay').style.display = 'none'; 
+        if(document.getElementById('loginModal')) document.getElementById('loginModal').style.display = 'none';
+        if(document.getElementById('overlay')) document.getElementById('overlay').style.display = 'none'; 
     }
 }
 
@@ -244,42 +391,16 @@ function printSystemLog(text) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function startVoiceRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Voice features unsupported in this window environment.");
-        return;
-    }
-    const recognition = new SpeechRecognition();
-    const micBtn = document.getElementById('micBtn');
-    micBtn.textContent = "🛑";
-    
-    recognition.onresult = function(event) {
-        document.getElementById('userInput').value = event.results[0][0].transcript;
-    };
-    recognition.onend = function() { micBtn.textContent = "🎤"; };
-    recognition.start();
-}
-
-function speakText(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(utterance);
-    }
-}
-
 function toggleMenu() { document.getElementById('sidebar').classList.toggle('active'); }
 
+// Core Pipeline Network Dispatcher
 async function fetchAIResponse(userPrompt) {
     const selectedModel = document.getElementById('modelSelect').value;
     
-    // GENERATE LIVE REAL-TIME CLOCK PARAMETERS EVERY TIME
     const now = new Date();
     const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const timeString = now.toLocaleTimeString('en-US');
     
-    // STRICT STRUCTURAL INJECTION PROMPT COMBINED WITH USER VALUE TO STOP 404 KNOWLEDGE DISCONNECTS
     const forcedLivePrompt = `IMPORTANT SYSTEM OVERRIDE: Today's verified current date is ${dateString} and the local system clock time is ${timeString}. You are SPAR-AI Studio, operating with live context synchronization. Answer the following prompt with absolute reference to this temporal timeline context if necessary.\n\nUser Prompt: ${userPrompt}`;
 
     try {
@@ -313,6 +434,7 @@ async function fetchAIResponse(userPrompt) {
     }
 }
 
+// User Submission Interface Handling Engine
 async function sendMessage() {
     if (currentTier === "free") {
         if (!isLoggedIn && messageCount >= initialFreeLimit) { showLoginModal(); return; }
@@ -329,6 +451,9 @@ async function sendMessage() {
     userDiv.textContent = messageText;
     chatMessages.appendChild(userDiv);
 
+    // 4. LOG HISTORY TO USER PERSISTENCE STORAGE
+    saveMessageToHistory('user', messageText);
+
     inputField.value = '';
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
@@ -338,18 +463,65 @@ async function sendMessage() {
         updateBadge();
     }
 
+    // 1. DYNAMIC IMAGE GENERATION PIPELINE DETECTOR
+    const textLower = messageText.toLowerCase();
+    if (textLower.includes("create image") || textLower.includes("generate image") || textLower.includes("draw") || textLower.includes("make an image")) {
+        const imageDiv = document.createElement('div');
+        imageDiv.className = 'message ai-message';
+        imageDiv.textContent = "🎨 Generating creative image metrics from your text script parameters...";
+        chatMessages.appendChild(imageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        // Strip trigger words to formulate a clean prompt string
+        let imagePrompt = messageText.replace(/(create image|generate image|draw|make an image|of|for|a)/gi, "").trim();
+        if(imagePrompt === "") imagePrompt = "abstract digital art neural network concept";
+        
+        // Build the dynamic target source URL
+        const encodedPrompt = encodeURIComponent(imagePrompt);
+        const dynamicImageSrc = `https://image.pollinations.ai/p/${encodedPrompt}?width=512&height=512&seed=${Math.floor(Math.random() * 100000)}`;
+
+        setTimeout(() => {
+            imageDiv.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px;">🎨 Generated Image Assets for: "${imagePrompt}"</div>
+                <img src="${dynamicImageSrc}" alt="${imagePrompt}" style="width: 100%; max-width: 320px; border-radius: 8px; margin-top: 5px; box-shadow: 0px 2px 8px rgba(0,0,0,0.3); display: block;" />
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            saveMessageToHistory('ai', dynamicImageSrc, true);
+        }, 1500);
+        return;
+    }
+
+    // Standard AI Text Pipeline Action Loop
     const aiDiv = document.createElement('div');
     aiDiv.className = 'message ai-message';
     aiDiv.textContent = "Spar AI is parsing query parameters...";
     chatMessages.appendChild(aiDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
+    // Trigger helper conditions natively inside text matching inputs
+    if (textLower === "open camera" || textLower === "camera capture") {
+        aiDiv.textContent = "Initializing camera permission gateway parameters...";
+        await requestCameraAccess();
+        return;
+    }
+    if (textLower === "track location" || textLower === "get location" || textLower === "where am i") {
+        aiDiv.textContent = "Accessing terminal geolocation node endpoints...";
+        requestLocationAccess();
+        return;
+    }
+
     const realAIResponse = await fetchAIResponse(messageText);
     aiDiv.textContent = realAIResponse;
     
+    // Save AI output response parameters to local log stream
+    saveMessageToHistory('ai', realAIResponse);
+
+    // 3. AUTOMATIC VOICE OUTPUT OVERRIDE TRIGGER
+    speakText(realAIResponse);
+    
     const audioBtn = document.createElement('button');
     audioBtn.className = 'speak-btn';
-    audioBtn.textContent = "🔊 Audio playback";
+    audioBtn.textContent = "🔊 Replay Audio";
     audioBtn.onclick = function() { speakText(realAIResponse); };
     aiDiv.appendChild(audioBtn);
 
@@ -360,4 +532,5 @@ document.getElementById('userInput').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') sendMessage();
 });
 
+// Boot the Core Framework Engine
 checkDailyLimit();
