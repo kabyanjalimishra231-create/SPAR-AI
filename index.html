@@ -2,419 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SPAR AI Studio</title>
-    <!-- Official Razorpay Checkout Script Extension Line -->
+    <!-- Tailwind CSS for smooth native design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for Premium Native Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Razorpay Web Integration -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-        :root {
-            --bg-main: #11111b;
-            --bg-sidebar: #1e1e2e;
-            --bg-bubble: #313244;
-            --text-main: #cdd6f4;
-            --accent-color: #89b4fa;
-            --accent-gradient: linear-gradient(135deg, #89b4fa 0%, #b4befe 100%);
-        }
-
-        .light-theme {
-            --bg-main: #eff1f5;
-            --bg-sidebar: #e6e9ef;
-            --bg-bubble: #ccd0da;
-            --text-main: #4c4f69;
-            --accent-color: #1e66f5;
-        }
-
-        .oled-theme {
-            --bg-main: #000000;
-            --bg-sidebar: #111111;
-            --bg-bubble: #222222;
-            --text-main: #ffffff;
-            --accent-color: #fab387;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
+        /* Prevents weird text highlighting or bouncing elastic scrolling on phone screens */
         body {
-            display: flex;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            height: 100vh;
-            overflow: hidden;
-            transition: background 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            background-color: #0d0e12;
         }
-
-        #sidebar {
-            width: 280px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-right: 1px solid rgba(255, 255, 255, 0.05);
-            transition: transform 0.3s ease;
-            z-index: 100;
-        }
-
-        .logo-area {
-            font-size: 22px;
-            font-weight: bold;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .nav-btn {
-            background: transparent;
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            text-align: left;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-        }
-
-        .nav-btn:hover {
-            background-color: var(--bg-bubble);
-            border-color: var(--accent-color);
-        }
-
-        .hardware-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .hw-btn {
-            padding: 8px;
-            font-size: 12px;
-            border-radius: 6px;
-            border: none;
-            background-color: var(--bg-bubble);
-            color: var(--text-main);
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .history-pane {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 15px;
-        }
-
-        .history-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #a6adc8;
-            margin-bottom: 10px;
-        }
-
-        #mainChat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .chat-header {
-            padding: 15px 25px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .control-selects {
-            display: flex;
-            gap: 10px;
-        }
-
-        select {
-            background-color: var(--bg-sidebar);
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 6px 12px;
-            border-radius: 6px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        #chatMessages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 12px 16px;
-            border-radius: 12px;
-            line-height: 1.5;
-            font-size: 15px;
-            word-wrap: break-word;
-        }
-
-        .user-message {
-            align-self: flex-end;
-            background: var(--accent-gradient);
-            color: #11111b;
-            font-weight: 500;
-            border-bottom-right-radius: 2px;
-        }
-
-        .ai-message {
-            align-self: flex-start;
-            background-color: var(--bg-sidebar);
-            color: var(--text-main);
-            border-bottom-left-radius: 2px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .speak-btn {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 4px 8px;
-            font-size: 11px;
-            background: var(--bg-bubble);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main);
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .chat-footer {
-            padding: 20px 25px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .input-wrapper {
-            flex: 1;
-            position: relative;
-            display: flex;
-            background-color: var(--bg-sidebar);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 25px;
-            padding: 5px 15px;
-            align-items: center;
-        }
-
-        #userInput {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: var(--text-main);
-            padding: 10px;
-            font-size: 15px;
-        }
-
-        .action-icon-btn {
-            background: transparent;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 5px;
-            color: var(--text-main);
-            transition: transform 0.1s;
-        }
-
-        .action-icon-btn:active {
-            transform: scale(0.9);
-        }
-
-        #sendBtn {
-            background: var(--accent-gradient);
-            color: #11111b;
-            border: none;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-
-        #overlay {
-            position: fixed;
-            top:0; left:0; width:100%; height:100%;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-            z-index: 998;
-            display: none;
-        }
-
-        .modal {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: var(--bg-sidebar);
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
-            z-index: 999;
-            display: none;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .modal input, .modal select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .modal-btn {
-            width: 100%;
-            padding: 12px;
-            background: var(--accent-gradient);
-            color: #11111b;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body>
+<body class="text-gray-100 font-sans h-screen flex flex-col justify-between overflow-hidden select-none">
 
-    <div id="sidebar">
-        <div class="logo-area">SPAR AI Studio</div>
-        <div id="sidebarPlanBadge" class="badge" style="background-color: var(--bg-bubble);">Plan: Free Basic</div>
-        <span id="tierBadge" style="display:none;"></span>
+    <!-- TOP HEADER APP BAR -->
+    <header class="w-full bg-[#161920] border-b border-gray-800 px-4 pt-4 pb-3 flex justify-between items-center z-50">
+        <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-slate-900 text-sm"></i>
+            </div>
+            <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">SPAR AI</span>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span id="use-badge" class="bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-500/20">
+                <span id="uses-left">3</span> Free Uses Left
+            </span>
+            <button onclick="triggerPayment()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-md shadow-md hover:opacity-90 active:scale-95 transition-all">
+                PRO
+            </button>
+        </div>
+    </header>
 
-        <button class="nav-btn" onclick="openPlansModal()">💎 Premium Upgrade Hub</button>
-        <button class="nav-btn" id="adminCouponBtn" style="display:none;" onclick="openCouponManagerModal()">🎫 Admin Coupon Rules</button>
-        <button class="nav-btn" id="adminLogoutBtn" style="display:none;" onclick="logoutAdmin()">🔒 Close Admin Panel</button>
+    <!-- MAIN DISPLAY SCREEN AREA -->
+    <main class="flex-1 w-full overflow-y-auto relative p-4 hide-scrollbar">
         
-        <div class="hardware-grid">
-            <button class="hw-btn" onclick="requestCameraAccess()">📷 Open Cam</button>
-            <button class="hw-btn" onclick="requestLocationAccess()">📍 Pin GPS</button>
-        </div>
-
-        <div class="history-pane">
-            <div class="history-title">Saved Search History</div>
-            <div id="sidebarHistoryList"></div>
-        </div>
-
-        <a id="adminGateLink" href="#" onclick="openAdminModal()" style="color:rgba(255,255,255,0.2); font-size:11px; text-decoration:none; text-align:center; margin-top:20px;">System Login Gateway</a>
-    </div>
-
-    <div id="mainChat">
-        <div class="chat-header">
-            <div style="font-weight: bold; font-size:16px;">Secure Pipeline Routing Active</div>
-            <div class="control-selects">
-                <select id="modelSelect" onchange="handleModelChange()">
-                    <option value="llama-3.1-8b-instant">Llama 3.1 8B (Free)</option>
-                    <option value="llama-3.3-70b-specdec">Llama 3.3 70B (Plus)</option>
-                    <option value="mixtral-8x7b-32768">Mixtral 8x7B (Ultra)</option>
-                </select>
-                <select id="themeSelect" onchange="handleThemeChange()">
-                    <option value="dark">Dark Aura</option>
-                    <option value="light">Light Slate</option>
-                    <option value="oled">OLED Black</option>
-                </select>
+        <!-- VIEW 1: FAST TEXT CHAT COMPANION -->
+        <div id="view-chat" class="w-full h-full flex flex-col space-y-4">
+            <div id="chat-scroller" class="flex-1 overflow-y-auto space-y-4 pr-1 hide-scrollbar">
+                <!-- App Welcome Bubble -->
+                <div class="bg-[#161920] p-4 rounded-2xl border border-gray-800 shadow-md">
+                    <p class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">High Speed Core</p>
+                    <h2 class="text-xl font-bold mb-2">Hello, I am SPAR AI</h2>
+                    <p class="text-gray-400 text-sm leading-relaxed">Ask me any complex question. Responses are accelerated through our instant cloud infrastructure.</p>
+                </div>
+            </div>
+            
+            <!-- Bottom Text Input + Camera Icon Button -->
+            <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800">
+                <button onclick="openCameraFeature()" class="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-camera text-gray-300"></i>
+                </button>
+                <input id="chat-input" type="text" placeholder="Type an instruction or question..." class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 px-2">
+                <button onclick="handleTextMessage()" class="w-10 h-10 bg-amber-500 text-slate-900 rounded-lg flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
             </div>
         </div>
 
-        <div id="chatMessages"></div>
+        <!-- VIEW 2: IMAGE GENERATION HUB (CREATE MODE) -->
+        <div id="view-create" class="w-full h-full hidden flex flex-col justify-between">
+            <div class="space-y-4">
+                <div class="bg-[#161920] p-4 rounded-2xl border border-gray-800">
+                    <h2 class="text-lg font-bold mb-1"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>Image Generation Mode</h2>
+                    <p class="text-gray-400 text-xs">Transform written descriptions directly into visual art assets.</p>
+                </div>
 
-        <div class="chat-footer">
-            <div class="input-wrapper">
-                <button id="micBtn" class="action-icon-btn" onclick="startVoiceRecognition()" title="Voice Input Mode">🎤</button>
-                <input type="text" id="userInput" placeholder="Ask Spar AI or type 'create image of...' anything...">
+                <!-- Live Generated Canvas Display Area -->
+                <div class="w-full aspect-square bg-[#161920] rounded-2xl border border-gray-800 flex flex-col items-center justify-center overflow-hidden relative group">
+                    <img id="generated-image" class="w-full h-full object-cover hidden" alt="AI Output">
+                    <div id="canvas-placeholder" class="text-center p-6">
+                        <i class="fa-solid fa-images text-gray-600 text-4xl mb-3 animate-pulse"></i>
+                        <p class="text-gray-400 text-xs px-6">Your visual generation canvas will render here</p>
+                    </div>
+                    <!-- Spinner Loader -->
+                    <div id="generation-loader" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center hidden">
+                        <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                        <p class="text-xs text-amber-400 font-medium">Rendering art assets...</p>
+                    </div>
+                </div>
             </div>
-            <button id="sendBtn" onclick="sendMessage()">➔</button>
+
+            <!-- Image Prompt Text Input -->
+            <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800 mt-4">
+                <input id="image-prompt" type="text" placeholder="Describe the image (e.g., retro vintage cyber don style)..." class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 px-2">
+                <button onclick="generateImage()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg whitespace-nowrap">
+                    Generate
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- LIMITED ACCESS LOGIN LOCK WINDOW -->
+    <div id="login-modal" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
+        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-gray-800 text-center shadow-2xl">
+            <div class="w-14 h-14 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+                <i class="fa-solid fa-lock text-xl"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-1">Usage Limit Reached</h3>
+            <p class="text-gray-400 text-xs px-2 mb-6">You have completed your free uses. Please login or sign up to unlock unlimited high-speed core cloud access.</p>
+            
+            <div class="space-y-3 mb-6">
+                <input id="login-email" type="email" placeholder="Enter your email address" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-amber-500 outline-none transition-colors">
+                <input id="login-pass" type="password" placeholder="Password" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-amber-500 outline-none transition-colors">
+            </div>
+
+            <button onclick="simulateLogin()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold py-3 rounded-xl shadow-md text-sm active:scale-95 transition-transform">
+                Sign In & Unlock
+            </button>
         </div>
     </div>
 
-    <div id="overlay" onclick="closeAllModals()"></div>
+    <!-- STICKY BOTTOM TAB NAVIGATION APP BAR -->
+    <nav class="w-full bg-[#161920] border-t border-gray-800 flex justify-around items-center py-2 pb-4">
+        <button onclick="switchView('chat')" id="nav-chat-btn" class="flex flex-col items-center space-y-1 text-amber-400 transition-colors">
+            <i class="fa-solid fa-message text-lg"></i>
+            <span class="text-[10px] font-medium">Fast Chat</span>
+        </button>
+        <button onclick="switchView('create')" id="nav-create-btn" class="flex flex-col items-center space-y-1 text-gray-500 hover:text-gray-300 transition-colors">
+            <i class="fa-solid fa-wand-magic text-lg"></i>
+            <span class="text-[10px] font-medium">Create Mode</span>
+        </button>
+    </nav>
 
-    <div id="adminModal" class="modal">
-        <div class="modal-title">Admin Credential Key Check</div>
-        <input type="password" id="adminPhoneInput" placeholder="Enter secure host verification digits...">
-        <button class="modal-btn" onclick="verifyAdminPhone()">Validate Authorization</button>
-    </div>
-
-    <div id="couponManagerModal" class="modal">
-        <div class="modal-title">Coupon Deployment Rules Engine</div>
-        <div id="activeCouponList" style="font-size:12px; margin-bottom:15px; color:#a6adc8;"></div>
-        <input type="text" id="newCouponCode" placeholder="Define Promo String (e.g. ULTRA50)">
-        <select id="newCouponTier">
-            <option value="plus">Spar Plus Tier</option>
-            <option value="ultra">Pro Ultra Tier</option>
-        </select>
-        <button class="modal-btn" onclick="saveAdminCoupon()">Commit New Rule Vector</button>
-    </div>
-
-    <div id="plansModal" class="modal">
-        <div class="modal-title">Select Premium Account Suite</div>
-        <input type="text" id="userCouponInput" placeholder="Have an admin promo sequence string? Enter here...">
-        <button class="modal-btn" onclick="redeemUserCoupon()" style="margin-bottom:15px;">Apply Code Sequence</button>
-        
-        <div style="display:flex; flex-direction:column; gap:8px;">
-            <div id="cardFree" style="padding:10px; border-radius:6px; background:var(--bg-main); font-size:13px; cursor:pointer;" onclick="purchaseTier('free')">
-                <b>Basic Trial Tier</b> - 20 Dynamic Requests Daily Limit Allocation
-            </div>
-            <div id="cardPlus" style="padding:10px; border-radius:6px; background:var(--bg-main); font-size:13px; cursor:pointer;" onclick="purchaseTier('plus')">
-                <b>Spar Plus Tier ⚡ (₹299/mo)</b> - Unlock Llama 70B Engine & Infinite Streaming
-            </div>
-            <div id="cardUltra" style="padding:10px; border-radius:6px; background:var(--bg-main); font-size:13px; cursor:pointer;" onclick="purchaseTier('ultra')">
-                <b>Pro Ultra Tier 🔥 (₹599/mo)</b> - Mixtral Reasoning & Premium OLED Layouts
-            </div>
-        </div>
-    </div>
-
-    <div id="loginModal" class="modal">
-        <div class="modal-title">Trial Quota Checkpoint Hit</div>
-        <p style="font-size:13px; margin-bottom:15px; color:#a6adc8;">Your initial 10-message anonymous allocation has expired. Authenticate email tracking lines to unlock your 10 remaining complimentary daily allocations.</p>
-        <input type="email" id="userEmailInput" placeholder="enter-routing-identity@domain.com">
-        <button class="modal-btn" onclick="handleEmailLogin()">Extend Workspace Allocation</button>
-    </div>
-
+    <!-- Application Script Connection -->
     <script src="app.js"></script>
 </body>
 </html>

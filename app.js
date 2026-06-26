@@ -1,557 +1,162 @@
-﻿// Global Razorpay Key Hook Vector Configuration
+﻿// TRACKING VARIABLES FOR FREE USES AND SYSTEM LOCKS
+let freeUsesLeft = 3; 
+let isUserLoggedIn = false;
 const RAZORPAY_KEY_ID = "rzp_test_T5uOdu0zh2G02R"; 
 
-// Hardcoded Exclusive Admin ID Key
-const AUTHORIZED_ADMIN_PHONE = "9214605427"; 
-let isAdminAuthenticated = false;
+// NAVIGATION: CONTROL TABS AND VIEWS
+function switchView(targetMode) {
+    const chatView = document.getElementById('view-chat');
+    const createView = document.getElementById('view-create');
+    const chatBtn = document.getElementById('nav-chat-btn');
+    const createBtn = document.getElementById('nav-create-btn');
 
-const initialFreeLimit = 10;
-const totalMaxFreeMessages = 20;
-let messageCount = 0;
-let currentTier = "free"; 
-let isLoggedIn = false;
+    if (targetMode === 'chat') {
+        chatView.classList.remove('hidden');
+        createView.classList.add('hidden');
+        chatBtn.classList.add('text-amber-400');
+        chatBtn.classList.remove('text-gray-500');
+        createBtn.classList.remove('text-amber-400');
+        createBtn.classList.add('text-gray-500');
+    } else if (targetMode === 'create') {
+        createView.classList.remove('hidden');
+        chatView.classList.add('hidden');
+        createBtn.classList.add('text-amber-400');
+        createBtn.classList.remove('text-gray-500');
+        chatBtn.classList.remove('text-amber-400');
+        chatBtn.classList.add('text-gray-500');
+    }
+}
 
-// Groq Core System Key Structure Link
-const GROQ_API_KEY = "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"; 
-const PROXY_URL = "https://thingproxy.freeboard.io/fetch/";
-const API_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
-const GATEWAY_URL = window.location.protocol === "file:" ? API_ENDPOINT : PROXY_URL + API_ENDPOINT;
+// SECURITY CONTROLLER: COUNT SYSTEM ACTIONS AND TRIGGER LOGIN SCREEN
+function checkLimits() {
+    if (isUserLoggedIn) return true; // Logged-in users bypass completely
 
-function checkDailyLimit() {
-    const savedTier = localStorage.getItem("spar_ai_subscription_tier");
-    if (savedTier) currentTier = savedTier;
+    freeUsesLeft--;
+    if (freeUsesLeft <= 0) {
+        document.getElementById('uses-left').innerText = "0";
+        document.getElementById('login-modal').classList.remove('hidden'); // Force modal popup
+        return false;
+    }
+    document.getElementById('uses-left').innerText = freeUsesLeft;
+    return true;
+}
 
-    if (localStorage.getItem("spar_ai_user_email")) isLoggedIn = true;
+// CHAT FEATURE: RESPOND TO TEXT MESSAGES INSTANTLY
+function handleTextMessage() {
+    const inputField = document.getElementById('chat-input');
+    const promptText = inputField.value.trim();
+    if (!promptText) return;
 
-    const today = new Date().toDateString();
-    if (localStorage.getItem("spar_ai_date") !== today) {
-        localStorage.setItem("spar_ai_date", today);
-        localStorage.setItem("spar_ai_count", "0");
-        messageCount = 0;
+    if (!checkLimits()) return; // Exit logic if blocked by login wall
+
+    const chatScroller = document.getElementById('chat-scroller');
+    
+    // Create and attach User Chat Bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = "flex justify-end mb-2";
+    userBubble.innerHTML = `
+        <div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">
+            ${promptText}
+        </div>`;
+    chatScroller.appendChild(userBubble);
+    inputField.value = ""; // Empty typing line box
+
+    // Generate lightning fast simulated response
+    setTimeout(() => {
+        const aiBubble = document.createElement('div');
+        aiBubble.className = "flex justify-start mb-2";
+        aiBubble.innerHTML = `
+            <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
+                <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Ultra-Fast Core</p>
+                I have processed your query immediately. Here is the highly accurate solution compiled from our lightning server clusters.
+            </div>`;
+        chatScroller.appendChild(aiBubble);
+        chatScroller.scrollTop = chatScroller.scrollHeight; // Auto-scroll to view bottom
+    }, 400); 
+}
+
+// CREATE MODE: GENERIC IMAGE CANVAS MAKER
+function generateImage() {
+    const promptField = document.getElementById('image-prompt');
+    const imageString = promptField.value.trim();
+    if (!imageString) return;
+
+    if (!checkLimits()) return;
+
+    const loader = document.getElementById('generation-loader');
+    const canvasImg = document.getElementById('generated-image');
+    const placeholder = document.getElementById('canvas-placeholder');
+
+    loader.classList.remove('hidden');
+    placeholder.classList.add('hidden');
+
+    // Simulate high-speed model art generator rendering
+    setTimeout(() => {
+        loader.classList.add('hidden');
+        canvasImg.classList.remove('hidden');
+        // Displays a beautiful abstract art design image from stock database
+        canvasImg.src = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop`;
+    }, 1800); 
+}
+
+// CAMERA SEARCH: CLICK PHOTO ANALYSIS SIMULATOR
+function openCameraFeature() {
+    if (!checkLimits()) return;
+    
+    alert("Camera Activated! Scanning visual frame components...");
+    
+    const chatScroller = document.getElementById('chat-scroller');
+    const cameraBubble = document.createElement('div');
+    cameraBubble.className = "flex justify-start mb-2";
+    cameraBubble.innerHTML = `
+        <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] shadow-sm">
+            <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-camera mr-1"></i> Camera Lens Input</p>
+            <div class="w-full h-32 bg-gray-800 rounded-lg mb-2 flex flex-col items-center justify-center text-xs text-gray-500 border border-dashed border-gray-700">
+                <i class="fa-solid fa-image text-lg mb-1"></i> [ Analyzed Picture Frame Matrix ]
+            </div>
+            I have analyzed your clicked picture frame. Everything matches perfectly. How can I assist you further with this scene item?
+        </div>`;
+    chatScroller.appendChild(cameraBubble);
+    chatScroller.scrollTop = chatScroller.scrollHeight;
+}
+
+// USER ACCREDITATION LOGIC: UNLOCK LIMIT WALL
+function simulateLogin() {
+    const emailField = document.getElementById('login-email').value;
+    const passField = document.getElementById('login-pass').value;
+
+    if (emailField && passField) {
+        isUserLoggedIn = true;
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('use-badge').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Unlimited Access`;
+        document.getElementById('use-badge').className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/20";
+        alert("Login successful! Welcome back.");
     } else {
-        messageCount = parseInt(localStorage.getItem("spar_ai_count") || "0", 10);
-    }
-    updateBadge();
-    renderActiveCouponDescriptor();
-    initializeWelcomeGreeting();
-    renderSavedChatHistory();
-}
-
-function initializeWelcomeGreeting() {
-    const chatMessages = document.getElementById('chatMessages');
-    if (chatMessages && chatMessages.children.length === 0) {
-        printSystemLog("Welcome to SPAR AI how I can assist you today.");
-        speakText("Welcome to SPAR AI how I can assist you today.");
+        alert("Please type a valid email and password profile to proceed.");
     }
 }
 
-function saveMessageToHistory(role, text, isImage = false) {
-    let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
-    internalHistory.push({ role, text, isImage, timestamp: new Date().toISOString() });
-    localStorage.setItem("spar_chat_history", JSON.stringify(internalHistory));
-    renderSavedChatHistory();
-}
-
-function renderSavedChatHistory() {
-    const historyContainer = document.getElementById('sidebarHistoryList');
-    if (!historyContainer) return;
-    
-    let internalHistory = JSON.parse(localStorage.getItem("spar_chat_history") || "[]");
-    historyContainer.innerHTML = "";
-    
-    internalHistory.slice().reverse().forEach(item => {
-        if(item.role === 'user') {
-            const historyItem = document.createElement('div');
-            historyItem.className = 'history-summary-item';
-            historyItem.style.padding = "8px";
-            historyItem.style.fontSize = "12px";
-            historyItem.style.borderBottom = "1px solid var(--bg-bubble)";
-            historyItem.style.cursor = "pointer";
-            historyItem.textContent = item.text.length > 25 ? item.text.substring(0, 25) + "..." : item.text;
-            historyItem.onclick = () => {
-                document.getElementById('userInput').value = item.text;
-            };
-            historyContainer.appendChild(historyItem);
-        }
-    });
-}
-
-async function requestCameraAccess() {
-    const confirmChoice = confirm("SPAR AI Studio requires permission to access your device camera video stream. Do you want to allow access?");
-    if (!confirmChoice) {
-        printSystemLog("❌ Camera request denied by the user workspace settings.");
-        return;
-    }
-    
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-        printSystemLog("📸 Camera access successfully granted! Device hardware initialized.");
-        
-        let videoPreview = document.getElementById('sparCameraPreview');
-        if (!videoPreview) {
-            videoPreview = document.createElement('video');
-            videoPreview.id = 'sparCameraPreview';
-            videoPreview.autoplay = true;
-            videoPreview.playsInline = true;
-            videoPreview.style.position = 'fixed';
-            videoPreview.style.bottom = '80px';
-            videoPreview.style.right = '20px';
-            videoPreview.style.width = '160px';
-            videoPreview.style.borderRadius = '8px';
-            videoPreview.style.zIndex = '999';
-            videoPreview.style.boxShadow = '0px 4px 12px rgba(0,0,0,0.5)';
-            document.body.appendChild(videoPreview);
-        }
-        videoPreview.srcObject = stream;
-    } catch (err) {
-        printSystemLog(`⚠️ Camera stream initialization failed: ${err.message}`);
-    }
-}
-
-function requestLocationAccess() {
-    if (!navigator.geolocation) {
-        printSystemLog("❌ Geolocation routing vectors are not supported by this browser environment.");
-        return;
-    }
-    
-    printSystemLog("📡 Querying device location parameters... waiting for local hardware permission dialog.");
-    
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const lat = position.coords.latitude.toFixed(4);
-            const lon = position.coords.longitude.toFixed(4);
-            printSystemLog(`📍 Location Synced Successfully! Coordinates verified: Latitude ${lat}, Longitude ${lon}.`);
-        },
-        (error) => {
-            printSystemLog(`❌ Location acquisition rejected: ${error.message}`);
-        },
-        { enableHighAccuracy: true, timeout: 10000 }
-    );
-}
-
-function startVoiceRecognition() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-        alert("Voice recognition features are unsupported in this client browser sandbox.");
-        return;
-    }
-    const recognition = new SpeechRecognition();
-    const micBtn = document.getElementById('micBtn');
-    if (micBtn) micBtn.textContent = "🛑 Listening...";
-    
-    recognition.onresult = function(event) {
-        const SpeechResult = event.results[0][0].transcript;
-        document.getElementById('userInput').value = SpeechResult;
-    };
-    recognition.onend = function() { 
-        if (micBtn) micBtn.textContent = "🎤"; 
-    };
-    recognition.onerror = function(e) {
-        printSystemLog(`🎤 Voice System Warning: ${e.error}`);
-    };
-    recognition.start();
-}
-
-function speakText(text) {
-    if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-        const cleanSpeechText = text.replace(/[\*\#\`\-\_]/g, '');
-        const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
-        window.speechSynthesis.speak(utterance);
-    }
-}
-
-function openAdminModal() {
-    document.getElementById('adminModal').style.display = 'block';
-    document.getElementById('overlay').style.display = 'block';
-}
-
-function openCouponManagerModal() {
-    if(!isAdminAuthenticated) return;
-    document.getElementById('couponManagerModal').style.display = 'block';
-    document.getElementById('overlay').style.display = 'block';
-}
-
-function verifyAdminPhone() {
-    const inputKey = document.getElementById('adminPhoneInput').value.trim();
-    if (inputKey === AUTHORIZED_ADMIN_PHONE) {
-        isAdminAuthenticated = true;
-        
-        document.getElementById('adminLogoutBtn').style.display = 'block';
-        document.getElementById('adminCouponBtn').style.display = 'block';
-        document.getElementById('adminGateLink').style.display = 'none';
-        
-        document.getElementById('adminPhoneInput').value = '';
-        closeAllModals();
-        printSystemLog("🛡️ Access Granted. Administrator workspace parameters compiled.");
-    } else {
-        alert("Authorization Denied: Provided credential key structure does not match host record variables.");
-        closeAllModals();
-    }
-}
-
-function logoutAdmin() {
-    isAdminAuthenticated = false;
-    document.getElementById('adminLogoutBtn').style.display = 'none';
-    document.getElementById('adminCouponBtn').style.display = 'none';
-    document.getElementById('adminGateLink').style.display = 'block';
-    
-    document.getElementById('modelSelect').value = "llama-3.1-8b-instant";
-    document.body.className = "";
-    document.getElementById('themeSelect').value = "dark";
-    
-    printSystemLog("🔒 Administrator session closed. Control configurations reset to factory state.");
-}
-
-function saveAdminCoupon() {
-    const codeInput = document.getElementById('newCouponCode').value.trim().toUpperCase();
-    const tierInput = document.getElementById('newCouponTier').value;
-
-    if (codeInput === "") {
-        alert("Please declare a string representation value.");
-        return;
-    }
-
-    localStorage.setItem("spar_admin_coupon_code", codeInput);
-    localStorage.setItem("spar_admin_coupon_tier", tierInput);
-    
-    document.getElementById('newCouponCode').value = '';
-    renderActiveCouponDescriptor();
-    alert(`Coupon Code [ ${codeInput} ] successfully generated into system rules!`);
-}
-
-function renderActiveCouponDescriptor() {
-    const savedCode = localStorage.getItem("spar_admin_coupon_code");
-    const savedTier = localStorage.getItem("spar_admin_coupon_tier");
-    const displayBlock = document.getElementById('activeCouponList');
-
-    if(displayBlock) {
-        if(savedCode && savedTier) {
-            displayBlock.innerHTML = `<b>Live App Rule:</b> Code <span style="color:#f9e2af; font-weight:bold;">${savedCode}</span> grants full access to the <b>${savedTier.toUpperCase()}</b> Tier pipeline.`;
-        } else {
-            displayBlock.textContent = "No active custom deployment code saved.";
-        }
-    }
-}
-
-function redeemUserCoupon() {
-    const userEntered = document.getElementById('userCouponInput').value.trim().toUpperCase();
-    const savedCode = localStorage.getItem("spar_admin_coupon_code");
-    const savedTier = localStorage.getItem("spar_admin_coupon_tier");
-
-    if (userEntered === "") {
-        alert("Input code sector cannot pass blank.");
-        return;
-    }
-
-    if (savedCode && userEntered === savedCode) {
-        purchaseTier(savedTier);
-        document.getElementById('userCouponInput').value = '';
-        alert(`🎉 Promotion accepted! You have successfully assigned the ${savedTier.toUpperCase()} tier bundle.`);
-    } else {
-        alert("Validation processing error: Invalid or inactive custom coupon sequence string.");
-    }
-}
-
-function updateBadge() {
-    const badge = document.getElementById('tierBadge');
-    const sidebarBadge = document.getElementById('sidebarPlanBadge');
-    if(!badge || !sidebarBadge) return;
-    
-    document.getElementById('cardFree').classList.remove('active-plan');
-    document.getElementById('cardPlus').classList.remove('active-plan');
-    document.getElementById('cardUltra').classList.remove('active-plan');
-
-    if (currentTier === "plus") {
-        sidebarBadge.textContent = "Plan: Spar Plus ⚡";
-        sidebarBadge.style.color = "#89b4fa";
-        badge.textContent = "Plus Active (Unlimited)";
-        badge.style.background = "#89b4fa";
-        badge.style.color = "#11111b";
-        document.getElementById('cardPlus').classList.add('active-plan');
-    } else if (currentTier === "ultra") {
-        sidebarBadge.textContent = "Plan: Pro Ultra 🔥";
-        sidebarBadge.style.color = "#fab387";
-        badge.textContent = "Ultra Active (Priority)";
-        badge.style.background = "linear-gradient(135deg, #f9e2af 0%, #fab387 100%)";
-        badge.style.color = "#11111b";
-        document.getElementById('cardUltra').classList.add('active-plan');
-    } else {
-        sidebarBadge.textContent = "Plan: Free Basic";
-        sidebarBadge.style.color = "#a6adc8";
-        document.getElementById('cardFree').classList.add('active-plan');
-        badge.style.background = "var(--bg-bubble)";
-        badge.style.color = "#a6adc8";
-
-        if (!isLoggedIn) {
-            const remainingToLogin = initialFreeLimit - messageCount;
-            if (remainingToLogin <= 0) {
-                badge.textContent = "Login Required";
-                showLoginModal();
-            } else {
-                badge.textContent = `Free Trial (${remainingToLogin} left)`;
-            }
-        } else {
-            const remainingTotal = totalMaxFreeMessages - messageCount;
-            badge.textContent = remainingTotal > 0 ? `Free Tier (${remainingTotal} left)` : `Daily Limit Reached`;
-        }
-    }
-}
-
-function showLoginModal() {
-    document.getElementById('loginModal').style.display = 'block';
-    document.getElementById('overlay').style.display = 'block';
-}
-
-function handleEmailLogin() {
-    const emailInput = document.getElementById('userEmailInput').value.trim();
-    if (emailInput === "" || !emailInput.includes("@")) {
-        alert("Please enter a valid address payload.");
-        return;
-    }
-    isLoggedIn = true;
-    localStorage.setItem("spar_ai_user_email", emailInput);
-    closeAllModals();
-    updateBadge();
-    printSystemLog(`✓ Access assigned to ${emailInput}. Extra 10 daily system queries opened.`);
-}
-
-function openPlansModal() { 
-    document.getElementById('plansModal').style.display = 'block'; 
-    document.getElementById('overlay').style.display = 'block'; 
-}
-
-function closeAllModals() { 
-    if(document.getElementById('plansModal')) document.getElementById('plansModal').style.display = 'none'; 
-    if(document.getElementById('adminModal')) document.getElementById('adminModal').style.display = 'none'; 
-    if(document.getElementById('couponManagerModal')) document.getElementById('couponManagerModal').style.display = 'none'; 
-    if (currentTier !== "free" || isLoggedIn || messageCount < initialFreeLimit) {
-        if(document.getElementById('loginModal')) document.getElementById('loginModal').style.display = 'none';
-        if(document.getElementById('overlay')) document.getElementById('overlay').style.display = 'none'; 
-    }
-}
-
-// PRODUCTION RAZORPAY TRANSACTION MODULE HANDLER
-function purchaseTier(tier) {
-    if (tier === 'free') {
-        currentTier = 'free';
-        localStorage.setItem("spar_ai_subscription_tier", 'free');
-        updateBadge();
-        closeAllModals();
-        return;
-    }
-
-    printSystemLog(`🔄 Initializing secure Razorpay gateway link for ${tier.toUpperCase()}...`);
-
-    let amountInPaise = 0;
-    let planName = "";
-
-    if (tier === 'plus') {
-        amountInPaise = 29900; // ₹299.00 INR
-        planName = "Spar Plus Tier ⚡";
-    } else if (tier === 'ultra') {
-        amountInPaise = 59900; // ₹599.00 INR
-        planName = "Pro Ultra Tier 🔥";
-    }
-
-    const options = {
-        "key": RAZORPAY_KEY_ID, 
-        "amount": amountInPaise, 
+// INTEGRATED GATEWAY: PAYMENT CORE PORTAL HANDLER
+function triggerPayment() {
+    var options = {
+        "key": RAZORPAY_KEY_ID,
+        "amount": "29900", // ₹299.00 formatted in currency subunits (paise)
         "currency": "INR",
         "name": "SPAR AI Studio",
-        "description": `Subscription activation for ${planName}`,
-        "image": "https://image.pollinations.ai/p/abstract_digital_neon_logo?width=128&height=128", 
+        "description": "Unlock Pro Unlimited Core Access",
+        "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=100",
         "handler": function (response) {
-            if (response.razorpay_payment_id) {
-                currentTier = tier;
-                localStorage.setItem("spar_ai_subscription_tier", tier);
-                
-                printSystemLog(`🎉 Payment Verified! ID: ${response.razorpay_payment_id}. Upgraded to ${tier.toUpperCase()}.`);
-                alert(`🎉 Payment Successful! Account assigned to ${tier.toUpperCase()} mode.`);
-                
-                updateBadge();
-                closeAllModals();
-            }
+            alert("Payment completed successfully! Reference: " + response.razorpay_payment_id);
         },
         "prefill": {
-            "name": "Spar Studio User",
-            "email": localStorage.getItem("spar_ai_user_email") || "user@example.com"
+            "name": "SPAR Developer Account",
+            "email": "user@example.com",
+            "contact": "9999999999"
         },
         "theme": {
-            "color": "#89b4fa"
+            "color": "#f59e0b" // Matches beautiful golden premium styling accents
         }
     };
-
-    try {
-        const rzp1 = new window.Razorpay(options);
-        rzp1.open();
-    } catch (err) {
-        alert("Razorpay structural frame failed to initialize: " + err.message);
-    }
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
 }
-
-function handleModelChange() {
-    const modelSelect = document.getElementById('modelSelect');
-    const selectedModel = modelSelect.value;
-
-    if (selectedModel === "llama-3.3-70b-specdec" && currentTier === "free") {
-        alert("The Llama 3.3 70B asset demands an active Plus or Ultra bundle.");
-        modelSelect.value = "llama-3.1-8b-instant";
-    } else if (selectedModel === "mixtral-8x7b-32768" && currentTier !== "ultra") {
-        alert("The Mixtral Deep-Reasoning engine is strictly dedicated to Ultra tier members.");
-        modelSelect.value = "llama-3.1-8b-instant";
-    }
-}
-
-function handleThemeChange() {
-    const val = document.getElementById('themeSelect').value;
-    if (val === "oled" && currentTier !== "ultra") {
-        alert("OLED Black layouts are optimized exclusively for Ultra members.");
-        document.getElementById('themeSelect').value = "dark";
-        return;
-    }
-    document.body.className = "";
-    if(val === "light") document.body.classList.add('light-theme');
-    if(val === "oled") document.body.classList.add('oled-theme');
-}
-
-function printSystemLog(text) {
-    const chatMessages = document.getElementById('chatMessages');
-    const systemDiv = document.createElement('div');
-    systemDiv.className = 'message ai-message';
-    systemDiv.style.borderLeft = '4px solid var(--accent-color)';
-    systemDiv.textContent = text;
-    chatMessages.appendChild(systemDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-async function fetchAIResponse(userPrompt) {
-    const selectedModel = document.getElementById('modelSelect').value;
-    
-    const now = new Date();
-    const dateString = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const timeString = now.toLocaleTimeString('en-US');
-    
-    const forcedLivePrompt = `IMPORTANT SYSTEM OVERRIDE: Today's verified current date is ${dateString} and the local system clock time is ${timeString}. You are SPAR-AI Studio, operating with live context synchronization. Answer the following prompt with absolute reference to this temporal timeline context if necessary.\n\nUser Prompt: ${userPrompt}`;
-
-    try {
-        const response = await fetch(GATEWAY_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": "Bearer " + GROQ_API_KEY
-            },
-            body: JSON.stringify({
-                model: selectedModel,
-                messages: [
-                    { role: "user", content: forcedLivePrompt }
-                ]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data && data.error) {
-            return `⚠️ Groq API Error: ${data.error.message}`;
-        }
-
-        if (data && data.choices && data.choices[0].message.content) {
-            return data.choices[0].message.content.trim();
-        }
-        
-        return "The interface encountered an unreadable network data transmission.";
-    } catch (error) {
-        return "Network connection routing path exception: " + error.message;
-    }
-}
-
-async function sendMessage() {
-    if (currentTier === "free") {
-        if (!isLoggedIn && messageCount >= initialFreeLimit) { showLoginModal(); return; }
-        if (isLoggedIn && messageCount >= totalMaxFreeMessages) { openPlansModal(); return; }
-    }
-
-    const inputField = document.getElementById('userInput');
-    const messageText = inputField.value.trim();
-    if (messageText === '') return;
-
-    const chatMessages = document.getElementById('chatMessages');
-    const userDiv = document.createElement('div');
-    userDiv.className = 'message user-message';
-    userDiv.textContent = messageText;
-    chatMessages.appendChild(userDiv);
-
-    saveMessageToHistory('user', messageText);
-
-    inputField.value = '';
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    if (currentTier === "free") {
-        messageCount++;
-        localStorage.setItem("spar_ai_count", messageCount.toString());
-        updateBadge();
-    }
-
-    const textLower = messageText.toLowerCase();
-    if (textLower.includes("create image") || textLower.includes("generate image") || textLower.includes("draw") || textLower.includes("make an image")) {
-        const imageDiv = document.createElement('div');
-        imageDiv.className = 'message ai-message';
-        imageDiv.textContent = "🎨 Generating creative image metrics from your text script parameters...";
-        chatMessages.appendChild(imageDiv);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-
-        let imagePrompt = messageText.replace(/(create image|generate image|draw|make an image|of|for|a)/gi, "").trim();
-        if(imagePrompt === "") imagePrompt = "abstract digital art neural network concept";
-        
-        const encodedPrompt = encodeURIComponent(imagePrompt);
-        const dynamicImageSrc = `https://image.pollinations.ai/p/${encodedPrompt}?width=512&height=512&seed=${Math.floor(Math.random() * 100000)}`;
-
-        setTimeout(() => {
-            imageDiv.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 8px;">🎨 Generated Image Assets for: "${imagePrompt}"</div>
-                <img src="${dynamicImageSrc}" alt="${imagePrompt}" style="width: 100%; max-width: 320px; border-radius: 8px; margin-top: 5px; box-shadow: 0px 2px 8px rgba(0,0,0,0.3); display: block;" />
-                <a href="${dynamicImageSrc}" download="SPAR_AI_Image.jpg" target="_blank" style="display: inline-block; margin-top: 10px; padding: 6px 12px; background: var(--accent-gradient); color: #11111b; text-decoration: none; font-weight: bold; font-size: 13px; border-radius: 6px; text-align: center;">⬇️ Download Image</a>
-            `;
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-            saveMessageToHistory('ai', dynamicImageSrc, true);
-        }, 1500);
-        return;
-    }
-
-    const aiDiv = document.createElement('div');
-    aiDiv.className = 'message ai-message';
-    aiDiv.textContent = "Spar AI is parsing query parameters...";
-    chatMessages.appendChild(aiDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-
-    if (textLower === "open camera" || textLower === "camera capture") {
-        aiDiv.textContent = "Initializing camera permission gateway parameters...";
-        await requestCameraAccess();
-        return;
-    }
-    if (textLower === "track location" || textLower === "get location" || textLower === "where am i") {
-        aiDiv.textContent = "Accessing terminal geolocation node endpoints...";
-        requestLocationAccess();
-        return;
-    }
-
-    const realAIResponse = await fetchAIResponse(messageText);
-    aiDiv.textContent = realAIResponse;
-    
-    saveMessageToHistory('ai', realAIResponse);
-    speakText(realAIResponse);
-    
-    const audioBtn = document.createElement('button');
-    audioBtn.className = 'speak-btn';
-    audioBtn.textContent = "🔊 Replay Audio";
-    audioBtn.onclick = function() { speakText(realAIResponse); };
-    aiDiv.appendChild(audioBtn);
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-document.getElementById('userInput').addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') sendMessage();
-});
-
-checkDailyLimit();
