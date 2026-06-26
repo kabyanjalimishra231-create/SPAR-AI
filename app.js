@@ -1,9 +1,15 @@
-﻿// TRACKING VARIABLES FOR FREE USES AND SYSTEM LOCKS
+﻿// ADMINISTRATIVE DEFAULT PARAMETERS
+let currentSubscriptionPrice = 299; // Set in INR base values
 let freeUsesLeft = 3; 
+let activeSystemCoupon = "VA1FREE"; // Default live fallback voucher
 let isUserLoggedIn = false;
+
+// INTERNAL CLICK TRACKER MECHANISM FOR HIDDEN PORTAL ACCESS
+let logoClickCounter = 0;
+let lastClickTimestamp = 0;
 const RAZORPAY_KEY_ID = "rzp_test_T5uOdu0zh2G02R"; 
 
-// NAVIGATION: CONTROL TABS AND VIEWS
+// TAB VIEWS SYSTEM CONTROLLER
 function switchView(targetMode) {
     const chatView = document.getElementById('view-chat');
     const createView = document.getElementById('view-create');
@@ -27,55 +33,49 @@ function switchView(targetMode) {
     }
 }
 
-// SECURITY CONTROLLER: COUNT SYSTEM ACTIONS AND TRIGGER LOGIN SCREEN
+// SECURITY LOGIC GATEWAY COUNTER
 function checkLimits() {
-    if (isUserLoggedIn) return true; // Logged-in users bypass completely
+    if (isUserLoggedIn) return true;
 
     freeUsesLeft--;
     if (freeUsesLeft <= 0) {
         document.getElementById('uses-left').innerText = "0";
-        document.getElementById('login-modal').classList.remove('hidden'); // Force modal popup
+        document.getElementById('login-modal').classList.remove('hidden');
         return false;
     }
     document.getElementById('uses-left').innerText = freeUsesLeft;
     return true;
 }
 
-// CHAT FEATURE: RESPOND TO TEXT MESSAGES INSTANTLY
+// CHAT HANDLER INTERFACE
 function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
     if (!promptText) return;
 
-    if (!checkLimits()) return; // Exit logic if blocked by login wall
+    if (!checkLimits()) return;
 
     const chatScroller = document.getElementById('chat-scroller');
-    
-    // Create and attach User Chat Bubble
     const userBubble = document.createElement('div');
     userBubble.className = "flex justify-end mb-2";
-    userBubble.innerHTML = `
-        <div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">
-            ${promptText}
-        </div>`;
+    userBubble.innerHTML = `<div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">${promptText}</div>`;
     chatScroller.appendChild(userBubble);
-    inputField.value = ""; // Empty typing line box
+    inputField.value = "";
 
-    // Generate lightning fast simulated response
     setTimeout(() => {
         const aiBubble = document.createElement('div');
         aiBubble.className = "flex justify-start mb-2";
         aiBubble.innerHTML = `
             <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
                 <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Ultra-Fast Core</p>
-                I have processed your query immediately. Here is the highly accurate solution compiled from our lightning server clusters.
+                Processed data query instantly. SPAR optimization protocols executed correctly with 0ms delay.
             </div>`;
         chatScroller.appendChild(aiBubble);
-        chatScroller.scrollTop = chatScroller.scrollHeight; // Auto-scroll to view bottom
+        chatScroller.scrollTop = chatScroller.scrollHeight;
     }, 400); 
 }
 
-// CREATE MODE: GENERIC IMAGE CANVAS MAKER
+// IMAGE CONVERSION RENDER CREATOR
 function generateImage() {
     const promptField = document.getElementById('image-prompt');
     const imageString = promptField.value.trim();
@@ -90,37 +90,29 @@ function generateImage() {
     loader.classList.remove('hidden');
     placeholder.classList.add('hidden');
 
-    // Simulate high-speed model art generator rendering
     setTimeout(() => {
         loader.classList.add('hidden');
         canvasImg.classList.remove('hidden');
-        // Displays a beautiful abstract art design image from stock database
         canvasImg.src = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop`;
     }, 1800); 
 }
 
-// CAMERA SEARCH: CLICK PHOTO ANALYSIS SIMULATOR
-function openCameraFeature() {
-    if (!checkLimits()) return;
+// REVISED VOUCHER / COUPON RECOGNITION HANDLING SUBSYSTEM
+function applyUserCoupon() {
+    const rawInput = document.getElementById('coupon-entry-input').value.trim().toUpperCase();
     
-    alert("Camera Activated! Scanning visual frame components...");
-    
-    const chatScroller = document.getElementById('chat-scroller');
-    const cameraBubble = document.createElement('div');
-    cameraBubble.className = "flex justify-start mb-2";
-    cameraBubble.innerHTML = `
-        <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] shadow-sm">
-            <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1"><i class="fa-solid fa-camera mr-1"></i> Camera Lens Input</p>
-            <div class="w-full h-32 bg-gray-800 rounded-lg mb-2 flex flex-col items-center justify-center text-xs text-gray-500 border border-dashed border-gray-700">
-                <i class="fa-solid fa-image text-lg mb-1"></i> [ Analyzed Picture Frame Matrix ]
-            </div>
-            I have analyzed your clicked picture frame. Everything matches perfectly. How can I assist you further with this scene item?
-        </div>`;
-    chatScroller.appendChild(cameraBubble);
-    chatScroller.scrollTop = chatScroller.scrollHeight;
+    if (rawInput === activeSystemCoupon.toUpperCase()) {
+        isUserLoggedIn = true; 
+        document.getElementById('login-modal').classList.add('hidden');
+        document.getElementById('use-badge').innerHTML = `<i class="fa-solid fa-ticket text-emerald-400 mr-1"></i> Coupon Active`;
+        document.getElementById('use-badge').className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/20";
+        alert(`Success! Coupon "${rawInput}" applied. Free unlimited access unlocked.`);
+    } else {
+        alert("Invalid coupon code reference profile. Please double check and re-apply.");
+    }
 }
 
-// USER ACCREDITATION LOGIC: UNLOCK LIMIT WALL
+// ACCOUNT AUTHENTICATOR METHOD
 function simulateLogin() {
     const emailField = document.getElementById('login-email').value;
     const passField = document.getElementById('login-pass').value;
@@ -128,35 +120,87 @@ function simulateLogin() {
     if (emailField && passField) {
         isUserLoggedIn = true;
         document.getElementById('login-modal').classList.add('hidden');
-        document.getElementById('use-badge').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Unlimited Access`;
+        document.getElementById('use-badge').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> Verified User`;
         document.getElementById('use-badge').className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/20";
-        alert("Login successful! Welcome back.");
+        alert("Login validated successfully!");
     } else {
-        alert("Please type a valid email and password profile to proceed.");
+        alert("Please completely satisfy authorization entry details.");
     }
 }
 
-// INTEGRATED GATEWAY: PAYMENT CORE PORTAL HANDLER
+// CAMERA SCAN METHOD
+function openCameraFeature() {
+    if (!checkLimits()) return;
+    alert("Camera interface engine scanning local elements array variables...");
+}
+
+// RAZORPAY ENGINE PAYMENTS DEPLOYMENT HANDLER (DYNAMIC SECTOR)
 function triggerPayment() {
+    const computedPaiseAmount = currentSubscriptionPrice * 100; // Translate to paise structure base currency
+    
     var options = {
         "key": RAZORPAY_KEY_ID,
-        "amount": "29900", // ₹299.00 formatted in currency subunits (paise)
+        "amount": computedPaiseAmount.toString(),
         "currency": "INR",
         "name": "SPAR AI Studio",
-        "description": "Unlock Pro Unlimited Core Access",
+        "description": "Unlock Pro Unlimited System Access Environment",
         "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=100",
         "handler": function (response) {
-            alert("Payment completed successfully! Reference: " + response.razorpay_payment_id);
+            alert("Payment verified! Reference: " + response.razorpay_payment_id);
+            isUserLoggedIn = true;
+            document.getElementById('use-badge').innerHTML = `<i class="fa-solid fa-crown text-amber-400 mr-1"></i> PRO Tier Active`;
         },
         "prefill": {
-            "name": "SPAR Developer Account",
+            "name": "SPAR Mobile Dev Account User",
             "email": "user@example.com",
             "contact": "9999999999"
         },
-        "theme": {
-            "color": "#f59e0b" // Matches beautiful golden premium styling accents
-        }
+        "theme": { "color": "#f59e0b" }
     };
     var rzp1 = new Razorpay(options);
     rzp1.open();
+}
+
+// NEW: ADMINISTRATOR DASHBOARD SECRET INTERCEPT SYSTEM
+function handleAdminSecretClick() {
+    const now = new Date().getTime();
+    if (now - lastClickTimestamp > 1500) {
+        logoClickCounter = 0; // Reset counter window threshold if idle
+    }
+    
+    logoClickCounter++;
+    lastClickTimestamp = now;
+
+    if (logoClickCounter === 5) {
+        logoClickCounter = 0;
+        document.getElementById('admin-modal').classList.remove('hidden'); // Launch hidden UI
+    }
+}
+
+function closeAdminDashboard() {
+    document.getElementById('admin-modal').classList.add('hidden');
+}
+
+// NEW: ADMIN SYSTEM CONFIG COMMIT MUTATOR RUNTIME EXECUTOR
+function saveAdminSettings() {
+    const inputPrice = parseInt(document.getElementById('admin-price-input').value);
+    const inputUses = parseInt(document.getElementById('admin-uses-input').value);
+    const inputCoupon = document.getElementById('admin-coupon-input').value.trim();
+
+    if (isNaN(inputPrice) || isNaN(inputUses) || !inputCoupon) {
+        alert("Error! Please populate administration controls parsing parameters precisely.");
+        return;
+    }
+
+    // Rewrite Application Configurations at Runtime Execution
+    currentSubscriptionPrice = inputPrice;
+    freeUsesLeft = inputUses;
+    activeSystemCoupon = inputCoupon;
+
+    // Update Main Screen Frontend Views Instantly
+    document.getElementById('header-price-display').innerText = `₹${currentSubscriptionPrice}`;
+    document.getElementById('uses-left').innerText = freeUsesLeft;
+
+    alert("Configurations committed to application instance runtime successfully!");
+    closeAdminDashboard();
 }

@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>SPAR AI Studio</title>
-    <!-- Tailwind CSS for smooth native design -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Premium Native Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Razorpay Web Integration -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-        /* Prevents weird text highlighting or bouncing elastic scrolling on phone screens */
         body {
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
@@ -22,9 +18,8 @@
 </head>
 <body class="text-gray-100 font-sans h-screen flex flex-col justify-between overflow-hidden select-none">
 
-    <!-- TOP HEADER APP BAR -->
     <header class="w-full bg-[#161920] border-b border-gray-800 px-4 pt-4 pb-3 flex justify-between items-center z-50">
-        <div class="flex items-center space-x-2">
+        <div onclick="handleAdminSecretClick()" class="flex items-center space-x-2 cursor-pointer active:scale-95 transition-transform">
             <div class="w-8 h-8 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
                 <i class="fa-solid fa-wand-magic-sparkles text-slate-900 text-sm"></i>
             </div>
@@ -34,19 +29,16 @@
             <span id="use-badge" class="bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-500/20">
                 <span id="uses-left">3</span> Free Uses Left
             </span>
-            <button onclick="triggerPayment()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-md shadow-md hover:opacity-90 active:scale-95 transition-all">
-                PRO
+            <button id="pro-badge-btn" onclick="triggerPayment()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-md shadow-md hover:opacity-90 active:scale-95 transition-all">
+                PRO (<span id="header-price-display">₹299</span>)
             </button>
         </div>
     </header>
 
-    <!-- MAIN DISPLAY SCREEN AREA -->
     <main class="flex-1 w-full overflow-y-auto relative p-4 hide-scrollbar">
         
-        <!-- VIEW 1: FAST TEXT CHAT COMPANION -->
         <div id="view-chat" class="w-full h-full flex flex-col space-y-4">
             <div id="chat-scroller" class="flex-1 overflow-y-auto space-y-4 pr-1 hide-scrollbar">
-                <!-- App Welcome Bubble -->
                 <div class="bg-[#161920] p-4 rounded-2xl border border-gray-800 shadow-md">
                     <p class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">High Speed Core</p>
                     <h2 class="text-xl font-bold mb-2">Hello, I am SPAR AI</h2>
@@ -54,7 +46,6 @@
                 </div>
             </div>
             
-            <!-- Bottom Text Input + Camera Icon Button -->
             <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800">
                 <button onclick="openCameraFeature()" class="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors">
                     <i class="fa-solid fa-camera text-gray-300"></i>
@@ -66,7 +57,6 @@
             </div>
         </div>
 
-        <!-- VIEW 2: IMAGE GENERATION HUB (CREATE MODE) -->
         <div id="view-create" class="w-full h-full hidden flex flex-col justify-between">
             <div class="space-y-4">
                 <div class="bg-[#161920] p-4 rounded-2xl border border-gray-800">
@@ -74,14 +64,12 @@
                     <p class="text-gray-400 text-xs">Transform written descriptions directly into visual art assets.</p>
                 </div>
 
-                <!-- Live Generated Canvas Display Area -->
                 <div class="w-full aspect-square bg-[#161920] rounded-2xl border border-gray-800 flex flex-col items-center justify-center overflow-hidden relative group">
                     <img id="generated-image" class="w-full h-full object-cover hidden" alt="AI Output">
                     <div id="canvas-placeholder" class="text-center p-6">
                         <i class="fa-solid fa-images text-gray-600 text-4xl mb-3 animate-pulse"></i>
                         <p class="text-gray-400 text-xs px-6">Your visual generation canvas will render here</p>
                     </div>
-                    <!-- Spinner Loader -->
                     <div id="generation-loader" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center hidden">
                         <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-2"></div>
                         <p class="text-xs text-amber-400 font-medium">Rendering art assets...</p>
@@ -89,7 +77,6 @@
                 </div>
             </div>
 
-            <!-- Image Prompt Text Input -->
             <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800 mt-4">
                 <input id="image-prompt" type="text" placeholder="Describe the image (e.g., retro vintage cyber don style)..." class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 px-2">
                 <button onclick="generateImage()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg whitespace-nowrap">
@@ -100,27 +87,73 @@
 
     </main>
 
-    <!-- LIMITED ACCESS LOGIN LOCK WINDOW -->
     <div id="login-modal" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
         <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-gray-800 text-center shadow-2xl">
             <div class="w-14 h-14 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
                 <i class="fa-solid fa-lock text-xl"></i>
             </div>
             <h3 class="text-xl font-bold mb-1">Usage Limit Reached</h3>
-            <p class="text-gray-400 text-xs px-2 mb-6">You have completed your free uses. Please login or sign up to unlock unlimited high-speed core cloud access.</p>
+            <p class="text-gray-400 text-xs px-2 mb-4">You have completed your free uses. Sign in or enter a promo coupon code to unlock access.</p>
             
-            <div class="space-y-3 mb-6">
-                <input id="login-email" type="email" placeholder="Enter your email address" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-amber-500 outline-none transition-colors">
-                <input id="login-pass" type="password" placeholder="Password" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-amber-500 outline-none transition-colors">
+            <div class="space-y-2 mb-4">
+                <input id="login-email" type="email" placeholder="Enter email address" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs focus:border-amber-500 outline-none text-white">
+                <input id="login-pass" type="password" placeholder="Password" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs focus:border-amber-500 outline-none text-white">
+                <button onclick="simulateLogin()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl shadow-md text-xs transition-transform">
+                    Sign In & Synchronize
+                </button>
             </div>
 
-            <button onclick="simulateLogin()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold py-3 rounded-xl shadow-md text-sm active:scale-95 transition-transform">
-                Sign In & Unlock
-            </button>
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-gray-800"></div>
+                <span class="flex-shrink mx-4 text-gray-500 text-[10px] uppercase font-bold tracking-wider">OR PROMO CODE</span>
+                <div class="flex-grow border-t border-gray-800"></div>
+            </div>
+
+            <div class="flex items-center space-x-2 mt-2">
+                <input id="coupon-entry-input" type="text" placeholder="Enter Coupon Code" class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wider focus:border-amber-500 outline-none text-white">
+                <button onclick="applyUserCoupon()" class="bg-gray-800 border border-gray-700 hover:bg-gray-700 font-bold text-xs px-4 py-2.5 rounded-xl text-amber-400 whitespace-nowrap">
+                    Apply
+                </button>
+            </div>
+            <button onclick="document.getElementById('login-modal').classList.add('hidden')" class="text-gray-500 text-[11px] underline mt-4 block mx-auto">Dismiss View</button>
         </div>
     </div>
 
-    <!-- STICKY BOTTOM TAB NAVIGATION APP BAR -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-6 hidden">
+        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-amber-500/30 shadow-2xl relative">
+            <button onclick="closeAdminDashboard()" class="absolute top-4 right-4 text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            
+            <div class="flex items-center space-x-2 mb-4 border-b border-gray-800 pb-3">
+                <i class="fa-solid fa-user-gear text-amber-400 text-lg"></i>
+                <h3 class="text-base font-bold">SPAR Administrative Portal</h3>
+            </div>
+
+            <div class="space-y-4 text-left">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Set Global Pro Amount (INR)</label>
+                    <div class="relative rounded-xl shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><span class="text-gray-500 text-xs">₹</span></div>
+                        <input id="admin-price-input" type="number" value="299" class="w-full bg-gray-900 border border-gray-800 rounded-xl pl-7 pr-4 py-2.5 text-xs focus:border-amber-500 outline-none text-white font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Set Default Free Action Caps</label>
+                    <input id="admin-uses-input" type="number" value="3" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs focus:border-amber-500 outline-none text-white font-bold">
+                </div>
+
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Live Active Authorization Coupon</label>
+                    <input id="admin-coupon-input" type="text" value="FREEACCESS2026" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs uppercase tracking-wider focus:border-amber-500 outline-none text-white font-bold text-amber-400">
+                </div>
+
+                <button onclick="saveAdminSettings()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold py-3 rounded-xl shadow-md text-xs mt-2 transition-transform active:scale-95">
+                    Commit Changes Securely
+                </button>
+            </div>
+        </div>
+    </div>
+
     <nav class="w-full bg-[#161920] border-t border-gray-800 flex justify-around items-center py-2 pb-4">
         <button onclick="switchView('chat')" id="nav-chat-btn" class="flex flex-col items-center space-y-1 text-amber-400 transition-colors">
             <i class="fa-solid fa-message text-lg"></i>
@@ -132,7 +165,6 @@
         </button>
     </nav>
 
-    <!-- Application Script Connection -->
     <script src="app.js"></script>
 </body>
 </html>
