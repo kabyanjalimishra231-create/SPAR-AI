@@ -92,6 +92,41 @@
             </div>
         </div>
 
+        <div id="view-account" class="w-full h-full hidden flex flex-col space-y-4">
+            <div class="bg-[#161920] p-5 rounded-2xl border border-gray-800 shadow-md">
+                <div class="flex items-center space-x-4 mb-4">
+                    <div class="w-12 h-12 bg-amber-500/10 rounded-full border border-amber-500/30 flex items-center justify-center text-amber-400">
+                        <i class="fa-solid fa-user-astronaut text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 id="account-username" class="text-base font-bold text-white">Guest User</h2>
+                        <p id="account-email" class="text-gray-500 text-xs">No profile email synchronized</p>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-800/80 pt-4 flex flex-col space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-gray-400">Account License Tier:</span>
+                        <div id="account-subs-status">⏳ FREE TIER</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-[#161920] rounded-2xl border border-gray-800 p-4 flex flex-col justify-between overflow-hidden">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-2 mb-2">
+                    <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-database mr-1.5 text-[10px]"></i> Local Search Ledger
+                    </h3>
+                    <button onclick="wipeLocalDeviceHistory()" class="text-[10px] text-gray-500 hover:text-red-400 font-medium transition-colors">
+                        <i class="fa-solid fa-trash-can mr-1"></i> Wipe Ledger
+                    </button>
+                </div>
+
+                <div id="account-search-history" class="flex-1 overflow-y-auto space-y-1.5 pr-1 hide-scrollbar">
+                    </div>
+            </div>
+        </div>
+
     </main>
 
     <div id="login-modal" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
@@ -99,8 +134,8 @@
             <div class="w-14 h-14 bg-amber-500/10 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
                 <i class="fa-solid fa-lock text-xl"></i>
             </div>
-            <h3 class="text-xl font-bold mb-1">Usage Limit Reached</h3>
-            <p class="text-gray-400 text-xs px-2 mb-4">Please log in or purchase a premium upgrade access key to bypass calculations.</p>
+            <h3 class="text-xl font-bold mb-1">Account Authorization</h3>
+            <p class="text-gray-400 text-xs px-2 mb-4">Please log in or purchase a premium upgrade access key to bypass calculation caps.</p>
             
             <div class="space-y-2 mb-4">
                 <input id="login-email" type="email" placeholder="Enter email address" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs outline-none text-white focus:border-amber-500">
@@ -188,7 +223,7 @@
                     <input id="admin-uses-input" type="number" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white font-bold outline-none">
                 </div>
                 <div>
-                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Live Free Access Authorization Coupon</label>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Live Access Authorization Coupon</label>
                     <input id="admin-coupon-input" type="text" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-amber-400 font-bold tracking-wider uppercase outline-none">
                 </div>
                 <button onclick="saveAdminSettings()" class="w-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold py-3 rounded-xl text-xs mt-2 transition-transform active:scale-95">
@@ -206,6 +241,10 @@
         <button onclick="switchView('create')" id="nav-create-btn" class="flex flex-col items-center space-y-1 text-gray-500">
             <i class="fa-solid fa-wand-magic text-lg"></i>
             <span class="text-[10px] font-medium">Create Mode</span>
+        </button>
+        <button onclick="switchView('account')" id="nav-account-btn" class="flex flex-col items-center space-y-1 text-gray-500">
+            <i class="fa-solid fa-circle-user text-lg"></i>
+            <span class="text-[10px] font-medium">My Account</span>
         </button>
     </nav>
 
