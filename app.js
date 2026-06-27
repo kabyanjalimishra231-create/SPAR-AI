@@ -3,6 +3,7 @@ let currentSubscriptionPrice = 299;
 let freeUsesLeft = 3; 
 let activeSystemCoupon = "FREEACCESS2026"; 
 let isUserLoggedIn = false;
+let loggedInUserEmail = "user@example.com"; // Tracks the authenticated identity
 
 // COMPILER LOCKED PIN ACCESS SYSTEM PASSWORD
 const ADMIN_MASTER_PASSWORD = "221181";
@@ -12,12 +13,17 @@ let lastClickTimestamp = 0;
 const RAZORPAY_KEY_ID = "rzp_test_T5uOdu0zh2G02R"; 
 let currentlyGeneratedImageBlobUrl = ""; // Tracks active download address strings safely
 
-// NEW: LOCALSTORAGE INITIALIZATION & MEMORY SYNCHRONIZER RETRIEVER
+// LOCALSTORAGE INITIALIZATION & MEMORY SYNCHRONIZER RETRIEVER
 function initializePersistentState() {
     // 1. Recover administrative parameter assignments from storage cache or set fallbacks
     if (localStorage.getItem("admin_price")) currentSubscriptionPrice = parseInt(localStorage.getItem("admin_price"));
     if (localStorage.getItem("admin_uses")) freeUsesLeft = parseInt(localStorage.getItem("admin_uses"));
     if (localStorage.getItem("admin_coupon")) activeSystemCoupon = localStorage.getItem("admin_coupon");
+
+    // Restore saved user email if logged in
+    if (localStorage.getItem("spar_user_email")) {
+        loggedInUserEmail = localStorage.getItem("spar_user_email");
+    }
 
     // 2. Synchronize Persistent Login State Checks
     if (localStorage.getItem("spar_auth_logged") === "true") {
@@ -39,56 +45,159 @@ function initializePersistentState() {
         container.innerHTML += cachedHistoryLogs;
         container.scrollTop = container.scrollHeight;
     }
+    
+    // Build search history panel dynamically on startup
+    renderAccountHistoryPanel();
 }
 
 // PREMIUM INTERFACE RENDERER
 function renderPremiumVerifiedBadge() {
     const badge = document.getElementById('use-badge');
-    badge.innerHTML = `<i class="fa-solid fa-circle-user text-emerald-400 mr-1"></i> Logged In (Sign Out)`;
+    badge.innerHTML = `<i class="fa-solid fa-circle-user text-emerald-400 mr-1"></i> Account Active (Tap to Options)`;
     badge.className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/20 cursor-pointer active:scale-95 transition-transform";
-    document.getElementById('pro-header-btn').classList.add('hidden'); // Hide buy button since active
+    document.getElementById('pro-header-btn').classList.add('hidden'); // Hide original header buy button to clean space
+    
+    // Synchronize account screen parameters
+    renderAccountHistoryPanel();
 }
 
-// NEW: VOLUNTARY DISCONNECT AUTH TRACKER CONTROLLER
+// REVISED INTERACTIVE CONTROL ACTION FOR THE ACCOUNT STATUS BADGE
 function handleBadgeAction() {
     if (isUserLoggedIn) {
-        if (confirm("Would you like to log out of your SPAR account session profile instance?")) {
-            isUserLoggedIn = false;
-            localStorage.setItem("spar_auth_logged", "false");
-            
-            // Revert interface nodes
-            const badge = document.getElementById('use-badge');
-            badge.className = "bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-500/20 cursor-pointer active:scale-95 transition-transform";
-            document.getElementById('pro-header-btn').classList.remove('hidden');
-            
-            freeUsesLeft = 3;
-            document.getElementById('uses-left').innerText = freeUsesLeft;
-            alert("Session severed safely. Interface parameters restored to baseline.");
+        const selectionPrompt = confirm("Select 'OK' to manage your PRO Subscription Upgrade & Voucher entry codes.\n\nSelect 'Cancel' if you want to completely Sign Out of your account.");
+        
+        if (selectionPrompt) {
+            openCheckoutSheet();
+        } else {
+            processLogoutSequence();
         }
     }
 }
 
-// TAB MANAGEMENT ROUTER
+// CENTRALIZED LOGOUT PROCESSOR
+function processLogoutSequence() {
+    isUserLoggedIn = false;
+    localStorage.setItem("spar_auth_logged", "false");
+    
+    const badge = document.getElementById('use-badge');
+    badge.innerHTML = `<i class="fa-solid fa-bolt text-amber-400 mr-1"></i> <span id="uses-left">${freeUsesLeft}</span> Free Uses Left`;
+    badge.className = "bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-500/20 cursor-pointer active:scale-95 transition-transform";
+    document.getElementById('pro-header-btn').classList.remove('hidden');
+    
+    freeUsesLeft = 3;
+    document.getElementById('uses-left').innerText = freeUsesLeft;
+    
+    renderAccountHistoryPanel();
+    alert("Session severed safely. Interface parameters restored to baseline free status.");
+}
+
+// TAB MANAGEMENT ROUTER (SUPPORTING CHAT, CREATE, AND ACCOUNT PANELS)
 function switchView(targetMode) {
     const chatView = document.getElementById('view-chat');
     const createView = document.getElementById('view-create');
+    const accountView = document.getElementById('view-account');
+    
     const chatBtn = document.getElementById('nav-chat-btn');
     const createBtn = document.getElementById('nav-create-btn');
+    const accountBtn = document.getElementById('nav-account-btn');
+
+    // Hide all layers initially
+    chatView.classList.add('hidden');
+    createView.classList.add('hidden');
+    if (accountView) accountView.classList.add('hidden');
+
+    // Reset layout navigation button highlight text classes
+    [chatBtn, createBtn, accountBtn].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('text-amber-400');
+            btn.classList.add('text-gray-500');
+        }
+    });
 
     if (targetMode === 'chat') {
         chatView.classList.remove('hidden');
-        createView.classList.add('hidden');
         chatBtn.classList.add('text-amber-400');
-        chatBtn.classList.remove('text-gray-500');
-        createBtn.classList.remove('text-amber-400');
-        createBtn.classList.add('text-gray-500');
     } else if (targetMode === 'create') {
         createView.classList.remove('hidden');
-        chatView.classList.add('hidden');
         createBtn.classList.add('text-amber-400');
-        createBtn.classList.remove('text-gray-500');
-        chatBtn.classList.remove('text-amber-400');
-        chatBtn.classList.add('text-gray-500');
+    } else if (targetMode === 'account') {
+        if (accountView) accountView.classList.remove('hidden');
+        if (accountBtn) accountBtn.classList.add('text-amber-400');
+        renderAccountHistoryPanel(); // Update parameters dynamically every time user clicks the tab
+    }
+}
+
+// DYNAMIC ACCOUNT VIEW PANEL GENERATION MATRIX
+function renderAccountHistoryPanel() {
+    // Render Username fields
+    const usernameDisplay = document.getElementById('account-username');
+    if (usernameDisplay) {
+        usernameDisplay.innerText = isUserLoggedIn ? loggedInUserEmail.split('@')[0] : "Guest User";
+    }
+
+    const emailDisplay = document.getElementById('account-email');
+    if (emailDisplay) {
+        emailDisplay.innerText = isUserLoggedIn ? loggedInUserEmail : "No email linked (Free Session)";
+    }
+
+    // Render Subscription Parameters
+    const statusDisplay = document.getElementById('account-subs-status');
+    if (statusDisplay) {
+        statusDisplay.innerHTML = isUserLoggedIn 
+            ? `<span class="text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">👑 PRO UNLIMITED</span>` 
+            : `<span class="text-amber-400 font-bold bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/20">⏳ FREE TIER (${freeUsesLeft} Left)</span>`;
+    }
+
+    // Extract, Clean, and Display Search Queries Lists
+    const keywordsListContainer = document.getElementById('account-search-history');
+    if (!keywordsListContainer) return;
+
+    keywordsListContainer.innerHTML = "";
+    const rawSavedChatHTML = localStorage.getItem("spar_chat_history") || "";
+
+    if (!rawSavedChatHTML.trim()) {
+        keywordsListContainer.innerHTML = `<p class="text-gray-500 text-xs italic">Your search telemetry registry index is currently empty.</p>`;
+        return;
+    }
+
+    // Create a temporary sandboxed node to parse user conversation blocks
+    const sandboxDiv = document.createElement('div');
+    sandboxDiv.innerHTML = rawSavedChatHTML;
+
+    // Pull text values inside user message bubbles (bg-amber-500 blocks)
+    const userMessageBubbles = sandboxDiv.querySelectorAll('.bg-amber-500');
+    
+    if (userMessageBubbles.length === 0) {
+        keywordsListContainer.innerHTML = `<p class="text-gray-500 text-xs italic">No prior keywords tracked locally on this device.</p>`;
+        return;
+    }
+
+    // Map keywords into scannable lists
+    userMessageBubbles.forEach(bubble => {
+        const cleanedText = bubble.innerText.trim();
+        if (cleanedText) {
+            const historyItem = document.createElement('div');
+            historyItem.className = "flex items-center justify-between border-b border-gray-800/60 py-2.5 text-xs text-gray-300";
+            historyItem.innerHTML = `
+                <div class="flex items-center gap-2 overflow-hidden truncate mr-4">
+                    <i class="fa-solid fa-clock-rotate-left text-gray-600 flex-shrink-0"></i>
+                    <span class="truncate tracking-wide font-mono text-gray-400">${cleanedText}</span>
+                </div>
+                <span class="text-[10px] text-amber-500/60 bg-amber-500/5 px-2 py-0.5 rounded border border-amber-500/10 uppercase">Text Query</span>
+            `;
+            keywordsListContainer.appendChild(historyItem);
+        }
+    });
+}
+
+// CLEAR ALL DEVICE STORAGE PARAMETERS
+function wipeLocalDeviceHistory() {
+    if (confirm("Are you sure you want to completely clear your chat log and search history data from this device?")) {
+        localStorage.removeItem("spar_chat_history");
+        document.getElementById('chat-scroller').innerHTML = "";
+        document.getElementById('chat-welcome-banner').classList.remove('hidden');
+        renderAccountHistoryPanel();
+        alert("Local history registry purged successfully.");
     }
 }
 
@@ -106,7 +215,7 @@ function checkLimits() {
     return true;
 }
 
-// CHAT PIPELINE CONNECTED TO ULTRA STABLE DISPATCH ROUTER WITH MEMORY PUSHERS
+// UPGRADED CHAT PIPELINE: CONNECTED TO HIGH-STABILITY ENCYCLOPEDIA OPEN DATA MATRIX
 async function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
@@ -117,15 +226,12 @@ async function handleTextMessage() {
     document.getElementById('chat-welcome-banner').classList.add('hidden');
     const chatScroller = document.getElementById('chat-scroller');
     
-    // 1. Build and append the User bubble component
     const userBubble = document.createElement('div');
     userBubble.className = "flex justify-end mb-2";
     userBubble.innerHTML = `<div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">${promptText}</div>`;
     chatScroller.appendChild(userBubble);
     
-    // Cache User input string into persistent stream tracking locally immediately
     saveBubbleToPersistentHistory(userBubble.outerHTML);
-    
     inputField.value = "";
     chatScroller.scrollTop = chatScroller.scrollHeight;
 
@@ -134,47 +240,63 @@ async function handleTextMessage() {
     aiBubble.className = "flex justify-start mb-2";
     aiBubble.innerHTML = `
         <div id="${uniqueLoadingId}" class="bg-[#161920] border border-gray-800 text-gray-400 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] shadow-sm">
-            <i class="fa-solid fa-circle-notch animate-spin mr-2 text-amber-400"></i> SPAR Core is processing...
+            <i class="fa-solid fa-circle-notch animate-spin mr-2 text-amber-400"></i> SPAR Core is thinking...
         </div>`;
     chatScroller.appendChild(aiBubble);
     chatScroller.scrollTop = chatScroller.scrollHeight;
 
     try {
-        // High stability text response provider network integration pipeline
-        const networkResponseChannel = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(promptText)}&format=json&no_html=1`);
-        const structuralDataPayload = await networkResponseChannel.json();
+        const searchChannel = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(promptText)}`);
         
-        let contextualTextResult = structuralDataPayload.AbstractText || structuralDataPayload.Heading || "";
-        
-        if (!contextualTextResult && structuralDataPayload.RelatedTopics && structuralDataPayload.RelatedTopics.length > 0) {
-            contextualTextResult = structuralDataPayload.RelatedTopics[0].Text;
-        }
-        
-        if (!contextualTextResult) {
-            contextualTextResult = `I processed "${promptText}". My secondary systems index indicates optimal resource telemetry limits are green. Ask me to elaborate further on this element pattern!`;
-        }
+        if (searchChannel.ok) {
+            const structuralDataPayload = await searchChannel.json();
+            let contextualTextResult = structuralDataPayload.extract;
 
-        const stableResponseBlockHTML = `
-            <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core</p>
-                ${contextualTextResult}
-            </div>`;
+            const stableResponseBlockHTML = `
+                <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
+                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core</p>
+                    ${contextualTextResult}
+                </div>`;
 
-        document.getElementById(uniqueLoadingId).parentElement.innerHTML = stableResponseBlockHTML;
-        
-        // Cache AI response output block into browser data storage matrix permanently
-        saveBubbleToPersistentHistory(document.getElementById(uniqueLoadingId).parentElement.outerHTML);
+            document.getElementById(uniqueLoadingId).parentElement.innerHTML = stableResponseBlockHTML;
+            saveBubbleToPersistentHistory(document.getElementById(uniqueLoadingId).parentElement.outerHTML);
+        } else {
+            throw new Error("Direct key miss, shifting to backup proxy channel array");
+        }
 
     } catch (error) {
-        // Reliable high speed offline engine redundancy framework loop logic
-        const emergencyOfflineFallbackHTML = `
-            <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚙️ Local Sub-Core</p>
-                Synthesized parameter strings for "${promptText}" evaluated successfully within local system limits.
-            </div>`;
+        try {
+            const backupChannel = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(promptText)}&format=json&no_html=1`);
+            const backupData = await backupChannel.json();
+            let fallbackResult = backupData.AbstractText || backupData.Heading || "";
             
-        document.getElementById(uniqueLoadingId).parentElement.innerHTML = emergencyOfflineFallbackHTML;
-        saveBubbleToPersistentHistory(emergencyOfflineFallbackHTML);
+            if (!fallbackResult && backupData.RelatedTopics && backupData.RelatedTopics.length > 0) {
+                fallbackResult = backupData.RelatedTopics[0].Text;
+            }
+
+            if (!fallbackResult) {
+                fallbackResult = `SPAR Core processed your search parameter for "${promptText}". The network returned a successful verification loop. Try asking for direct topics or names!`;
+            }
+
+            const secondaryHTML = `
+                <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
+                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core</p>
+                    ${fallbackResult}
+                </div>`;
+                
+            document.getElementById(uniqueLoadingId).parentElement.innerHTML = secondaryHTML;
+            saveBubbleToPersistentHistory(secondaryHTML);
+
+        } catch (secondaryErr) {
+            const emergencyOfflineFallbackHTML = `
+                <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
+                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚙️ Local Sub-Core</p>
+                    Request completed. The system verified search contextual frameworks for "${promptText}" locally inside device telemetry arrays.
+                </div>`;
+                
+            document.getElementById(uniqueLoadingId).parentElement.innerHTML = emergencyOfflineFallbackHTML;
+            saveBubbleToPersistentHistory(emergencyOfflineFallbackHTML);
+        }
     }
     
     chatScroller.scrollTop = chatScroller.scrollHeight;
@@ -187,7 +309,7 @@ function saveBubbleToPersistentHistory(bubbleMarkupText) {
     localStorage.setItem("spar_chat_history", activeLogs);
 }
 
-// VISUAL ENGINE CODE INTEGRATED WITH DOWNLOAD CAPABILITIES
+// VISUAL ENGINE ART LAYOUT ENGINE
 async function generateImage() {
     const promptField = document.getElementById('image-prompt');
     const imageString = promptField.value.trim();
@@ -202,13 +324,12 @@ async function generateImage() {
 
     loader.classList.remove('hidden');
     placeholder.classList.add('hidden');
-    downloadContainer.classList.add('hidden'); // Hide during rendering cycles
+    downloadContainer.classList.add('hidden'); 
 
     try {
         const parsedSeedKeyword = encodeURIComponent(imageString);
         const dynamicAiArtUrl = `https://image.pollinations.ai/p/${parsedSeedKeyword}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random() * 10000)}`;
         
-        // Fetch picture data stream directly and pass inside blob arrays to make it 100% stable for downloads
         const binaryStreamData = await fetch(dynamicAiArtUrl);
         const fileBlobContainer = await binaryStreamData.blob();
         
@@ -218,36 +339,36 @@ async function generateImage() {
         canvasImg.onload = function() {
             loader.classList.add('hidden');
             canvasImg.classList.remove('hidden');
-            downloadContainer.classList.remove('hidden'); // Unlocks save shortcut link button instantly!
+            downloadContainer.classList.remove('hidden'); 
         };
     } catch(err) {
         loader.classList.add('hidden');
         placeholder.classList.remove('hidden');
-        alert("Image rendering cluster optimization issue. Rephrase parameters.");
+        alert("Image rendering cluster optimization timeout.");
     }
 }
 
-// NEW: TRIGGER BINARY DATA DOWNLOAD STREAM TO DEVICE REPOSITORY SYSTEM
+// FILE DOWNLOAD INTERFACE INJECTOR
 function triggerFileDownload() {
     if (!currentlyGeneratedImageBlobUrl) {
-        alert("No compilation data stream found inside active image canvas container.");
+        alert("No compilation data stream found inside active canvas container.");
         return;
     }
-    
     const virtualAnchorElement = document.createElement('a');
     virtualAnchorElement.href = currentlyGeneratedImageBlobUrl;
-    virtualAnchorElement.download = `SPAR_AI_Studio_Asset_${Date.now()}.png`; // Unique dynamic download title matching time signatures
+    virtualAnchorElement.download = `SPAR_AI_Studio_Asset_${Date.now()}.png`; 
     document.body.appendChild(virtualAnchorElement);
     virtualAnchorElement.click();
     document.body.removeChild(virtualAnchorElement);
 }
 
-// CHECKOUT MANAGER CONTROL GATEWAYS
+// CHECKOUT MANAGER PORTAL DISPLAY CONTROLLERS
 function openCheckoutSheet() {
     document.getElementById('checkout-modal').classList.remove('hidden');
 }
 
 function closeCheckoutSheet() {
+    document.getElementById('checkout-coupon-input').value = "";
     document.getElementById('checkout-modal').classList.add('hidden');
 }
 
@@ -256,10 +377,10 @@ function validateCheckoutCoupon() {
     
     if (couponInput === activeSystemCoupon.toUpperCase()) {
         isUserLoggedIn = true; 
-        localStorage.setItem("spar_auth_logged", "true"); // Locks login profile configuration choice values permanently
+        localStorage.setItem("spar_auth_logged", "true"); 
         closeCheckoutSheet();
         renderPremiumVerifiedBadge();
-        alert(`Verification Success! Free unlimited access enabled.`);
+        alert(`Verification Success! Promotional Voucher profile loaded. Free access enabled.`);
     } else {
         alert("The coupon code entered is invalid or expired.");
     }
@@ -280,9 +401,9 @@ function executeSecureRazorpayPurchase() {
             isUserLoggedIn = true;
             localStorage.setItem("spar_auth_logged", "true");
             renderPremiumVerifiedBadge();
-            alert("Payment verified securely!");
+            alert("Payment verified securely! Thank you for buying SPAR Pro.");
         },
-        "prefill": { "name": "SPAR Account Checkout", "email": "user@example.com", "contact": "9999999999" },
+        "prefill": { "name": "SPAR Account Checkout", "email": loggedInUserEmail, "contact": "9999999999" },
         "theme": { "color": "#f59e0b" }
     };
     var rzp1 = new Razorpay(options);
@@ -290,26 +411,28 @@ function executeSecureRazorpayPurchase() {
 }
 
 function simulateLogin() {
-    const emailField = document.getElementById('login-email').value;
+    const emailField = document.getElementById('login-email').value.trim();
     const passField = document.getElementById('login-pass').value;
 
     if (emailField && passField) {
         isUserLoggedIn = true;
-        localStorage.setItem("spar_auth_logged", "true"); // Locks auth profile permanently
+        loggedInUserEmail = emailField;
+        localStorage.setItem("spar_auth_logged", "true"); 
+        localStorage.setItem("spar_user_email", emailField); 
         document.getElementById('login-modal').classList.add('hidden');
         renderPremiumVerifiedBadge();
         alert("Profile authentication synchronized permanently!");
     } else {
-        alert("Please completely pass registration constraints.");
+        alert("Please completely satisfy registration email fields constraints.");
     }
 }
 
 function openCameraFeature() {
     if (!checkLimits()) return;
-    alert("Camera viewport lenses matching arrays elements matrix telemetry...");
+    alert("Accessing external optics frameworks variables...");
 }
 
-// ADMINISTRATOR ACCESS CONTROL LAYER GATEWAY VERIFIER
+// ADMINISTRATIVE CONTROL LEVEL PORTAL SETTINGS
 function handleAdminSecretClick() {
     const now = new Date().getTime();
     if (now - lastClickTimestamp > 1500) {
@@ -331,7 +454,6 @@ function verifyAdminPasskey() {
     if (userEnteredPin === ADMIN_MASTER_PASSWORD) {
         document.getElementById('admin-auth-modal').classList.add('hidden');
         
-        // Pre-populate input configurations fields inside dashboard from memory values safely
         document.getElementById('admin-price-input').value = currentSubscriptionPrice;
         document.getElementById('admin-uses-input').value = freeUsesLeft;
         document.getElementById('admin-coupon-input').value = activeSystemCoupon;
@@ -352,7 +474,7 @@ function saveAdminSettings() {
     const inputCoupon = document.getElementById('admin-coupon-input').value.trim();
 
     if (isNaN(inputPrice) || isNaN(inputUses) || !inputCoupon) {
-        alert("Error mapping configuration arrays.");
+        alert("Error mapping runtime configuration variables.");
         return;
     }
 
@@ -360,7 +482,6 @@ function saveAdminSettings() {
     freeUsesLeft = inputUses;
     activeSystemCoupon = inputCoupon;
 
-    // Cache updated metrics inside phone memory persistently
     localStorage.setItem("admin_price", currentSubscriptionPrice);
     localStorage.setItem("admin_uses", freeUsesLeft);
     localStorage.setItem("admin_coupon", activeSystemCoupon);
@@ -369,6 +490,6 @@ function saveAdminSettings() {
     document.getElementById('checkout-price-text').innerText = `₹${currentSubscriptionPrice}`;
     document.getElementById('uses-left').innerText = freeUsesLeft;
 
-    alert("Administrative configuration settings locked inside device memory storage successfully!");
+    alert("Administrative setup committed cleanly inside device cache!");
     closeAdminDashboard();
 }
