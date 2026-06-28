@@ -20,8 +20,8 @@ const appTranslationDictionary = {
     en: {
         usesLeft: "Free Uses Left",
         chatWelcomeTitle: "Welcome to SPAR AI Studio",
-        chatWelcomeDesc: "Ask questions in English or हिंदी! Your conversational AI model session is active.",
-        chatPlaceholder: "Message SPAR AI...",
+        chatWelcomeDesc: "Ask questions in English or हिंदी! Your live internet-connected AI session is active.",
+        chatPlaceholder: "Ask about current news, live gold prices...",
         createTitle: "Image Studio",
         createDesc: "Transform written specifications directly into download-ready artwork.",
         createPlaceholder: "Describe the image context...",
@@ -42,20 +42,20 @@ const appTranslationDictionary = {
         navAccount: "My Account",
         guestUser: "Guest User",
         noEmail: "No profile email synchronized",
-        loadingAi: "SPAR AI is generating response...",
+        loadingAi: "SPAR AI is searching websites & generating response...",
         alertNameEmpty: "Please enter a valid username.",
         alertNameSuccess: "Username updated successfully!",
         alertEmailInvalid: "Please enter a valid Gmail address.",
         alertEmailSuccess: "Gmail address linked successfully!",
         alertWipeConfirm: "Are you sure you want to completely clear your local historical database?",
         alertWipeSuccess: "Local search history logs wiped successfully.",
-        sysInstruction: "Answer the prompt clearly and accurately."
+        sysInstruction: "You are connected to live internet search tracking websites. Answer the prompt accurately using up-to-date current data or historical facts."
     },
     hi: {
         usesLeft: "फ्री उपयोग शेष",
         chatWelcomeTitle: "SPAR AI स्टूडियो में आपका स्वागत है",
-        chatWelcomeDesc: "अंग्रेजी या हिंदी में प्रश्न पूछें! आपका संवादात्मक AI आदेश सत्र सक्रिय है।",
-        chatPlaceholder: "SPAR AI को संदेश भेजें...",
+        chatWelcomeDesc: "अंग्रेजी या हिंदी में प्रश्न पूछें! लाइव इंटरनेट और समाचार डेटा सक्रिय है।",
+        chatPlaceholder: "आज का गोल्ड रेट, समाचार या कुछ भी पूछें...",
         createTitle: "इमेज स्टूडियो",
         createDesc: "लिखित निर्देशों को सीधे डाउनलोड-योग्य कलाकृतियों में बदलें।",
         createPlaceholder: "इमेज का विवरण लिखें...",
@@ -76,14 +76,14 @@ const appTranslationDictionary = {
         navAccount: "मेरा खाता",
         guestUser: "अतिथि उपयोगकर्ता",
         noEmail: "कोई ईमेल लिंक नहीं है",
-        loadingAi: "SPAR AI उत्तर तैयार कर रहा है...",
+        loadingAi: "SPAR AI इंटरनेट पर खोज कर रहा है...",
         alertNameEmpty: "कृपया एक वैध यूजरनेम दर्ज करें।",
         alertNameSuccess: "यूजरनेम सफलतापूर्वक अपडेट हो गया!",
         alertEmailInvalid: "कृपया सही ईमेल एड्रेस दर्ज करें।",
         alertEmailSuccess: "Gmail सफलतापूर्वक लिंक हो गया!",
         alertWipeConfirm: "क्या आप सचमुच अपना पूरा चैट इतिहास डिलीट करना चाहते हैं?",
         alertWipeSuccess: "चैट इतिहास सफलतापूर्वक साफ़ कर दिया गया है।",
-        sysInstruction: "Respond entirely in fluent Hindi language using Devanagari script. Keep it highly natural."
+        sysInstruction: "You are connected to live internet search. Respond entirely in fluent Hindi language using Devanagari script based on live web metrics."
     }
 };
 
@@ -240,7 +240,7 @@ function renderAccountHistoryPanel() {
     });
 }
 
-// TEXT MODEL PIPELINE UPGRADED WITH STABLE ARCHITECTURE ROUTING ARRAYS
+// TEXT MODEL PIPELINE CONFIGURED WITH SEARCH MODALITY
 async function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
@@ -274,15 +274,15 @@ async function handleTextMessage() {
     try {
         const structuralQueryPrompt = `${dict.sysInstruction} User Question: ${promptText}`;
         
-        // Added model parameters explicitly to pull directly from high-capacity computing layers
-        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(structuralQueryPrompt)}?model=openai&cache=false`);
+        // CRITICAL UPDATE: Routing directly to the web 'search' model variant inside the parameter configuration matrix
+        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(structuralQueryPrompt)}?model=search&cache=false`);
 
         if (response.ok) {
             let aiResponseText = await response.text();
             
             const stableResponseBlockHTML = `
                 <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">🧠 SPAR Intelligent Core</p>
+                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">🔍 SPAR Live Search Engine</p>
                     ${aiResponseText.replace(/\n/g, '<br>')}
                 </div>`;
 
@@ -339,6 +339,7 @@ function checkLimits() {
     return true;
 }
 
+// CACHE WRITING LOGIC
 function saveBubbleToPersistentHistory(html) {
     let logs = localStorage.getItem("spar_chat_history") || "";
     localStorage.setItem("spar_chat_history", logs + html);
