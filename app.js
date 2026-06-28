@@ -54,8 +54,8 @@ const appTranslationDictionary = {
     hi: {
         usesLeft: "फ्री उपयोग शेष",
         chatWelcomeTitle: "SPAR AI स्टूडियो में आपका स्वागत है",
-        chatWelcomeDesc: "अंग्रेजी या हिंदी में प्रश्न पूछें! आपका संवादात्मक AI मॉडल सत्र सक्रिय है।",
-        chatPlaceholder: "SPAR AI को संदेश भेजें (हिंदी या English)...",
+        chatWelcomeDesc: "अंग्रेजी या हिंदी में प्रश्न पूछें! आपका संवादात्मक AI आदेश सत्र सक्रिय है।",
+        chatPlaceholder: "SPAR AI को संदेश भेजें...",
         createTitle: "इमेज स्टूडियो",
         createDesc: "लिखित निर्देशों को सीधे डाउनलोड-योग्य कलाकृतियों में बदलें।",
         createPlaceholder: "इमेज का विवरण लिखें...",
@@ -96,7 +96,6 @@ function initializePersistentState() {
     if (localStorage.getItem("spar_user_email")) loggedInUserEmail = localStorage.getItem("spar_user_email");
     if (localStorage.getItem("spar_username")) currentUsernameString = localStorage.getItem("spar_username");
     
-    // Load app language settings state if tracked inside persistent cache
     if (localStorage.getItem("spar_app_lang")) currentSelectedLanguage = localStorage.getItem("spar_app_lang");
 
     document.getElementById('app-language-select').value = currentSelectedLanguage;
@@ -122,7 +121,6 @@ function initializePersistentState() {
     applySelectedLanguageUIElements();
 }
 
-// FEATURE INTERFACE COMPONENT: APP LANGUAGE CONVERTER RE-RENDERER
 function changeApplicationLanguage(targetLangCode) {
     currentSelectedLanguage = targetLangCode;
     localStorage.setItem("spar_app_lang", currentSelectedLanguage);
@@ -132,15 +130,10 @@ function changeApplicationLanguage(targetLangCode) {
 function applySelectedLanguageUIElements() {
     const dict = appTranslationDictionary[currentSelectedLanguage];
 
-    // Main Header Elements
     document.getElementById('lbl-uses-left').innerText = dict.usesLeft;
-
-    // Fast Chat Elements
     document.getElementById('chat-welcome-title').innerText = dict.chatWelcomeTitle;
     document.getElementById('chat-welcome-desc').innerText = dict.chatWelcomeDesc;
     document.getElementById('chat-input').placeholder = dict.chatPlaceholder;
-
-    // Create Mode Elements
     document.getElementById('create-title').innerHTML = `<i class="fa-solid fa-palette text-amber-400 mr-2"></i>` + dict.createTitle;
     document.getElementById('create-desc').innerText = dict.createDesc;
     document.getElementById('image-prompt').placeholder = dict.createPlaceholder;
@@ -148,8 +141,6 @@ function applySelectedLanguageUIElements() {
     document.getElementById('btn-save-device').innerHTML = `<i class="fa-solid fa-circle-arrow-down text-sm mr-2"></i>` + dict.btnSave;
     document.getElementById('canvas-placeholder-text').innerText = dict.canvasPlaceholder;
     document.getElementById('generation-loader-text').innerText = dict.loaderText;
-
-    // My Account Elements
     document.getElementById('account-settings-heading').innerText = dict.accountSettings;
     document.getElementById('lbl-select-lang').innerText = dict.lblSelectLang;
     document.getElementById('update-username-input').placeholder = dict.usernamePlaceholder;
@@ -158,8 +149,6 @@ function applySelectedLanguageUIElements() {
     document.getElementById('btn-link-email').innerText = dict.btnLinkEmail;
     document.getElementById('history-ledger-title').innerHTML = `<i class="fa-solid fa-database mr-1.5 text-[10px]"></i>` + dict.historyLedger;
     document.getElementById('btn-delete-history').innerHTML = `<i class="fa-solid fa-trash-can mr-1"></i>` + dict.btnDeleteHistory;
-
-    // Tab Bar Elements
     document.getElementById('nav-text-chat').innerText = dict.navChat;
     document.getElementById('nav-text-create').innerText = dict.navCreate;
     document.getElementById('nav-text-account').innerText = dict.navAccount;
@@ -167,7 +156,6 @@ function applySelectedLanguageUIElements() {
     renderAccountHistoryPanel();
 }
 
-// PROFILE ACTIONS HANDLERS
 function updateProfileUsername() {
     const dict = appTranslationDictionary[currentSelectedLanguage];
     const inputElement = document.getElementById('update-username-input');
@@ -205,10 +193,8 @@ function wipeLocalDeviceHistory() {
     }
 }
 
-// DYNAMIC INTERFACE LIST LOG PANEL SYNC
 function renderAccountHistoryPanel() {
     const dict = appTranslationDictionary[currentSelectedLanguage];
-    
     const usernameDisplay = document.getElementById('account-username');
     if (usernameDisplay) usernameDisplay.innerText = (currentUsernameString === "Guest User") ? dict.guestUser : currentUsernameString;
 
@@ -254,7 +240,7 @@ function renderAccountHistoryPanel() {
     });
 }
 
-// TEXT MODEL PIPELINE AGENT MATRIX WITH LANGUAGE AUTO-ALIGNMENT
+// TEXT MODEL PIPELINE UPGRADED WITH STABLE ARCHITECTURE ROUTING ARRAYS
 async function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
@@ -269,8 +255,8 @@ async function handleTextMessage() {
     const userBubble = document.createElement('div');
     userBubble.className = "flex justify-end mb-2";
     userBubble.innerHTML = `<div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">${promptText}</div>`;
-    chatScroller.appendChild(userBubble);
     
+    chatScroller.appendChild(userBubble);
     saveBubbleToPersistentHistory(userBubble.outerHTML);
     inputField.value = "";
     chatScroller.scrollTop = chatScroller.scrollHeight;
@@ -286,9 +272,10 @@ async function handleTextMessage() {
     chatScroller.scrollTop = chatScroller.scrollHeight;
 
     try {
-        // Appending the explicit linguistic system configuration variable safely based on dropdown profile tracking state
-        const structuralQueryPrompt = `${dict.sysInstruction} Prompt: ${promptText}`;
-        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(structuralQueryPrompt)}`);
+        const structuralQueryPrompt = `${dict.sysInstruction} User Question: ${promptText}`;
+        
+        // Added model parameters explicitly to pull directly from high-capacity computing layers
+        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(structuralQueryPrompt)}?model=openai&cache=false`);
 
         if (response.ok) {
             let aiResponseText = await response.text();
@@ -305,7 +292,7 @@ async function handleTextMessage() {
             throw new Error("Matrix connection drop");
         }
     } catch (error) {
-        const errorMsg = currentSelectedLanguage === "hi" ? "त्रुटि! कनेक्शन की जांच करें।" : "Connection error. Check network state.";
+        const errorMsg = currentSelectedLanguage === "hi" ? "त्रुटि! कनेक्शन की जांच करें या कुछ देर बाद प्रयास करें।" : "Server busy. Please try again in a moment.";
         document.getElementById(uniqueLoadingId).parentElement.innerHTML = `
             <div class="bg-[#161920] border border-red-900 text-gray-400 px-4 py-2.5 rounded-2xl text-sm max-w-[85%]">
                 ⚠️ ${errorMsg}
@@ -315,7 +302,6 @@ async function handleTextMessage() {
     renderAccountHistoryPanel();
 }
 
-// OTHER APPLICATION SHELL COMPONENTS
 function renderPremiumVerifiedBadge() {
     const badge = document.getElementById('use-badge');
     badge.innerHTML = `<i class="fa-solid fa-crown text-emerald-400 mr-1"></i> PRO Active`;
