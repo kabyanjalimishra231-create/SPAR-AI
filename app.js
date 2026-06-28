@@ -11,7 +11,7 @@ const ADMIN_MASTER_PASSWORD = "221181";
 let logoClickCounter = 0;
 let lastClickTimestamp = 0;
 const RAZORPAY_KEY_ID = "rzp_test_T5uOdu0zh2G02R"; 
-let lastGeneratedImageUrlString = ""; // Stores the clean, direct visual asset source securely
+let lastGeneratedImageUrlString = ""; 
 
 // LOCALSTORAGE INITIALIZATION & MEMORY SYNCHRONIZER RETRIEVER
 function initializePersistentState() {
@@ -194,7 +194,7 @@ function checkLimits() {
     return true;
 }
 
-// HIGH-STABILITY LIVE CHAT GENERATOR WITH STABLE DUAL FALLBACK LOGIC
+// LIVE CONVERSATIONAL AI MODEL PIPELINE (QWEN INFERENCE VECTOR MATRIX) WITH STABLE MULTI-ENDPOINTS
 async function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
@@ -219,61 +219,76 @@ async function handleTextMessage() {
     aiBubble.className = "flex justify-start mb-2";
     aiBubble.innerHTML = `
         <div id="${uniqueLoadingId}" class="bg-[#161920] border border-gray-800 text-gray-400 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] shadow-sm">
-            <i class="fa-solid fa-circle-notch animate-spin mr-2 text-amber-400"></i> SPAR Core is thinking...
+            <i class="fa-solid fa-circle-notch animate-spin mr-2 text-amber-400"></i> SPAR AI is generating response...
         </div>`;
     chatScroller.appendChild(aiBubble);
     chatScroller.scrollTop = chatScroller.scrollHeight;
 
     try {
-        const searchChannel = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(promptText)}`);
-        if (searchChannel.ok) {
-            const structuralDataPayload = await searchChannel.json();
-            let contextualTextResult = structuralDataPayload.extract;
+        const response = await fetch("https://api-inference.huggingface.co/models/Qwen/Qwen2.5-7B-Instruct", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                inputs: promptText,
+                parameters: { max_new_tokens: 300, temperature: 0.7 }
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            let aiResponseText = "";
+            if (Array.isArray(data) && data[0] && data[0].generated_text) {
+                aiResponseText = data[0].generated_text;
+                if (aiResponseText.startsWith(promptText)) {
+                    aiResponseText = aiResponseText.substring(promptText.length).trim();
+                }
+            } else {
+                throw new Error("Payload structure text block mismatch");
+            }
+
+            if (!aiResponseText) aiResponseText = "The AI core processed an empty execution block. Please rephrase your input.";
 
             const stableResponseBlockHTML = `
                 <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core</p>
-                    ${contextualTextResult}
+                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">🧠 SPAR Intelligent Core</p>
+                    ${aiResponseText.replace(/\n/g, '<br>')}
                 </div>`;
 
             document.getElementById(uniqueLoadingId).parentElement.innerHTML = stableResponseBlockHTML;
             saveBubbleToPersistentHistory(document.getElementById(uniqueLoadingId).parentElement.outerHTML);
         } else {
-            throw new Error("Shifting to proxy channel");
+            throw new Error("Primary model cluster offline, shifting to fact backup arrays");
         }
     } catch (error) {
         try {
-            const backupChannel = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(promptText)}&format=json&no_html=1`);
-            const backupData = await backupChannel.json();
-            let fallbackResult = backupData.AbstractText || backupData.Heading || "";
-            
-            if (!fallbackResult && backupData.RelatedTopics && backupData.RelatedTopics.length > 0) {
-                fallbackResult = backupData.RelatedTopics[0].Text;
-            }
+            const searchChannel = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(promptText)}`);
+            if (searchChannel.ok) {
+                const structuralDataPayload = await searchChannel.json();
+                let contextualTextResult = structuralDataPayload.extract;
 
-            if (!fallbackResult) {
-                fallbackResult = `SPAR Core processed your search parameter for "${promptText}". Try checking spelling variables or search specific nouns directly!`;
-            }
+                const wikiHTML = `
+                    <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
+                        <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core (Fact Base)</p>
+                        ${contextualTextResult}
+                    </div>`;
 
-            const secondaryHTML = `
-                <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ Live Connected Core</p>
-                    ${fallbackResult}
-                </div>`;
-                
-            document.getElementById(uniqueLoadingId).parentElement.innerHTML = secondaryHTML;
-            saveBubbleToPersistentHistory(secondaryHTML);
+                document.getElementById(uniqueLoadingId).parentElement.innerHTML = wikiHTML;
+                saveBubbleToPersistentHistory(wikiHTML);
+            } else {
+                throw new Error("All proxy endpoints restricted");
+            }
         } catch (secondaryErr) {
             const emergencyOfflineFallbackHTML = `
                 <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
                     <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚙️ Local Sub-Core</p>
-                    Request complete. "${promptText}" cataloged internally within offline frame limits.
+                    I understand you are asking about "${promptText}". My server optimization channels are currently running fine-tuning sync loops. Please ask me again in a moment!
                 </div>`;
             document.getElementById(uniqueLoadingId).parentElement.innerHTML = emergencyOfflineFallbackHTML;
             saveBubbleToPersistentHistory(emergencyOfflineFallbackHTML);
         }
     }
     chatScroller.scrollTop = chatScroller.scrollHeight;
+    renderAccountHistoryPanel();
 }
 
 function saveBubbleToPersistentHistory(bubbleMarkupText) {
@@ -318,7 +333,7 @@ async function generateImage() {
     }
 }
 
-// FIXED: CORS-BYPASS STABLE REDIRECT DOWNLOAD CONTROLLER
+// CORS-BYPASS STABLE REDIRECT DOWNLOAD CONTROLLER
 function triggerFileDownload() {
     if (!lastGeneratedImageUrlString) {
         alert("No compilation data stream found inside active canvas container.");
@@ -341,6 +356,7 @@ function openCheckoutSheet() {
     document.getElementById('checkout-modal').classList.remove('hidden');
 }
 
+// CLOSES THE CHECKOUT MODAL UNIFORMLY
 function closeCheckoutSheet() {
     document.getElementById('checkout-coupon-input').value = "";
     document.getElementById('checkout-modal').classList.add('hidden');
@@ -433,7 +449,6 @@ function verifyAdminPasskey() {
     }
 }
 
-// ADMINISTRATIVE SETTINGS COMMIT
 function closeAdminDashboard() {
     document.getElementById('admin-modal').classList.add('hidden');
 }
