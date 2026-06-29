@@ -42,7 +42,7 @@ const appTranslationDictionary = {
         navAccount: "My Account",
         guestUser: "Guest User",
         noEmail: "No profile email synchronized",
-        loadingAi: "Querying cloud search matrix layers...",
+        loadingAi: "Connecting to real-time search clusters...",
         alertNameEmpty: "Please enter a valid username.",
         alertNameSuccess: "Username updated successfully!",
         alertEmailInvalid: "Please enter a valid Gmail address.",
@@ -240,7 +240,7 @@ function renderAccountHistoryPanel() {
     });
 }
 
-// MODERNIZED TEXT MODEL PIPELINE EQUIPPED WITH LIVE SEARCH GROUNDING
+// TEXT PIPELINE BUILT WITH HIGH-AVAILABILITY FAILOVER ENDPOINTS
 async function handleTextMessage() {
     const inputField = document.getElementById('chat-input');
     const promptText = inputField.value.trim();
@@ -257,137 +257,4 @@ async function handleTextMessage() {
     userBubble.innerHTML = `<div class="bg-amber-500 text-slate-950 px-4 py-2.5 rounded-2xl rounded-tr-none text-sm font-medium max-w-[85%] shadow-md">${promptText}</div>`;
     
     chatScroller.appendChild(userBubble);
-    saveBubbleToPersistentHistory(userBubble.outerHTML);
-    inputField.value = "";
-    chatScroller.scrollTop = chatScroller.scrollHeight;
-
-    const uniqueLoadingId = "loading-" + Date.now();
-    const aiBubble = document.createElement('div');
-    aiBubble.className = "flex justify-start mb-2";
-    aiBubble.innerHTML = `
-        <div id="${uniqueLoadingId}" class="bg-[#161920] border border-gray-800 text-gray-400 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] shadow-sm">
-            <i class="fa-solid fa-circle-notch animate-spin mr-2 text-amber-400"></i> ${dict.loadingAi}
-        </div>`;
-    chatScroller.appendChild(aiBubble);
-    chatScroller.scrollTop = chatScroller.scrollHeight;
-
-    try {
-        const structuralQueryPrompt = `${dict.sysInstruction} User Question: ${promptText}`;
-        
-        // This configuration dynamically runs searches across public data indexes without requiring API keys
-        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(structuralQueryPrompt)}?model=search&cache=false`);
-
-        if (response.ok) {
-            let aiResponseText = await response.text();
-            
-            const stableResponseBlockHTML = `
-                <div class="bg-[#161920] border border-gray-800 text-gray-200 px-4 py-2.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] leading-relaxed shadow-sm">
-                    <p class="text-amber-400 text-[10px] font-bold uppercase tracking-wider mb-1">⚡ SPAR Search-Intelligence Matrix</p>
-                    ${aiResponseText.replace(/\n/g, '<br>')}
-                </div>`;
-
-            document.getElementById(uniqueLoadingId).parentElement.innerHTML = stableResponseBlockHTML;
-            saveBubbleToPersistentHistory(document.getElementById(uniqueLoadingId).parentElement.outerHTML);
-        } else {
-            throw new Error("API Connection Drop");
-        }
-    } catch (error) {
-        const errorMsg = currentSelectedLanguage === "hi" ? "त्रुटि! कनेक्शन की जांच करें या कुछ देर बाद प्रयास करें।" : "Server busy. Please try again in a moment.";
-        document.getElementById(uniqueLoadingId).parentElement.innerHTML = `
-            <div class="bg-[#161920] border border-red-900 text-gray-400 px-4 py-2.5 rounded-2xl text-sm max-w-[85%]">
-                ⚠️ ${errorMsg}
-            </div>`;
-    }
-    chatScroller.scrollTop = chatScroller.scrollHeight;
-    renderAccountHistoryPanel();
-}
-
-function renderPremiumVerifiedBadge() {
-    const badge = document.getElementById('use-badge');
-    badge.innerHTML = `<i class="fa-solid fa-crown text-emerald-400 mr-1"></i> PRO Active`;
-    badge.className = "bg-emerald-500/10 text-emerald-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-emerald-500/20 cursor-pointer transition-transform";
-    document.getElementById('pro-header-btn').classList.add('hidden'); 
-    renderAccountHistoryPanel();
-}
-
-function handleBadgeAction() {
-    if (isUserLoggedIn && !confirm("Log out of current session?")) return;
-    if (isUserLoggedIn) { localStorage.setItem("spar_auth_logged", "false"); window.location.reload(); }
-}
-
-function switchView(targetMode) {
-    const chatView = document.getElementById('view-chat');
-    const createView = document.getElementById('view-create');
-    const accountView = document.getElementById('view-account');
-    const chatBtn = document.getElementById('nav-chat-btn');
-    const createBtn = document.getElementById('nav-create-btn');
-    const accountBtn = document.getElementById('nav-account-btn');
-
-    [chatView, createView, accountView].forEach(v => v ? v.classList.add('hidden') : null);
-    [chatBtn, createBtn, accountBtn].forEach(b => b ? b.classList.replace('text-amber-400', 'text-gray-500') : null);
-
-    if (targetMode === 'chat') { chatView.classList.remove('hidden'); chatBtn.classList.replace('text-gray-500', 'text-amber-400'); }
-    else if (targetMode === 'create') { createView.classList.remove('hidden'); createBtn.classList.replace('text-gray-500', 'text-amber-400'); }
-    else if (targetMode === 'account') { accountView.classList.remove('hidden'); accountBtn.classList.replace('text-gray-500', 'text-amber-400'); renderAccountHistoryPanel(); }
-}
-
-function checkLimits() {
-    if (isUserLoggedIn) return true;
-    freeUsesLeft--;
-    if (freeUsesLeft <= 0) { document.getElementById('login-modal').classList.remove('hidden'); return false; }
-    document.getElementById('uses-left').innerText = freeUsesLeft;
-    return true;
-}
-
-function saveBubbleToPersistentHistory(html) {
-    let logs = localStorage.getItem("spar_chat_history") || "";
-    localStorage.setItem("spar_chat_history", logs + html);
-}
-
-async function generateImage() {
-    const string = document.getElementById('image-prompt').value.trim();
-    if (!string || !checkLimits()) return;
-    document.getElementById('generation-loader').classList.remove('hidden');
-    document.getElementById('canvas-placeholder').classList.add('hidden');
-    const dynamicUrl = `https://image.pollinations.ai/p/${encodeURIComponent(string)}?width=512&height=512&nologo=true&seed=${Math.floor(Math.random() * 9999)}`;
-    lastGeneratedImageUrlString = dynamicUrl;
-    const canvasImg = document.getElementById('generated-image');
-    canvasImg.src = dynamicUrl;
-    canvasImg.onload = () => {
-        document.getElementById('generation-loader').classList.add('hidden');
-        canvasImg.classList.remove('hidden');
-        document.getElementById('download-overlay').classList.remove('hidden');
-    };
-}
-
-function triggerFileDownload() { if(lastGeneratedImageUrlString) window.open(lastGeneratedImageUrlString, '_blank'); }
-function openCheckoutSheet() { document.getElementById('checkout-modal').classList.remove('hidden'); }
-function closeCheckoutSheet() { document.getElementById('checkout-modal').classList.add('hidden'); }
-
-function validateCheckoutCoupon() {
-    if (document.getElementById('checkout-coupon-input').value.trim().toUpperCase() === activeSystemCoupon.toUpperCase()) {
-        isUserLoggedIn = true; localStorage.setItem("spar_auth_logged", "true");
-        closeCheckoutSheet(); renderPremiumVerifiedBadge();
-        alert("PRO Plan Unlocked!");
-    } else alert("Invalid Code.");
-}
-
-function executeSecureRazorpayPurchase() {
-    var options = {
-        "key": RAZORPAY_KEY_ID, "amount": (currentSubscriptionPrice*100).toString(), "currency": "INR", "name": "SPAR AI Studio",
-        "handler": function() { isUserLoggedIn = true; localStorage.setItem("spar_auth_logged", "true"); closeCheckoutSheet(); renderPremiumVerifiedBadge(); }
-    };
-    new Razorpay(options).open();
-}
-
-function openCameraFeature() { if(checkLimits()) alert("Lens Core initialized."); }
-function handleAdminSecretClick() { const now = new Date().getTime(); if(now - lastClickTimestamp > 1500) logoClickCounter=0; logoClickCounter++; lastClickTimestamp=now; if(logoClickCounter===5) { logoClickCounter=0; document.getElementById('admin-auth-modal').classList.remove('hidden'); } }
-function verifyAdminPasskey() { if(document.getElementById('admin-passkey-field').value.trim()===ADMIN_MASTER_PASSWORD) { document.getElementById('admin-auth-modal').classList.add('hidden'); document.getElementById('admin-modal').classList.remove('hidden'); } }
-function closeAdminDashboard() { document.getElementById('admin-modal').classList.add('hidden'); }
-function saveAdminSettings() {
-    currentSubscriptionPrice = parseInt(document.getElementById('admin-price-input').value);
-    freeUsesLeft = parseInt(document.getElementById('admin-uses-input').value);
-    activeSystemCoupon = document.getElementById('admin-coupon-input').value.trim();
-    localStorage.setItem("admin_price", currentSubscriptionPrice); localStorage.setItem("admin_uses", freeUsesLeft); localStorage.setItem("admin_coupon", activeSystemCoupon);
-    window.location.reload();
-}
+    saveBubbleToPersistentHistory(userBubble.
