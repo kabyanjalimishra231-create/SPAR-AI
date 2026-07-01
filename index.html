@@ -2,199 +2,259 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SPAR AI Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPAR AI Studio Ultra</title>
+    <!-- Tailwind CSS Engine -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Vector Graphics Icon Library -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Razorpay Standard Global Script Gateway Interface -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-    <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            background-color: #0d0e12;
-        }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-    </style>
 </head>
-<body class="text-gray-100 font-sans h-screen flex flex-col justify-between overflow-hidden select-none" onload="initializePersistentState()">
+<body class="bg-[#0b0c10] text-gray-200 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-amber-500 selection:text-slate-950">
 
-    <header class="w-full bg-[#161920] border-b border-gray-800 px-4 pt-4 pb-3 flex justify-between items-center z-50">
-        <div onclick="handleAdminSecretClick()" class="flex items-center space-x-2 cursor-pointer active:scale-95 transition-transform">
-            <div class="w-8 h-8 bg-gradient-to-tr from-amber-500 to-yellow-400 rounded-lg flex items-center justify-center shadow-lg shadow-amber-500/20">
-                <i class="fa-solid fa-wand-magic-sparkles text-slate-900 text-sm"></i>
+    <!-- TOP GLOBAL SYSTEM HEADER NAVIGATION -->
+    <header class="bg-[#111318] border-b border-gray-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="handleAdminSecretClick()">
+            <div class="h-8 w-8 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 shadow-lg shadow-amber-500/10">Σ</div>
+            <div class="flex flex-col">
+                <span class="text-white font-bold text-sm tracking-wide font-mono leading-none">SPAR ULTRA</span>
+                <span class="text-[9px] text-amber-400 font-mono tracking-widest mt-0.5 uppercase">Matrix Compute v3.0</span>
             </div>
-            <span class="font-bold text-lg tracking-wide bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">SPAR AI</span>
         </div>
-        <div class="flex items-center space-x-2">
-            <div id="use-badge" onclick="handleBadgeAction()" class="bg-amber-500/10 text-amber-400 text-xs font-semibold px-2.5 py-1 rounded-full border border-amber-500/20 cursor-pointer active:scale-95 transition-transform">
-                <span id="uses-left">3</span> <span id="lbl-uses-left">Free Uses Left</span>
-            </div>
-            <button id="pro-header-btn" onclick="openCheckoutSheet()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-md shadow-md hover:opacity-90 active:scale-95 transition-all">
-                PRO (<span id="header-price-display">₹299</span>)
+        <div class="flex items-center gap-3">
+            <button id="pro-header-btn" onclick="openCheckoutSheet()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md transition-transform active:scale-95 flex items-center gap-1">
+                <i class="fa-solid fa-crown text-[11px]"></i> Upgrade
             </button>
+            <div id="use-badge" onclick="handleBadgeAction()" class="bg-[#161920] border border-gray-800 text-[11px] font-semibold px-3 py-1.5 rounded-xl text-gray-400 flex items-center gap-1.5 transition-all">
+                <span id="lbl-uses-left">Free Uses Left</span>: <span id="uses-left" class="text-amber-400 font-bold font-mono">3</span>
+            </div>
         </div>
     </header>
 
-    <main class="flex-1 w-full overflow-y-auto relative p-4 hide-scrollbar">
+    <!-- CORE DESKTOP VIEWPORT WORKSPACE MOUNT FRAME -->
+    <main class="flex-1 max-w-2xl w-full mx-auto p-4 flex flex-col justify-stretch overflow-hidden">
         
-        <div id="view-chat" class="w-full h-full flex flex-col space-y-4">
-            <div id="chat-scroller" class="flex-1 overflow-y-auto space-y-4 pr-1 hide-scrollbar">
-                <div id="chat-welcome-banner" class="bg-[#161920] p-4 rounded-2xl border border-gray-800 shadow-md">
-                    <p class="text-amber-400 text-xs font-bold uppercase tracking-wider mb-1">Persistent LLM Core</p>
-                    <h2 id="chat-welcome-title" class="text-xl font-bold mb-2">Welcome to SPAR AI Studio</h2>
-                    <p id="chat-welcome-desc" class="text-gray-400 text-sm leading-relaxed">Ask questions in English or हिंदी! Your conversational AI model session is active.</p>
+        <!-- PANEL VIEW 1: ADVANCED AI NEXUS CHAT WORKSPACE -->
+        <section id="view-chat" class="flex-1 flex flex-col justify-between min-h-[65vh]">
+            <!-- Scrollable Conversation Cluster Panel -->
+            <div id="chat-scroller" class="flex-1 overflow-y-auto space-y-4 mb-4 max-h-[63vh] pr-1 pb-4 scroll-smooth">
+                <div id="chat-welcome-banner" class="bg-[#111318] border border-gray-800/60 rounded-2xl p-6 text-center space-y-2 shadow-sm mt-4">
+                    <div class="h-12 w-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-amber-500/20">
+                        <i class="fa-solid fa-microchip text-amber-400 text-lg"></i>
+                    </div>
+                    <h2 id="chat-welcome-title" class="text-white font-extrabold text-base font-mono">Welcome to SPAR AI Ultra</h2>
+                    <p id="chat-welcome-desc" class="text-gray-400 text-xs leading-relaxed max-w-sm mx-auto">Quantum Engine connected. Real-time metrics and advanced mathematics calculations are online.</p>
                 </div>
             </div>
-            
-            <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800">
-                <button onclick="openCameraFeature()" class="w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded-lg flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-camera text-gray-300"></i>
+
+            <!-- Unified Text Submission & Optical Scanning Command Box Tray -->
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-2 flex items-center gap-2 shadow-lg shadow-black/40">
+                <button onclick="openCameraFeature()" class="h-10 w-10 text-gray-400 hover:text-amber-400 bg-[#161920] hover:bg-amber-500/5 rounded-xl flex items-center justify-center transition-all border border-gray-800/40" title="Optical Image Scanner Capture">
+                    <i class="fa-solid fa-camera text-sm"></i>
                 </button>
-                <input id="chat-input" type="text" placeholder="Message SPAR AI..." class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 px-2">
-                <button onclick="handleTextMessage()" class="w-10 h-10 bg-amber-500 text-slate-900 rounded-lg flex items-center justify-center font-bold">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-
-        <div id="view-create" class="w-full h-full hidden flex flex-col justify-between">
-            <div class="space-y-4">
-                <div class="bg-[#161920] p-4 rounded-2xl border border-gray-800">
-                    <h2 id="create-title" class="text-lg font-bold mb-1"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>Image Studio</h2>
-                    <p id="create-desc" class="text-gray-400 text-xs">Transform written specifications directly into download-ready artwork.</p>
-                </div>
-
-                <div class="w-full aspect-square bg-[#161920] rounded-2xl border border-gray-800 flex flex-col items-center justify-center overflow-hidden relative group">
-                    <img id="generated-image" class="w-full h-full object-cover hidden" alt="AI Output Canvas">
-                    <div id="download-overlay" class="absolute bottom-4 right-4 hidden">
-                        <button id="btn-save-device" onclick="triggerFileDownload()" class="bg-slate-900/90 hover:bg-slate-900 text-amber-400 border border-gray-700 font-bold px-4 py-2 rounded-xl text-xs flex items-center shadow-xl transition-all active:scale-95 backdrop-blur-sm">
-                            <i class="fa-solid fa-circle-arrow-down text-sm mr-2"></i> Save to Device
-                        </button>
-                    </div>
-                    <div id="canvas-placeholder" class="text-center p-6">
-                        <i class="fa-solid fa-images text-gray-600 text-4xl mb-3"></i>
-                        <p id="canvas-placeholder-text" class="text-gray-400 text-xs px-6">Render high definition assets instantly</p>
-                    </div>
-                    <div id="generation-loader" class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center hidden">
-                        <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-                        <p id="generation-loader-text" class="text-xs text-amber-400 font-medium">Processing pixels...</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="w-full flex items-center space-x-2 bg-[#161920] p-2 rounded-xl border border-gray-800 mt-4">
-                <input id="image-prompt" type="text" placeholder="Describe the image context..." class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 px-2">
-                <button id="btn-generate-submit" onclick="generateImage()" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-lg whitespace-nowrap">
-                    Generate
+                <input type="text" id="chat-input" placeholder="Ask anything, type math equations..." 
+                       class="flex-1 bg-transparent border-0 outline-none text-sm px-2 text-gray-100 placeholder-gray-500 font-sans"
+                       onkeydown="if(event.key === 'Enter') handleTextMessage()"/>
+                <button onclick="handleTextMessage()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 h-10 w-10 rounded-xl flex items-center justify-center transition-all shadow-md shadow-amber-500/5">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
                 </button>
             </div>
-        </div>
+        </section>
 
-        <div id="view-account" class="w-full h-full hidden flex flex-col space-y-4">
-            <div class="bg-[#161920] p-5 rounded-2xl border border-gray-800 shadow-md">
-                <div class="flex items-center space-x-4 mb-4">
-                    <div class="w-12 h-12 bg-amber-500/10 rounded-full border border-amber-500/30 flex items-center justify-center text-amber-400">
-                        <i class="fa-solid fa-user-astronaut text-xl"></i>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <h2 id="account-username" class="text-base font-bold text-white truncate">Guest User</h2>
-                        <p id="account-email" class="text-gray-500 text-xs truncate">No profile email synchronized</p>
-                    </div>
-                    <div id="account-subs-status" class="text-xs">⏳ FREE TIER</div>
+        <!-- PANEL VIEW 2: DEDICATED TELEMETRY HISTORY WORKSPACE -->
+        <section id="view-history" class="hidden flex-1 flex flex-col gap-4">
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
+                <div>
+                    <h3 id="history-ledger-title" class="text-white text-sm font-bold font-mono text-amber-400 flex items-center"><i class="fa-solid fa-database mr-1.5 text-[10px]"></i>Telemetry Log History</h3>
+                    <p class="text-gray-500 text-[11px] mt-0.5">Touch or click any previous log line item to restore and execute the prompt block context instantly.</p>
                 </div>
-                
-                <div class="border-t border-gray-800/80 pt-4 space-y-3">
-                    <h4 id="account-settings-heading" class="text-xs font-bold text-gray-400 uppercase tracking-wider">Account Settings</h4>
-                    
-                    <div class="flex flex-col space-y-1.5">
-                        <label id="lbl-select-lang" class="text-[11px] text-gray-400 font-medium">App Language / ऐप की भाषा:</label>
-                        <select id="app-language-select" onchange="changeApplicationLanguage(this.value)" class="w-full bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5 text-xs text-amber-400 font-semibold outline-none focus:border-amber-500 cursor-pointer">
-                            <option value="en">English (US)</option>
-                            <option value="hi">Hindi (हिंदी)</option>
-                        </select>
-                    </div>
+                <button id="btn-delete-history" onclick="wipeLocalDeviceHistory()" class="text-red-400 hover:text-red-300 text-xs font-semibold bg-red-500/5 px-3 py-1.5 rounded-xl border border-red-500/10 transition-all">
+                    <i class="fa-solid fa-trash-can mr-1"></i>Purge Database Logs
+                </button>
+            </div>
+            <!-- Live Micro Ledger Injection target -->
+            <div id="account-search-history" class="bg-[#111318] border border-gray-800 rounded-2xl p-3 flex-1 space-y-2 overflow-y-auto max-h-[60vh] min-h-[40vh]">
+                <!-- Interactive clickable historical search bars mount right here dynamically -->
+            </div>
+        </section>
 
-                    <div class="flex gap-2 pt-1">
-                        <input id="update-username-input" type="text" placeholder="New Username" class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs outline-none text-white focus:border-amber-500">
-                        <button id="btn-update-name" onclick="updateProfileUsername()" class="bg-gray-800 hover:bg-gray-700 text-amber-400 font-bold text-xs px-3 py-2 rounded-xl border border-gray-700 whitespace-nowrap transition-colors">
-                            Update Name
-                        </button>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <input id="update-email-input" type="email" placeholder="yourname@gmail.com" class="flex-1 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2 text-xs outline-none text-white focus:border-amber-500">
-                        <button id="btn-link-email" onclick="updateProfileEmail()" class="bg-gray-800 hover:bg-gray-700 text-amber-400 font-bold text-xs px-3 py-2 rounded-xl border border-gray-700 whitespace-nowrap transition-colors">
-                            Link Gmail
-                        </button>
-                    </div>
-                </div>
+        <!-- PANEL VIEW 3: IMAGE STUDIO PRO WORKSPACE LABORATORY -->
+        <section id="view-create" class="hidden flex-1 flex flex-col gap-4">
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4">
+                <h3 id="create-title" class="text-white text-sm font-bold font-mono flex items-center"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>Image Studio Pro</h3>
+                <p id="create-desc" class="text-gray-400 text-xs mt-0.5">Transform written prompt syntax natively into high-density download-ready visual assets.</p>
             </div>
 
-            <div class="flex-1 bg-[#161920] rounded-2xl border border-gray-800 p-4 flex flex-col justify-between overflow-hidden">
-                <div class="flex justify-between items-center border-b border-gray-800 pb-2 mb-2">
-                    <h3 id="history-ledger-title" class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-database mr-1.5 text-[10px]"></i> History Ledger
-                    </h3>
-                    <button id="btn-delete-history" onclick="wipeLocalDeviceHistory()" class="text-[10px] text-red-400 hover:text-red-300 font-bold tracking-wide border border-red-500/20 bg-red-500/5 px-2.5 py-1 rounded-lg transition-all active:scale-95">
-                        <i class="fa-solid fa-trash-can mr-1"></i> Delete History
+            <!-- Image Composition Canvas Dynamic Workspace -->
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl aspect-square w-full flex items-center justify-center relative overflow-hidden group shadow-inner">
+                <!-- Idle state placeholder -->
+                <p id="canvas-placeholder-text" class="text-gray-600 text-xs italic font-mono select-none">Render engine idling... standing by for generation matrix.</p>
+                <!-- Image Generation Pixel Loader -->
+                <div id="generation-loader" class="hidden flex flex-col items-center gap-3 text-center z-10 bg-slate-950/80 absolute inset-0 justify-center p-4">
+                    <i class="fa-solid fa-rotate animate-spin text-amber-400 text-2xl"></i>
+                    <p id="generation-loader-text" class="text-gray-300 font-mono text-xs">Processing pixels and upscaling layers...</p>
+                </div>
+                <!-- Actual Dynamic Target Asset Graphic Output -->
+                <img id="generated-image" src="" alt="SPAR Generated Output Vector" class="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
+                <!-- Micro Floating Download Overlay Link Controller -->
+                <div id="download-overlay" class="hidden absolute bottom-3 right-3">
+                    <button id="btn-save-device" onclick="triggerFileDownload()" class="bg-slate-950/90 text-white hover:bg-amber-500 hover:text-slate-950 border border-gray-800 text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl backdrop-blur-md transition-all flex items-center">
+                        <i class="fa-solid fa-circle-arrow-down text-sm mr-2"></i>Export to Disk
                     </button>
                 </div>
-
-                <div id="account-search-history" class="flex-1 overflow-y-auto space-y-1.5 pr-1 hide-scrollbar">
-                    </div>
             </div>
-        </div>
+
+            <!-- Creation Workspace Command Textarea Controls Array -->
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-2 flex items-center gap-2 shadow-sm">
+                <input type="text" id="image-prompt" placeholder="Describe the visual asset context..." class="flex-1 bg-transparent border-0 outline-none text-sm px-2 text-gray-100 placeholder-gray-500"/>
+                <button id="btn-generate-submit" onclick="generateImage()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md">
+                    Synthesize Asset
+                </button>
+            </div>
+        </section>
+
+        <!-- PANEL VIEW 4: SYSTEM PROFILE ACCOUNT PARAMETERS -->
+        <section id="view-account" class="hidden flex-1 flex flex-col gap-4">
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
+                <div class="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-mono text-lg font-bold">U</div>
+                <div class="flex-1 overflow-hidden">
+                    <div class="flex items-center gap-2">
+                        <h4 id="account-username" class="text-white text-sm font-bold truncate">Guest User</h4>
+                        <div id="account-subs-status"></div>
+                    </div>
+                    <p id="account-email" class="text-gray-500 text-xs truncate mt-0.5">user@example.com</p>
+                </div>
+            </div>
+
+            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 space-y-4">
+                <h3 id="account-settings-heading" class="text-white text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-gray-800 pb-2">User Profile Framework</h3>
+                
+                <!-- Translation Language Engine Selector dropdown mapping -->
+                <div class="space-y-1.5">
+                    <label id="lbl-select-lang" class="text-gray-400 text-xs font-medium">System Language Core:</label>
+                    <select id="app-language-select" onchange="changeApplicationLanguage(this.value)" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40">
+                        <option value="en">English (US Vector Script)</option>
+                        <option value="hi">हिन्दी (Devanagari Localization)</option>
+                    </select>
+                </div>
+
+                <!-- Update Name Parameters Form Field Box -->
+                <div class="space-y-1.5">
+                    <div class="flex gap-2">
+                        <input type="text" id="update-username-input" placeholder="Update Profile Name" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40"/>
+                        <button id="btn-update-name" onclick="updateProfileUsername()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium px-3 rounded-xl border border-gray-700/60 transition-all">Apply Changes</button>
+                    </div>
+                </div>
+
+                <!-- Synchronize Mail Identity Data Block -->
+                <div class="space-y-1.5">
+                    <div class="flex gap-2">
+                        <input type="email" id="update-email-input" placeholder="synchronize@gmail.com" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40"/>
+                        <button id="btn-link-email" onclick="updateProfileEmail()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium px-3 rounded-xl border border-gray-700/60 transition-all">Verify Identity Token</button>
+                    </div>
+                </div>
+            </div>
+        </section>
 
     </main>
 
-    <nav class="w-full bg-[#161920] border-t border-gray-800 flex justify-around items-center py-2 pb-4">
-        <button onclick="switchView('chat')" id="nav-chat-btn" class="flex flex-col items-center space-y-1 text-amber-400">
-            <i class="fa-solid fa-message text-lg"></i>
-            <span id="nav-text-chat" class="text-[10px] font-medium">Fast Chat</span>
+    <!-- FLOATING INTERFACE FOOTER NAVIGATION SYSTEM -->
+    <nav class="bg-[#111318] border-t border-gray-800/80 px-4 py-1.5 flex items-center justify-around sticky bottom-0 z-50 shadow-2xl backdrop-blur-lg">
+        <button id="nav-chat-btn" onclick="switchView('chat')" class="flex flex-col items-center gap-0.5 text-amber-400 p-2 transition-all">
+            <i class="fa-solid fa-comments text-base"></i>
+            <span id="nav-text-chat" class="text-[9px] font-bold font-mono tracking-wider">AI Nexus Chat</span>
         </button>
-        <button onclick="switchView('create')" id="nav-create-btn" class="flex flex-col items-center space-y-1 text-gray-500">
-            <i class="fa-solid fa-wand-magic text-lg"></i>
-            <span id="nav-text-create" class="text-[10px] font-medium">Create Mode</span>
+        <button id="nav-history-btn" onclick="switchView('history')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
+            <i class="fa-solid fa-clock-rotate-left text-base"></i>
+            <span id="nav-text-history" class="text-[9px] font-bold font-mono tracking-wider">History Ledger</span>
         </button>
-        <button onclick="switchView('account')" id="nav-account-btn" class="flex flex-col items-center space-y-1 text-gray-500">
-            <i class="fa-solid fa-circle-user text-lg"></i>
-            <span id="nav-text-account" class="text-[10px] font-medium">My Account</span>
+        <button id="nav-create-btn" onclick="switchView('create')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
+            <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+            <span id="nav-text-create" class="text-[9px] font-bold font-mono tracking-wider">Imaging Studio</span>
+        </button>
+        <button id="nav-account-btn" onclick="switchView('account')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
+            <i class="fa-solid fa-user-gear text-base"></i>
+            <span id="nav-text-account" class="text-[9px] font-bold font-mono tracking-wider">System Profile</span>
         </button>
     </nav>
 
-    <div id="login-modal" class="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 hidden">
-        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-gray-800 text-center shadow-2xl">
-            <h3 class="text-xl font-bold mb-1">Authorization Layer</h3>
-            <button onclick="document.getElementById('login-modal').classList.add('hidden'); openCheckoutSheet();" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs mt-4">Upgrade Core Plan</button>
+    <!-- PREMIUM CHECKOUT AND PRICING DIALOG MODAL LAYOUT -->
+    <div id="checkout-modal" class="hidden fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
+        <div class="bg-[#111318] border border-gray-800 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
+                <h3 class="text-white font-bold text-sm font-mono flex items-center gap-2"><i class="fa-solid fa-gem text-amber-400"></i> Premium Upgrade Core</h3>
+                <button onclick="closeCheckoutSheet()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+            </div>
+            <div class="text-center py-2 bg-amber-500/5 rounded-xl border border-amber-500/10">
+                <span class="text-gray-400 text-xs">Total Single Payment Matrix Authorization:</span>
+                <p id="checkout-price-text" class="text-white text-2xl font-black font-mono tracking-tight mt-0.5 text-amber-400">₹299</p>
+            </div>
+            <div class="space-y-1">
+                <label class="text-gray-400 text-[11px] font-medium">Bypass Promo Access Validation Key:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="checkout-coupon-input" placeholder="FREEACCESS2026" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 text-xs uppercase font-mono tracking-wider text-gray-200 outline-none focus:border-amber-500/40"/>
+                    <button onclick="validateCheckoutCoupon()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-3 py-2 rounded-xl border border-gray-700">Apply</button>
+                </div>
+            </div>
+            <button onclick="executeSecureRazorpayPurchase()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all shadow-lg shadow-amber-500/10 uppercase font-mono tracking-wider">
+                Initialize Secure Razorpay Terminal
+            </button>
         </div>
     </div>
-    <div id="checkout-modal" class="fixed inset-0 bg-black/95 z-[150] flex items-center justify-center p-6 hidden">
-        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-amber-500/20 text-center shadow-2xl relative">
-            <button onclick="closeCheckoutSheet()" class="absolute top-4 right-4 text-gray-500"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h3 class="text-xl font-bold mb-4">SPAR Pro Studio</h3>
-            <button onclick="executeSecureRazorpayPurchase()" class="w-full bg-amber-500 text-slate-950 font-bold py-2.5 rounded-xl text-xs">Pay Securely</button>
-            <input id="checkout-coupon-input" type="text" placeholder="COUPON CODE" class="w-full bg-gray-900 border border-gray-800 text-center mt-3 py-2.5 rounded-xl text-xs text-amber-400 outline-none">
-            <button onclick="validateCheckoutCoupon()" class="w-full bg-gray-800 text-amber-400 font-bold py-2 rounded-xl text-xs mt-2">Apply Voucher</button>
-        </div>
-    </div>
-    <div id="admin-auth-modal" class="fixed inset-0 bg-black/98 z-[190] flex items-center justify-center p-6 hidden">
-        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-red-500/20 text-center relative">
-            <input id="admin-passkey-field" type="password" placeholder="••••••" class="w-full bg-gray-900 text-center py-2 text-amber-400 outline-none mb-2">
-            <button onclick="verifyAdminPasskey()" class="w-full bg-gray-800 text-xs font-bold py-2 rounded-lg">Verify</button>
-        </div>
-    </div>
-    <div id="admin-modal" class="fixed inset-0 bg-black/95 z-[200] flex items-center justify-center p-6 hidden">
-        <div class="bg-[#161920] w-full max-w-sm rounded-2xl p-6 border border-amber-500/30 relative">
-            <button onclick="closeAdminDashboard()" class="absolute top-4 right-4 text-gray-500"><i class="fa-solid fa-xmark"></i></button>
-            <div class="space-y-3">
-                <input id="admin-price-input" type="number" class="w-full bg-gray-900 p-2 rounded text-xs text-white">
-                <input id="admin-uses-input" type="number" class="w-full bg-gray-900 p-2 rounded text-xs text-white">
-                <input id="admin-coupon-input" type="text" class="w-full bg-gray-900 p-2 rounded text-xs text-amber-400">
-                <button onclick="saveAdminSettings()" class="w-full bg-amber-500 font-bold py-2 rounded text-xs text-black">Save</button>
+
+    <!-- SECRET ADMIN PASSWORD PROMPT MODAL -->
+    <div id="admin-auth-modal" class="hidden fixed inset-0 bg-slate-950/90 z-[999] flex items-center justify-center p-4">
+        <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 w-full max-w-xs space-y-3">
+            <h3 class="text-white text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Security Gate Challenge</h3>
+            <input type="password" id="admin-passkey-field" placeholder="Enter administrative token..." class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-gray-200 outline-none"/>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('admin-auth-modal').classList.add('hidden')" class="flex-1 bg-gray-900 text-gray-400 text-xs rounded-xl py-2">Cancel</button>
+                <button onclick="verifyAdminPasskey()" class="flex-1 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl py-2">Verify</button>
             </div>
         </div>
     </div>
 
+    <!-- MAIN ADMINISTRATIVE CONFIGURATION DASHBOARD MODAL PANEL -->
+    <div id="admin-modal" class="hidden fixed inset-0 bg-slate-950/80 z-[1000] flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-[#111318] border border-gray-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
+            <h3 class="text-red-400 font-mono font-bold text-sm tracking-wide uppercase border-b border-gray-800 pb-2 flex items-center gap-1">
+                <i class="fa-solid fa-user-shield"></i> Core Parameters Configuration Panel
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-gray-400 text-[11px]">System Standard Price (₹):</label>
+                    <input type="number" id="admin-price-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono"/>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-gray-400 text-[11px]">Free Cycle Threshold Token:</label>
+                    <input type="number" id="admin-uses-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono"/>
+                </div>
+            </div>
+            <div class="space-y-1">
+                <label class="text-gray-400 text-[11px]">Active Coupon Passkey Designation String:</label>
+                <input type="text" id="admin-coupon-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase tracking-wider"/>
+            </div>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-900 text-gray-400 hover:text-white text-xs font-bold py-2.5 rounded-xl border border-gray-800 transition-all">Terminate Stream</button>
+                <button onclick="saveAdminSettings()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-extrabold text-xs py-2.5 rounded-xl transition-all shadow-md">Commit Parameters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FALLBACK HIDDEN PRICING MAPS TO PREVENT SYSTEM BOUNDS EXCEPTIONS -->
+    <div style="display: none !important;">
+        <span id="header-price-display">₹299</span>
+        <div id="login-modal" class="hidden"></div>
+    </div>
+
+    <!-- LOCAL APPLICATION EXECUTION LAYER SOURCE LINK MAPPING -->
     <script src="app.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Safe initialize application execution cycle routine
+            initializePersistentState();
+        });
+    </script>
 </body>
 </html>
