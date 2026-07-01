@@ -56,11 +56,11 @@ const appTranslationDictionary = {
         alertEmailSuccess: "State synchronized: Electronic mail domain anchored to local user space.",
         alertWipeConfirm: "CRITICAL ACTION: Complete historical deletion requested. Proceed with database wipe?",
         alertWipeSuccess: "Data state cleared: Persistent local chat logs have been safely deleted.",
-        sysInstruction: "You are SPAR AI Ultra, an expert mathematics, science, and real-time computation engine operating in 2026. If the user presents a mathematical or logical query, break it down step-by-step using clear logical proofs, theorems, and exact calculations. For regular queries, anchor response data in verifiable live metrics."
+        sysInstruction: "You are SPAR AI Ultra, an expert mathematics, science, and real-time computation engine operating in 2026. If the user presents a mathematical or logical query, break it down step-by-step using clear logical proofs, theorems, and exact calculations. Format mathematical representations clearly. For regular queries, anchor response data in verifiable live metrics."
     },
     hi: {
         usesLeft: "फ्री उपयोग शेष",
-        chatWelcomeTitle: "SPAR AI अल्ट्रा में आपका स्वागत है",
+        chatWelcomeTitle: "SPAR AI अल्ट्रा में स्वागत है",
         chatWelcomeDesc: "उन्नत क्वांटम इंजन सक्रिय है। गणित समाधान, लाइव मैच एनालिसिस, गोल्ड ट्रैकिंग, मौसम पूर्वानुमान और कैमरा स्कैनर फीचर्स ऑन हैं।",
         chatPlaceholder: "कुछ भी पूछें, गणित समीकरण लिखें, या /score, /weather का उपयोग करें...",
         createTitle: "इमेज स्टूडियो प्रो",
@@ -685,6 +685,7 @@ function triggerFileDownload() {
     if (lastGeneratedImageUrlString) window.open(lastGeneratedImageUrlString, '_blank'); 
 }
 
+// BILLING MODALS ROUTINES
 function openCheckoutSheet() { 
     const checkoutModal = document.getElementById('checkout-modal');
     if (checkoutModal) checkoutModal.classList.remove('hidden'); 
