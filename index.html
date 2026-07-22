@@ -3,42 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spar AI - Multimodal & Subscription Assistant</title>
+    <title>Spar AI - Groq Powered</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for chat area */
+        #chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-box::-webkit-scrollbar-thumb {
+            background-color: #2d2f31;
+            border-radius: 3px;
+        }
+    </style>
 </head>
-<body class="bg-[#131314] text-gray-200 font-sans min-h-screen flex flex-col">
+<body class="bg-[#131314] text-gray-100 font-sans h-screen flex flex-col justify-between overflow-hidden">
 
     <!-- CONFIGURATION -->
     <script>
-        // Paste your Gemini Key here (Supports both AQ... and AIza... keys)
-        const GEMINI_API_KEY = "AQ.Ab8RN6Lr3Gy2NbfFcNI8RY6tLGD0SguBjpgk5RiTWyaPyCYqcw"; 
-        const GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash:generateContent";
+        // Paste your Groq API key here (starts with gsk_...)
+        const GROQ_API_KEY = "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"; 
+        const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
+        
+        let availableCredits = 5;
+        let selectedImageData = null; // Stores { mimeType, data (base64) }
     </script>
 
-    <!-- Header -->
-    <header class="flex items-center justify-between p-4 border-b border-[#2d2f31] bg-[#1e1f20]">
-        <div class="flex items-center gap-2">
-            <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
-            <span class="font-bold text-lg text-white">Spar AI</span>
-        </div>
+    <!-- HEADER -->
+    <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-6 py-4 flex justify-between items-center z-10">
         <div class="flex items-center gap-3">
-            <!-- Usage/Subscription Status Banner -->
-            <div id="usage-banner" class="bg-[#131314] border border-[#2d2f31] text-xs text-gray-300 px-3 py-1.5 rounded-full flex items-center gap-2 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-emerald-400" id="status-indicator"></span>
-                <span id="usage-count">5 free credits remaining</span>
-                <button onclick="openSubscriptionModal()" class="text-blue-400 hover:underline font-semibold ml-1">Upgrade</button>
+            <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center border border-blue-500/30">
+                <i class="fa-solid fa-sparkles text-lg"></i>
             </div>
+            <div>
+                <h1 class="font-bold text-base text-gray-100 flex items-center gap-2">
+                    Spar AI
+                    <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full font-semibold">Groq Speed</span>
+                </h1>
+                <p class="text-xs text-gray-400">Powered by Llama 3.3 & Vision</p>
+            </div>
+        </div>
 
-            <button onclick="clearChatHistory()" title="Clear Chat History" class="text-xs bg-red-500/10 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-full hover:bg-red-500/20 transition-colors">
-                <i class="fa-solid fa-trash mr-1"></i> Clear
-            </button>
+        <!-- CREDIT TRACKER -->
+        <div class="bg-[#131314] border border-[#2d2f31] px-3 py-1.5 rounded-full flex items-center gap-2">
+            <i class="fa-solid fa-bolt text-yellow-400 text-xs"></i>
+            <span class="text-xs text-gray-300 font-medium">Credits: <span id="credit-count" class="text-blue-400 font-bold">5</span>/5</span>
         </div>
     </header>
 
-    <!-- Chat Container -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 overflow-y-auto space-y-4" id="chat-box">
-        <div class="flex gap-3">
+    <!-- CHAT CONTAINER -->
+    <main id="chat-box" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 max-w-4xl mx-auto w-full">
+        <!-- AI Welcome Message -->
+        <div class="flex items-start gap-3">
             <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-sparkles text-sm"></i>
             </div>
@@ -46,190 +62,65 @@
                 <div class="flex items-center gap-2 text-blue-400 font-bold text-xs">
                     Spar AI
                 </div>
-                <p class="leading-relaxed">Hello! I am ready for text, photo uploads, or live <strong>Camera Search</strong>. Use the toolbar below to start.</p>
+                <p class="leading-relaxed">Hello! I am ready. You can ask me text questions, upload images, or take photos with your camera using your Groq API key.</p>
             </div>
         </div>
     </main>
 
-    <!-- Image Preview Bar -->
-    <div id="image-preview-container" class="hidden max-w-4xl w-full mx-auto px-4 pb-2">
-        <div class="relative inline-block">
-            <img id="attached-image-preview" src="" alt="Attached Preview" class="w-20 h-20 object-cover rounded-xl border-2 border-blue-500 shadow-md">
-            <button onclick="removeAttachedImage()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 shadow">
+    <!-- INPUT BAR CONTAINER -->
+    <footer class="p-4 bg-[#131314] border-t border-[#2d2f31] max-w-4xl mx-auto w-full">
+        <!-- Image Preview Thumbnail (Hidden by default) -->
+        <div id="image-preview-container" class="hidden mb-3 relative inline-block">
+            <img id="image-preview" class="w-20 h-20 object-cover rounded-xl border border-blue-500/50 shadow-md">
+            <button onclick="clearImage()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-700 transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-    </div>
 
-    <!-- Toolbar & Input Area -->
-    <footer class="max-w-4xl w-full mx-auto p-4">
-        <form id="chat-form" onsubmit="handleFormSubmit(event)" class="relative flex items-center gap-2">
+        <!-- Input Box -->
+        <div class="bg-[#1e1f20] border border-[#2d2f31] focus-within:border-blue-500/50 rounded-2xl p-2 flex items-center gap-2 transition shadow-inner">
+            <!-- Hidden File Input -->
+            <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
             
-            <input type="file" id="file-input" accept="image/*" onchange="handleFileSelect(event)" class="hidden">
+            <!-- Upload Image Button -->
+            <button onclick="document.getElementById('file-input').click()" title="Upload Image" class="p-2.5 text-gray-400 hover:text-blue-400 hover:bg-[#2d2f31] rounded-xl transition">
+                <i class="fa-solid fa-paperclip text-base"></i>
+            </button>
 
-            <div class="flex items-center gap-1 bg-[#1e1f20] border border-[#2d2f31] rounded-full px-2 py-1">
-                <!-- Attach Image -->
-                <button type="button" onclick="document.getElementById('file-input').click()" title="Attach File" class="w-9 h-9 text-gray-400 hover:text-blue-400 rounded-full flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-paperclip text-sm"></i>
-                </button>
+            <!-- Live Camera Button -->
+            <button onclick="openCamera()" title="Take Photo" class="p-2.5 text-gray-400 hover:text-blue-400 hover:bg-[#2d2f31] rounded-xl transition">
+                <i class="fa-solid fa-camera text-base"></i>
+            </button>
 
-                <!-- Camera Visual Search -->
-                <button type="button" onclick="openCameraModal()" title="Live Camera Search" class="w-9 h-9 text-gray-400 hover:text-emerald-400 rounded-full flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-camera text-sm"></i>
-                </button>
-
-                <!-- Voice Input -->
-                <button type="button" id="voice-btn" onclick="toggleVoiceRecognition()" title="Voice Input" class="w-9 h-9 text-gray-400 hover:text-purple-400 rounded-full flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-microphone text-sm"></i>
-                </button>
-            </div>
-
-            <!-- Text Field -->
-            <input 
-                type="text" 
-                id="user-input" 
-                placeholder="Ask or search with image..." 
-                class="flex-1 bg-[#1e1f20] border border-[#2d2f31] rounded-full py-3 pl-5 pr-12 text-sm text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors shadow-lg"
-                autocomplete="off"
-            >
+            <!-- Text Area Input -->
+            <input id="user-input" type="text" placeholder="Ask anything or describe an image..." class="flex-1 bg-transparent text-sm text-gray-100 placeholder-gray-500 focus:outline-none px-2" onkeydown="if(event.key === 'Enter') handleSend()">
 
             <!-- Send Button -->
-            <button 
-                type="submit" 
-                id="send-btn"
-                class="bg-blue-600 hover:bg-blue-500 text-white w-10 h-10 rounded-full flex items-center justify-center transition-colors shadow-md flex-shrink-0"
-            >
-                <i class="fa-solid fa-paper-plane text-xs"></i>
+            <button id="send-btn" onclick="handleSend()" class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-xl transition flex items-center justify-center min-w-[40px]">
+                <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
-        </form>
+        </div>
     </footer>
 
     <!-- CAMERA MODAL -->
-    <div id="camera-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl flex flex-col">
-            <div class="p-4 border-b border-[#2d2f31] flex justify-between items-center">
-                <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
-                    <i class="fa-solid fa-camera"></i> Live Camera Search
-                </div>
-                <button onclick="closeCameraModal()" class="text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+    <div id="camera-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex flex-col items-center justify-center p-4">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-4 max-w-md w-full flex flex-col items-center gap-4">
+            <div class="flex justify-between items-center w-full">
+                <h3 class="text-sm font-semibold text-gray-200">Capture Photo</h3>
+                <button onclick="closeCamera()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
-            <div class="relative bg-black flex items-center justify-center min-h-[300px]">
-                <video id="camera-feed" autoplay playsinline class="w-full h-auto max-h-[400px] object-cover"></video>
-                <canvas id="camera-canvas" class="hidden"></canvas>
-            </div>
-
-            <div class="p-4 flex justify-center gap-4 bg-[#131314]">
-                <button onclick="captureCameraSnapshot()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-6 py-2.5 rounded-full flex items-center gap-2 shadow-lg transition-colors text-sm">
-                    <i class="fa-solid fa-circle-dot"></i> Capture & Analyze
-                </button>
-                <button onclick="closeCameraModal()" class="bg-[#2d2f31] hover:bg-gray-700 text-gray-300 font-medium px-5 py-2.5 rounded-full text-sm">
-                    Cancel
-                </button>
+            <video id="camera-video" autoplay playsinline class="w-full h-64 object-cover rounded-xl bg-black border border-[#2d2f31]"></video>
+            <canvas id="camera-canvas" class="hidden"></canvas>
+            <div class="flex gap-3 w-full">
+                <button onclick="closeCamera()" class="flex-1 py-2 bg-[#2d2f31] text-gray-300 rounded-xl text-sm hover:bg-[#3d3f41] transition">Cancel</button>
+                <button onclick="capturePhoto()" class="flex-1 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-500 transition"><i class="fa-solid fa-circle-dot mr-1"></i> Snap Photo</button>
             </div>
         </div>
     </div>
 
-    <!-- PRO SUBSCRIPTION MODAL -->
-    <div id="pricing-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative">
-            <button onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-
-            <div class="w-12 h-12 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center mx-auto text-xl">
-                <i class="fa-solid fa-crown"></i>
-            </div>
-            <h3 class="text-xl font-bold text-white">Upgrade to Spar Pro</h3>
-            <p class="text-gray-400 text-sm">Unlock unlimited visual camera searches, faster responses, and priority processing.</p>
-            
-            <div class="bg-[#131314] p-4 rounded-xl border border-[#2d2f31] text-left space-y-2 text-sm">
-                <div class="flex items-center gap-2 text-gray-300"><i class="fa-solid fa-check text-emerald-400"></i> Unlimited Visual Camera Search</div>
-                <div class="flex items-center gap-2 text-gray-300"><i class="fa-solid fa-check text-emerald-400"></i> Unlimited Chat Messages</div>
-                <div class="flex items-center gap-2 text-gray-300"><i class="fa-solid fa-check text-emerald-400"></i> Priority High-Speed Access</div>
-            </div>
-
-            <div class="text-2xl font-bold text-white">$9.99 <span class="text-xs text-gray-400 font-normal">/ month</span></div>
-
-            <button onclick="handleCheckout()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-colors shadow-lg">
-                Subscribe Now
-            </button>
-            <button onclick="closeSubscriptionModal()" class="text-xs text-gray-400 hover:text-white block mx-auto">
-                Continue with Free Tier
-            </button>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT ENGINE -->
     <script>
-        let attachedImageData = null;
-        let cameraStream = null;
-        let isListening = false;
-        let recognition = null;
-
-        // --- SUBSCRIPTION & QUOTA LOGIC ---
-        const MAX_FREE_USES = 5;
-        let userPlan = localStorage.getItem("user_plan") || "free"; // "free" or "pro"
-        let usageCount = parseInt(localStorage.getItem("usage_count") || "0");
-
-        function updateSubscriptionUI() {
-            const bannerCount = document.getElementById("usage-count");
-            const indicator = document.getElementById("status-indicator");
-
-            if (userPlan === "pro") {
-                bannerCount.textContent = "Spar Pro Active";
-                indicator.className = "w-2 h-2 rounded-full bg-blue-400 animate-pulse";
-            } else {
-                const remaining = Math.max(0, MAX_FREE_USES - usageCount);
-                bannerCount.textContent = `${remaining} free credits remaining`;
-                indicator.className = remaining > 0 ? "w-2 h-2 rounded-full bg-emerald-400" : "w-2 h-2 rounded-full bg-red-500";
-            }
-        }
-
-        function checkAndDeductQuota() {
-            if (userPlan === "pro") return true;
-
-            if (usageCount >= MAX_FREE_USES) {
-                openSubscriptionModal();
-                alert("You have used all 5 free credits! Please upgrade to Spar Pro to continue.");
-                return false;
-            }
-
-            usageCount++;
-            localStorage.setItem("usage_count", usageCount);
-            updateSubscriptionUI();
-            return true;
-        }
-
-        function openSubscriptionModal() {
-            document.getElementById("pricing-modal").classList.remove("hidden");
-        }
-
-        function closeSubscriptionModal() {
-            if (userPlan === "free" && usageCount >= MAX_FREE_USES) {
-                alert("Please upgrade to Pro to continue using Spar AI.");
-                return;
-            }
-            document.getElementById("pricing-modal").classList.add("hidden");
-        }
-
-        function handleCheckout() {
-            // Replace with your Stripe Payment Link if available
-            const STRIPE_PAYMENT_LINK = "https://buy.stripe.com/your_payment_link_here";
-
-            if (STRIPE_PAYMENT_LINK.includes("your_payment_link_here")) {
-                // DEMO MODE: Activates Pro plan instantly for testing
-                alert("Demo Mode: Subscribed to Pro Plan successfully!");
-                localStorage.setItem("user_plan", "pro");
-                userPlan = "pro";
-                updateSubscriptionUI();
-                document.getElementById("pricing-modal").classList.add("hidden");
-            } else {
-                window.location.href = STRIPE_PAYMENT_LINK;
-            }
-        }
+        let mediaStream = null;
 
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
@@ -237,209 +128,190 @@
             );
         }
 
-        // --- File Attachment Handler ---
+        // File Selection Handler
         function handleFileSelect(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const base64String = e.target.result.split(',')[1];
-                attachedImageData = {
-                    inlineData: {
-                        mimeType: file.type || "image/jpeg",
-                        data: base64String
-                    }
+                const base64Data = e.target.result.split(',')[1];
+                selectedImageData = {
+                    mimeType: file.type,
+                    data: base64Data
                 };
-                document.getElementById('attached-image-preview').src = e.target.result;
+                document.getElementById('image-preview').src = e.target.result;
                 document.getElementById('image-preview-container').classList.remove('hidden');
             };
             reader.readAsDataURL(file);
         }
 
-        function removeAttachedImage() {
-            attachedImageData = null;
-            document.getElementById('image-preview-container').classList.add('hidden');
+        // Clear Selected Image
+        function clearImage() {
+            selectedImageData = null;
             document.getElementById('file-input').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
         }
 
-        // --- Camera Modal Handler ---
-        async function openCameraModal() {
-            const modal = document.getElementById('camera-modal');
-            const video = document.getElementById('camera-feed');
-            modal.classList.remove('hidden');
-
+        // Camera Management
+        async function openCamera() {
             try {
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' }, 
-                    audio: false 
-                });
-                video.srcObject = cameraStream;
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                const videoTrack = document.getElementById('camera-video');
+                videoTrack.srcObject = mediaStream;
+                document.getElementById('camera-modal').classList.remove('hidden');
             } catch (err) {
-                alert("Camera access denied or unavailable.");
-                closeCameraModal();
+                alert("Camera access denied or unavailable: " + err.message);
             }
         }
 
-        function closeCameraModal() {
-            const modal = document.getElementById('camera-modal');
-            modal.classList.add('hidden');
-
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
+        function closeCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
             }
+            document.getElementById('camera-modal').classList.add('hidden');
         }
 
-        function captureCameraSnapshot() {
-            const video = document.getElementById('camera-feed');
+        function capturePhoto() {
+            const video = document.getElementById('camera-video');
             const canvas = document.getElementById('camera-canvas');
-            const context = canvas.getContext('2d');
-
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             const dataUrl = canvas.toDataURL('image/jpeg');
             const base64Data = dataUrl.split(',')[1];
 
-            attachedImageData = {
-                inlineData: {
-                    mimeType: 'image/jpeg',
-                    data: base64Data
-                }
+            selectedImageData = {
+                mimeType: 'image/jpeg',
+                data: base64Data
             };
 
-            document.getElementById('attached-image-preview').src = dataUrl;
+            document.getElementById('image-preview').src = dataUrl;
             document.getElementById('image-preview-container').classList.remove('hidden');
 
-            closeCameraModal();
-
-            const inputField = document.getElementById('user-input');
-            if (!inputField.value.trim()) {
-                inputField.value = "Identify and explain this object in detail.";
-            }
+            closeCamera();
         }
 
-        // --- Voice Input ---
-        function toggleVoiceRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert("Voice recognition is not supported in this browser.");
+        // Handle Send Trigger
+        function handleSend() {
+            if (availableCredits <= 0) {
+                alert("You have used all 5 free credits for this session!");
                 return;
             }
 
-            const voiceBtn = document.getElementById('voice-btn');
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const inputEl = document.getElementById('user-input');
+            const promptText = inputEl.value.trim();
 
-            if (isListening) {
-                recognition.stop();
-                return;
-            }
+            if (!promptText && !selectedImageData) return;
 
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
+            // Update Credits
+            availableCredits--;
+            document.getElementById('credit-count').innerText = availableCredits;
 
-            recognition.onstart = () => {
-                isListening = true;
-                voiceBtn.classList.add('text-red-500', 'animate-pulse');
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('user-input').value = transcript;
-            };
-
-            recognition.onerror = () => stopVoiceUI();
-            recognition.onend = () => stopVoiceUI();
-
-            recognition.start();
-        }
-
-        function stopVoiceUI() {
-            isListening = false;
-            document.getElementById('voice-btn').classList.remove('text-red-500', 'animate-pulse');
-        }
-
-        // --- Form Handler ---
-        async function handleFormSubmit(event) {
-            event.preventDefault();
-
-            // Check quota before processing prompt
-            if (!checkAndDeductQuota()) return;
-
-            const inputField = document.getElementById('user-input');
-            const prompt = inputField.value.trim();
-
-            if (!prompt && !attachedImageData) return;
-
-            inputField.value = '';
             const chatBox = document.getElementById('chat-box');
+            const currentImg = selectedImageData;
             
-            let imageTag = attachedImageData ? 
-                `<img src="${document.getElementById('attached-image-preview').src}" class="w-32 h-32 object-cover rounded-lg mb-2 border border-blue-400">` : '';
+            // Render User Bubble
+            let userContentHTML = '';
+            if (currentImg) {
+                userContentHTML += `<img src="data:${currentImg.mimeType};base64,${currentImg.data}" class="w-40 h-40 object-cover rounded-xl mb-2 border border-blue-500/30">`;
+            }
+            if (promptText) {
+                userContentHTML += `<p class="leading-relaxed">${escapeHTML(promptText)}</p>`;
+            }
 
-            const userBubble = `
-                <div class="flex justify-end gap-3">
-                    <div class="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-sm">
-                        ${imageTag}
-                        <p class="leading-relaxed whitespace-pre-wrap">${escapeHTML(prompt || "Visual Search")}</p>
-                    </div>
+            const userBubble = document.createElement('div');
+            userBubble.className = "flex items-start gap-3 justify-end";
+            userBubble.innerHTML = `
+                <div class="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-sm">
+                    ${userContentHTML}
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gray-700 text-gray-300 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-user text-sm"></i>
                 </div>`;
-            chatBox.insertAdjacentHTML('beforeend', userBubble);
+            chatBox.appendChild(userBubble);
 
-            const imageToSend = attachedImageData;
-            removeAttachedImage();
+            // Clear Input
+            inputEl.value = '';
+            clearImage();
 
-            const loadingId = 'loading-' + Date.now();
-            const aiLoadingBubble = `
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-sparkles text-sm"></i>
-                    </div>
-                    <div id="${loadingId}" class="bg-[#1e1f20] border border-[#2d2f31] text-gray-400 p-4 rounded-2xl rounded-tl-none text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Processing request...
-                    </div>
+            // Render Loading Bubble
+            const loadingId = "loading-" + Date.now();
+            const aiBubble = document.createElement('div');
+            aiBubble.className = "flex items-start gap-3";
+            aiBubble.innerHTML = `
+                <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-sparkles text-sm"></i>
+                </div>
+                <div id="${loadingId}" class="bg-[#1e1f20] border border-[#2d2f31] text-gray-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%] flex items-center gap-2">
+                    <i class="fa-solid fa-circle-notch fa-spin text-blue-400"></i> Thinking with Groq...
                 </div>`;
-            chatBox.insertAdjacentHTML('beforeend', aiLoadingBubble);
+            chatBox.appendChild(aiBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            await sendChatMessage(prompt || "Describe this image in detail.", imageToSend, loadingId);
+            // Execute Groq API Request
+            sendChatMessageToGroq(promptText, currentImg, loadingId);
         }
 
-        // --- API Request (Handles AQ. and AIza keys dynamically) ---
-        async function sendChatMessage(textPrompt, imageObject, loadingId) {
+        // Groq API Call Handler
+        async function sendChatMessageToGroq(textPrompt, imageObject, loadingId) {
             const chatBox = document.getElementById('chat-box');
-            
-            const parts = [];
-            if (textPrompt) parts.push({ text: textPrompt });
-            if (imageObject) parts.push(imageObject);
+            const cleanKey = GROQ_API_KEY.trim();
 
-            let requestUrl = GEMINI_BASE_URL;
-            let requestHeaders = { 'Content-Type': 'application/json' };
-
-            const cleanKey = GEMINI_API_KEY.trim();
-
-            if (cleanKey.startsWith('AQ')) {
-                requestHeaders['Authorization'] = `Bearer ${cleanKey}`;
-                requestHeaders['x-goog-api-key'] = cleanKey;
-            } else {
-                requestUrl += `?key=${encodeURIComponent(cleanKey)}`;
-                requestHeaders['x-goog-api-key'] = cleanKey;
+            if (!cleanKey || cleanKey.includes("YOUR_GROQ_API_KEY_HERE")) {
+                const targetBubble = document.getElementById(loadingId);
+                targetBubble.parentElement.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-yellow-600/20 text-yellow-400 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-key text-sm"></i>
+                    </div>
+                    <div class="bg-[#1e1f20] border border-yellow-500/50 text-yellow-300 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
+                        <strong>Configuration Needed:</strong> Please add your Groq API Key (starts with <code>gsk_</code>) inside the script tag at the top of <code>index.html</code>.
+                    </div>`;
+                return;
             }
 
+            // Build OpenAI/Groq Message Payload
+            const userContent = [];
+            
+            if (textPrompt) {
+                userContent.push({ type: "text", text: textPrompt });
+            } else if (imageObject) {
+                userContent.push({ type: "text", text: "Describe this image in detail." });
+            }
+
+            if (imageObject) {
+                const dataUrl = `data:${imageObject.mimeType};base64,${imageObject.data}`;
+                userContent.push({
+                    type: "image_url",
+                    image_url: { url: dataUrl }
+                });
+            }
+
+            // Dynamic model routing: Vision model for images, standard LLM for text
+            const selectedModel = imageObject ? "llama-3.2-11b-vision-preview" : "llama-3.3-70b-versatile";
+
             try {
-                const response = await fetch(requestUrl, {
+                const response = await fetch(GROQ_BASE_URL, {
                     method: 'POST',
-                    headers: requestHeaders,
-                    body: JSON.stringify({ contents: [{ parts }] })
+                    headers: {
+                        'Authorization': `Bearer ${cleanKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: selectedModel,
+                        messages: [{ role: "user", content: userContent }]
+                    })
                 });
 
                 const data = await response.json();
                 const targetBubble = document.getElementById(loadingId);
 
-                if (response.ok && data.candidates && data.candidates[0].content.parts[0].text) {
-                    const aiText = data.candidates[0].content.parts[0].text;
+                if (response.ok && data.choices && data.choices[0]?.message?.content) {
+                    const aiText = data.choices[0].message.content;
                     targetBubble.parentElement.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-sparkles text-sm"></i>
@@ -451,13 +323,13 @@
                             <p class="leading-relaxed whitespace-pre-wrap">${escapeHTML(aiText)}</p>
                         </div>`;
                 } else {
-                    const errorMsg = data.error?.message || "Error status " + response.status;
+                    const errorMsg = data.error?.message || "HTTP status " + response.status;
                     targetBubble.parentElement.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-red-600/20 text-red-400 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                         </div>
                         <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
-                            <strong>API Error (${response.status}):</strong> ${escapeHTML(errorMsg)}
+                            <strong>Groq API Error (${response.status}):</strong> ${escapeHTML(errorMsg)}
                         </div>`;
                 }
             } catch (err) {
@@ -468,32 +340,13 @@
                             <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                         </div>
                         <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
-                            <strong>Network Error:</strong> Failed to connect to Gemini API.
+                            <strong>Network Error:</strong> Failed to communicate with Groq Cloud.
                         </div>`;
                 }
             }
             
             chatBox.scrollTop = chatBox.scrollHeight;
         }
-
-        function clearChatHistory() {
-            const chatBox = document.getElementById('chat-box');
-            chatBox.innerHTML = `
-                <div class="flex gap-3">
-                    <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-                        <i class="fa-solid fa-sparkles text-sm"></i>
-                    </div>
-                    <div class="bg-[#1e1f20] border border-[#2d2f31] text-gray-200 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%] space-y-2 shadow-sm">
-                        <div class="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                            Spar AI
-                        </div>
-                        <p class="leading-relaxed">Chat history cleared! Ready for your next query.</p>
-                    </div>
-                </div>`;
-        }
-
-        // Initialize UI State
-        document.addEventListener("DOMContentLoaded", updateSubscriptionUI);
     </script>
 </body>
 </html>
