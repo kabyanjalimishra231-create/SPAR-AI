@@ -9,11 +9,11 @@
 </head>
 <body class="bg-[#131314] text-gray-200 font-sans min-h-screen flex flex-col">
 
-    <!-- OPENAI CONFIGURATION -->
+    <!-- GEMINI CONFIGURATION -->
     <script>
-        // 1. Paste your OpenAI API key below (Starts with sk- or sk-proj-)
-        const OPENAI_API_KEY = "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"; 
-        const OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+        // Paste your Google Gemini API key below (Starts with AIzaSy)
+        const GEMINI_API_KEY = "AQ.Ab8RN6J8_4f-cLHkqtjZe2cSKKTabGQ_6j5QblZiEb2MTCCL7g"; 
+        const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     </script>
 
     <!-- Header -->
@@ -22,14 +22,13 @@
             <i class="fa-solid fa-sparkles text-blue-400 text-xl"></i>
             <span class="font-bold text-lg text-white">Spar AI</span>
         </div>
-        <span class="text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full">
-            Powered by OpenAI
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">
+            Powered by Gemini Free
         </span>
     </header>
 
     <!-- Main Chat Area -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 overflow-y-auto space-y-4" id="chat-box">
-        <!-- Welcome Message -->
         <div class="flex gap-3">
             <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
                 <i class="fa-solid fa-sparkles text-sm"></i>
@@ -56,7 +55,7 @@
             <button 
                 type="submit" 
                 id="send-btn"
-                class="absolute right-2 bg-blue-600 hover:bg-blue-500 text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                class="absolute right-2 bg-blue-600 hover:bg-blue-500 text-white w-9 h-9 rounded-full flex items-center justify-center transition-colors shadow-md"
             >
                 <i class="fa-solid fa-paper-plane text-xs"></i>
             </button>
@@ -78,10 +77,8 @@
 
             if (!prompt) return;
 
-            // Clear input
             inputField.value = '';
 
-            // Add User Message to Chat
             const chatBox = document.getElementById('chat-box');
             const userBubble = `
                 <div class="flex justify-end gap-3">
@@ -91,7 +88,6 @@
                 </div>`;
             chatBox.insertAdjacentHTML('beforeend', userBubble);
 
-            // Add Temporary AI Loading Bubble
             const loadingId = 'loading-' + Date.now();
             const aiLoadingBubble = `
                 <div class="flex gap-3">
@@ -105,7 +101,6 @@
             chatBox.insertAdjacentHTML('beforeend', aiLoadingBubble);
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // Send Request to OpenAI API
             await sendChatMessage(prompt, loadingId);
         }
 
@@ -113,26 +108,21 @@
             const chatBox = document.getElementById('chat-box');
             
             try {
-                const response = await fetch(OPENAI_ENDPOINT, {
+                const response = await fetch(GEMINI_ENDPOINT, {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${OPENAI_API_KEY}`
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "gpt-4o-mini", // Fast and low cost
-                        messages: [
-                            { role: "system", content: "You are Spar, a helpful AI assistant." },
-                            { role: "user", content: textPrompt }
-                        ]
+                        contents: [{
+                            parts: [{ text: textPrompt }]
+                        }]
                     })
                 });
 
                 const data = await response.json();
                 const targetBubble = document.getElementById(loadingId);
 
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    const aiText = data.choices[0].message.content;
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const aiText = data.candidates[0].content.parts[0].text;
                     targetBubble.parentElement.innerHTML = `
                         <div class="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
                             <i class="fa-solid fa-sparkles text-sm"></i>
@@ -160,7 +150,7 @@
                             <i class="fa-solid fa-triangle-exclamation text-sm"></i>
                         </div>
                         <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
-                            <strong>Network Error:</strong> Failed to connect to OpenAI API. Check your internet connection or key.
+                            <strong>Network Error:</strong> Check your internet connection or API key.
                         </div>`;
                 }
             }
