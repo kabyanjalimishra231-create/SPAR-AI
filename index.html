@@ -1,328 +1,607 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Real-Time AI Assistant</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    body {
-      background-color: #0f172a;
-      color: #f8fafc;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .chat-card {
-      width: 100%;
-      max-width: 768px;
-      height: 85vh;
-      background-color: #1e293b;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
-    }
-
-    .chat-header {
-      padding: 16px;
-      border-bottom: 1px solid #334155;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #0f172a;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-    }
-
-    .chat-header h2 {
-      font-size: 1.1rem;
-      color: #38bdf8;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-    }
-
-    select, input[type="password"] {
-      background: #1e293b;
-      color: #f8fafc;
-      border: 1px solid #475569;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    .chat-body {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 12px 16px;
-      border-radius: 8px;
-      line-height: 1.5;
-      font-size: 0.95rem;
-      white-space: pre-wrap;
-    }
-
-    .message.user {
-      align-self: flex-end;
-      background-color: #2563eb;
-      color: #ffffff;
-    }
-
-    .message.assistant {
-      align-self: flex-start;
-      background-color: #334155;
-      color: #f8fafc;
-    }
-
-    .message.system-status {
-      align-self: center;
-      background: transparent;
-      color: #94a3b8;
-      font-size: 0.8rem;
-      font-style: italic;
-    }
-
-    .chat-footer {
-      padding: 16px;
-      border-top: 1px solid #334155;
-      display: flex;
-      gap: 10px;
-      background-color: #0f172a;
-      border-bottom-left-radius: 12px;
-      border-bottom-right-radius: 12px;
-    }
-
-    .chat-footer input[type="text"] {
-      flex: 1;
-      background: #1e293b;
-      border: 1px solid #475569;
-      color: #f8fafc;
-      padding: 10px 14px;
-      border-radius: 6px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .chat-footer button {
-      background: #0284c7;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .chat-footer button:hover {
-      background: #0369a1;
-    }
-  </style>
-</head>
-<body>
-
-<div class="chat-card">
-  <div class="chat-header">
-    <h2>AI Search Assistant</h2>
-    <div class="controls">
-      <select id="providerSelect">
-        <option value="groq">Groq (Llama 3.3)</option>
-        <option value="openrouter">OpenRouter (Online Search)</option>
-      </select>
-      <input 
-        type="password" 
-        id="apiKeyInput" 
-        placeholder="Enter API Key" 
-        value="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"
-        onchange="saveApiKey()" 
-      />
-    </div>
-  </div>
-
-  <div class="chat-body" id="chatBody">
-    <div class="message assistant">Hello! Ask me anything about current events, topics, or standard questions.</div>
-  </div>
-
-  <div class="chat-footer">
-    <input type="text" id="userInput" placeholder="Type your prompt here..." onkeydown="if(event.key==='Enter') sendMessage()" />
-    <button onclick="sendMessage()">Send</button>
-  </div>
-</div>
-
-<script>
-  const DEFAULT_GROQ_KEY = "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";
-
-  window.addEventListener("DOMContentLoaded", () => {
-    const savedKey = localStorage.getItem("userApiKey");
-    if (savedKey) {
-      document.getElementById("apiKeyInput").value = savedKey;
-    } else {
-      document.getElementById("apiKeyInput").value = DEFAULT_GROQ_KEY;
-    }
-  });
-
-  function saveApiKey() {
-    const key = document.getElementById("apiKeyInput").value.trim();
-    localStorage.setItem("userApiKey", key);
-  }
-
-  async function sendMessage() {
-    const userInput = document.getElementById("userInput");
-    const chatBody = document.getElementById("chatBody");
-    const provider = document.getElementById("providerSelect").value;
-    const apiKey = document.getElementById("apiKeyInput").value.trim() || DEFAULT_GROQ_KEY;
-
-    const query = userInput.value.trim();
-    if (!query) return;
-
-    if (!apiKey) {
-      alert("Please enter an API Key.");
-      return;
-    }
-
-    appendMessage(query, "user");
-    userInput.value = "";
-
-    const statusId = appendMessage("Fetching real-time context...", "system-status");
-
-    try {
-      let aiResponseText = "";
-
-      if (provider === "groq") {
-        const webContext = await fetchRealTimeContext(query);
-        updateStatus(statusId, "Generating response with Groq...");
-        aiResponseText = await queryGroqAPI(query, webContext, apiKey);
-
-      } else if (provider === "openrouter") {
-        updateStatus(statusId, "Searching web and generating via OpenRouter...");
-        aiResponseText = await queryOpenRouterAPI(query, apiKey);
-      }
-
-      removeMessage(statusId);
-      appendMessage(aiResponseText, "assistant");
-
-    } catch (error) {
-      console.error(error);
-      removeMessage(statusId);
-      appendMessage(`Error: ${error.message}`, "assistant");
-    }
-  }
-
-  async function fetchRealTimeContext(query) {
-    try {
-      const wikiUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(query)}`;
-      const res = await fetch(wikiUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.extract) {
-          return data.extract;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spar AI - Complete Multimodal Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Mobile Viewport Height Fix */
+        body {
+            height: 100vh;
+            height: 100dvh;
         }
-      }
-    } catch (err) {
-      console.warn("Could not fetch Wikipedia context:", err);
-    }
-    return "";
-  }
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d2f31;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-[#131314] text-gray-100 font-sans flex flex-col justify-between overflow-hidden antialiased">
 
-  async function queryGroqAPI(userInput, webContext, apiKey) {
-    const today = new Date().toISOString().split('T')[0];
+    <!-- HEADER / NAVIGATION -->
+    <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-3 sm:px-4 py-2.5 flex justify-between items-center z-20 shrink-0">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- HISTORY DRAWER TOGGLE -->
+            <button onclick="toggleHistoryDrawer()" class="p-2 text-gray-400 hover:text-white transition rounded-lg hover:bg-[#2d2f31] active:bg-[#3c4043]" title="Chat History">
+                <i class="fa-solid fa-bars-staggered text-base"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/30">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <span class="font-bold text-base sm:text-lg text-gray-100 tracking-wide">Spar AI</span>
+            </div>
+        </div>
 
-    const systemPrompt = `Today's date is ${today}. You are a helpful real-time assistant. 
-When answering, rely on current context and information up to the year 2026. 
-${webContext ? `[LIVE SEARCH CONTEXT]:\n${webContext}` : ''}`;
+        <div class="flex items-center gap-1.5 sm:gap-3">
+            <!-- MODE SELECTOR -->
+            <button id="mode-toggle" onclick="cycleMode()" class="px-2.5 py-1.5 rounded-full bg-[#2d2f31] border border-[#3c4043] text-xs font-semibold text-gray-300 hover:text-white transition flex items-center gap-1.5">
+                <i id="mode-icon" class="fa-solid fa-message text-blue-400"></i>
+                <span id="mode-text" class="hidden xs:inline">Chat Mode</span>
+            </button>
 
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userInput }
-        ],
-        temperature: 0.5
-      })
-    });
+            <!-- PRO / CREDITS STATUS -->
+            <button onclick="openSubscriptionModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-[#2d2f31] border border-[#3c4043] text-xs font-medium hover:border-gray-500 transition">
+                <i id="user-badge-icon" class="fa-solid fa-bolt text-yellow-400"></i>
+                <span id="user-status-text" class="hidden sm:inline">Credits: <strong id="credits-count" class="text-white">5</strong></span>
+            </button>
 
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || "Groq API request failed.");
-    }
+            <!-- USER ACCOUNT MENU -->
+            <button onclick="openAccountModal()" class="w-8 h-8 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center hover:opacity-90 transition border border-blue-400/30 shrink-0" id="user-avatar-btn">
+                U
+            </button>
+            
+            <!-- ADMIN LINK -->
+            <a href="admin.html" target="_blank" title="Open Admin Panel" class="p-2 text-gray-400 hover:text-white transition shrink-0">
+                <i class="fa-solid fa-gear"></i>
+            </a>
+        </div>
+    </header>
 
-    const data = await response.json();
-    return data.choices[0].message.content;
-  }
+    <!-- SIDE DRAWER: CHAT HISTORY & OVERLAY -->
+    <div id="drawer-overlay" onclick="toggleHistoryDrawer()" class="fixed inset-0 bg-black/60 z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+    <aside id="history-drawer" class="fixed inset-y-0 left-0 w-72 sm:w-80 bg-[#1e1f20] border-r border-[#2d2f31] z-40 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-4 shadow-2xl">
+        <div class="space-y-4">
+            <div class="flex items-center justify-between border-b border-[#2d2f31] pb-3">
+                <span class="font-bold text-sm text-gray-200 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Chat History
+                </span>
+                <button onclick="toggleHistoryDrawer()" class="text-gray-400 hover:text-white p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <button onclick="startNewChat()" class="w-full py-2.5 px-3 rounded-xl bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 border border-blue-500/30 font-semibold text-xs transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Start New Chat
+            </button>
+            <div id="history-list" class="space-y-1.5 overflow-y-auto max-h-[65vh] pr-1 text-xs">
+                <!-- Saved chats dynamically inserted here -->
+            </div>
+        </div>
+        <button onclick="clearAllHistory()" class="w-full py-2.5 text-red-400 hover:text-red-300 text-xs font-medium border-t border-[#2d2f31] flex items-center justify-center gap-2">
+            <i class="fa-solid fa-trash-can"></i> Clear All History
+        </button>
+    </aside>
 
-  async function queryOpenRouterAPI(userInput, apiKey) {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "meta-llama/llama-3.3-70b-instruct:online",
-        messages: [
-          { role: "user", content: userInput }
-        ]
-      })
-    });
+    <!-- MAIN CHAT INTERFACE AREA -->
+    <main class="flex-1 w-full max-w-4xl mx-auto p-2 sm:p-4 flex flex-col justify-between min-h-0 relative">
+        
+        <!-- MESSAGES CONTAINER -->
+        <div id="chat-box" class="flex-1 space-y-4 overflow-y-auto pr-1 sm:pr-2 pb-4">
+            <!-- Initial Welcome Banner -->
+            <div class="flex items-start gap-2.5 sm:gap-3">
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs shrink-0 border border-blue-500/30">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-3 sm:p-4 text-xs sm:text-sm max-w-[90%] sm:max-w-[85%] text-gray-200 leading-relaxed">
+                    Hello! Welcome to <strong>Spar AI Multimodal</strong>.<br/><br/>
+                    • 💬 <strong>Chat Mode:</strong> Powered by Groq LLM<br/>
+                    • 🎨 <strong>Image Creator:</strong> High-resolution AI art generation<br/>
+                    • 🌐 <strong>Live Search:</strong> Fetch current news & live web facts<br/>
+                    • 📜 <strong>Chat History & Account:</strong> Full persistent sessions<br/>
+                    • 📷 <strong>Camera & Audio:</strong> Photo upload & Read aloud
+                </div>
+            </div>
+        </div>
 
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.error?.message || "OpenRouter API request failed.");
-    }
+        <!-- ATTACHMENT PREVIEW ZONE -->
+        <div id="attachment-preview" class="hidden relative w-fit mb-2">
+            <img id="preview-img" src="" class="w-20 h-20 object-cover rounded-xl border border-[#2d2f31]">
+            <button onclick="clearAttachment()" class="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
 
-    const data = await response.json();
-    return data.choices[0].message.content;
-  }
+        <!-- INPUT BAR & CONTROLS -->
+        <div class="w-full shrink-0 pb-1 sm:pb-2">
+            <form onsubmit="handleSend(event)" class="flex items-center gap-1 sm:gap-2 bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-1.5 sm:p-2 focus-within:border-blue-500/50 transition shadow-xl">
+                
+                <!-- CAMERA SNAP -->
+                <label for="camera-input" class="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition shrink-0" title="Snap Photo">
+                    <i class="fa-solid fa-camera text-sm sm:text-base"></i>
+                </label>
+                <input id="camera-input" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleImageAttach(event)">
 
-  function appendMessage(text, role) {
-    const chatBody = document.getElementById("chatBody");
-    const msgDiv = document.createElement("div");
-    const id = "msg-" + Date.now();
-    msgDiv.id = id;
-    msgDiv.className = `message ${role}`;
-    msgDiv.textContent = text;
-    chatBody.appendChild(msgDiv);
-    chatBody.scrollTop = chatBody.scrollHeight;
-    return id;
-  }
+                <!-- FILE UPLOAD -->
+                <label for="file-input" class="p-2 text-gray-400 hover:text-blue-400 cursor-pointer transition shrink-0" title="Upload Image">
+                    <i class="fa-solid fa-paperclip text-sm sm:text-base"></i>
+                </label>
+                <input id="file-input" type="file" accept="image/*" class="hidden" onchange="handleImageAttach(event)">
 
-  function updateStatus(id, newText) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = newText;
-  }
+                <!-- INPUT TEXTFIELD -->
+                <input id="chat-input" type="text" placeholder="Type a message, search web, or generate image..." class="flex-1 bg-transparent px-2 text-xs sm:text-sm text-gray-100 focus:outline-none min-w-0">
 
-  function removeMessage(id) {
-    const el = document.getElementById(id);
-    if (el) el.remove();
-  }
-</script>
+                <!-- VOICE MIC -->
+                <button type="button" onclick="toggleVoiceInput()" id="mic-btn" class="p-2 text-gray-400 hover:text-red-400 transition shrink-0" title="Voice Input">
+                    <i class="fa-solid fa-microphone text-sm sm:text-base"></i>
+                </button>
 
+                <!-- SEND BUTTON -->
+                <button type="submit" class="p-2.5 sm:p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-paper-plane text-xs sm:text-sm"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- USER ACCOUNT MODAL -->
+    <div id="account-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-5 sm:p-6 max-w-sm w-full space-y-4 relative shadow-2xl">
+            <button onclick="closeAccountModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="text-base font-bold text-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-user text-blue-400"></i> User Profile
+            </h3>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-gray-400 block mb-1">Display Name</label>
+                    <input id="user-name-input" type="text" class="w-full bg-[#131314] border border-[#2d2f31] p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500" placeholder="Your Name">
+                </div>
+                <div class="p-3 bg-[#131314] rounded-xl border border-[#2d2f31] space-y-1">
+                    <span class="text-gray-400 block">Account Status:</span>
+                    <span id="account-status-label" class="font-bold text-yellow-400">Free Tier</span>
+                </div>
+                <button onclick="saveUserProfile()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition">
+                    Save Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUBSCRIPTION / PROMO MODAL -->
+    <div id="sub-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl relative">
+            <button onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-500/30">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-100">Upgrade to Spar AI Pro</h3>
+                <p class="text-xs text-gray-400">Unlimited image creation, live searches, and context responses.</p>
+            </div>
+            <div class="bg-[#131314] border border-[#2d2f31] p-3.5 rounded-xl flex justify-between items-center">
+                <div>
+                    <h4 class="font-bold text-xs sm:text-sm text-gray-200">Pro VIP Pass</h4>
+                    <p class="text-[10px] sm:text-[11px] text-gray-500">Unlimited usage & premium engines</p>
+                </div>
+                <span id="modal-price-display" class="text-base sm:text-lg font-extrabold text-emerald-400">$4.99</span>
+            </div>
+            <div class="space-y-2">
+                <label class="text-xs text-gray-400 font-medium">Have a Promo Code?</label>
+                <div class="flex gap-2">
+                    <input id="promo-code-input" type="text" placeholder="PRO-UNLIMITED-2026" class="flex-1 bg-[#131314] border border-[#2d2f31] text-xs text-gray-100 p-2.5 rounded-xl uppercase focus:outline-none focus:border-amber-500">
+                    <button onclick="applyPromoCode()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl transition shrink-0">Redeem</button>
+                </div>
+                <p id="promo-msg" class="text-xs hidden"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        const GROQ_API_KEY = "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";
+
+        // Modes: 0 = Chat, 1 = Live Search, 2 = AI Image
+        let currentModeIndex = 0;
+        const modes = [
+            { name: "Chat Mode", icon: "fa-solid fa-message text-blue-400", placeholder: "Ask anything..." },
+            { name: "Live Search", icon: "fa-solid fa-globe text-emerald-400", placeholder: "Search live web news & real-time facts..." },
+            { name: "Image Mode", icon: "fa-solid fa-image text-amber-400", placeholder: "Describe an image to create..." }
+        ];
+
+        let selectedImageData = null;
+        let isRecording = false;
+        let recognition = null;
+        let activeChatSessionId = Date.now().toString();
+
+        // Voice Speech Dictation Setup
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = (e) => {
+                document.getElementById('chat-input').value = e.results[0][0].transcript;
+                toggleVoiceInput();
+            };
+            recognition.onerror = () => toggleVoiceInput();
+        }
+
+        // Configuration Sync
+        function getSystemConfig() {
+            const freeCreditsLimit = parseInt(localStorage.getItem('spar_ai_free_credits') || "5");
+            const priceDisplay = localStorage.getItem('spar_ai_sub_price') || "$4.99";
+            const validCodes = JSON.parse(localStorage.getItem('spar_ai_promo_codes')) || ["PRO-UNLIMITED-2026", "VIP-SPAR-AI", "MEMBERSHIP-2026"];
+            const isPro = localStorage.getItem('spar_ai_pro_active') === 'true';
+            const userName = localStorage.getItem('spar_ai_user_name') || "User";
+
+            return { freeCreditsLimit, priceDisplay, validCodes, isPro, userName };
+        }
+
+        let config = getSystemConfig();
+        let userCredits = parseInt(sessionStorage.getItem('spar_ai_user_credits'));
+        if (isNaN(userCredits)) {
+            userCredits = config.freeCreditsLimit;
+            sessionStorage.setItem('spar_ai_user_credits', userCredits);
+        }
+
+        function updateUI() {
+            config = getSystemConfig();
+            document.getElementById('modal-price-display').innerText = config.priceDisplay;
+            document.getElementById('user-avatar-btn').innerText = config.userName.charAt(0).toUpperCase();
+
+            const badgeIcon = document.getElementById('user-badge-icon');
+            const statusText = document.getElementById('user-status-text');
+
+            if (config.isPro) {
+                badgeIcon.className = "fa-solid fa-crown text-amber-400";
+                statusText.innerHTML = `<strong class="text-amber-400">PRO VIP</strong>`;
+                document.getElementById('account-status-label').innerText = "PRO VIP Member (Unlimited)";
+                document.getElementById('account-status-label').className = "font-bold text-amber-400";
+            } else {
+                badgeIcon.className = "fa-solid fa-bolt text-yellow-400";
+                statusText.innerHTML = `Credits: <strong class="text-white">${userCredits}</strong>`;
+                document.getElementById('account-status-label').innerText = `Free Tier (${userCredits} Credits Remaining)`;
+                document.getElementById('account-status-label').className = "font-bold text-yellow-400";
+            }
+
+            renderHistoryList();
+        }
+
+        // Mode Switching
+        function cycleMode() {
+            currentModeIndex = (currentModeIndex + 1) % modes.length;
+            const activeMode = modes[currentModeIndex];
+            document.getElementById('mode-text').innerText = activeMode.name;
+            document.getElementById('mode-icon').className = activeMode.icon;
+            document.getElementById('chat-input').placeholder = activeMode.placeholder;
+        }
+
+        // Drawer Controls
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('history-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            const isOpen = !drawer.classList.contains('-translate-x-full');
+
+            if (isOpen) {
+                drawer.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+            } else {
+                drawer.classList.remove('-translate-x-full');
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        }
+
+        // Chat History Persistence
+        function getChatHistory() {
+            return JSON.parse(localStorage.getItem('spar_ai_chat_history') || '{}');
+        }
+
+        function saveMessageToHistory(sessionId, sender, text, image = null) {
+            const history = getChatHistory();
+            if (!history[sessionId]) {
+                history[sessionId] = { title: text.substring(0, 24) || "New Conversation", messages: [] };
+            }
+            history[sessionId].messages.push({ sender, text, image, time: new Date().toLocaleTimeString() });
+            localStorage.setItem('spar_ai_chat_history', JSON.stringify(history));
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const history = getChatHistory();
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            Object.keys(history).reverse().forEach(sessionId => {
+                const session = history[sessionId];
+                const btn = document.createElement('button');
+                btn.className = `w-full text-left p-2.5 rounded-xl border border-[#2d2f31] hover:bg-[#2d2f31] transition truncate ${sessionId === activeChatSessionId ? 'bg-[#2d2f31] border-blue-500/50 text-white' : 'text-gray-400'}`;
+                btn.innerText = session.title || "Chat Session";
+                btn.onclick = () => loadChatSession(sessionId);
+                container.appendChild(btn);
+            });
+        }
+
+        function loadChatSession(sessionId) {
+            activeChatSessionId = sessionId;
+            const history = getChatHistory();
+            const session = history[sessionId];
+            const chatBox = document.getElementById('chat-box');
+            chatBox.innerHTML = '';
+
+            if (session && session.messages) {
+                session.messages.forEach(msg => appendMessageUI(msg.sender, msg.text, msg.image));
+            }
+            toggleHistoryDrawer();
+        }
+
+        function startNewChat() {
+            activeChatSessionId = Date.now().toString();
+            document.getElementById('chat-box').innerHTML = `
+                <div class="flex items-start gap-2.5 sm:gap-3">
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs shrink-0 border border-blue-500/30">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-3.5 text-xs sm:text-sm max-w-[85%] text-gray-200">
+                        New session started. Ask a question, create an image, or search the web!
+                    </div>
+                </div>
+            `;
+            toggleHistoryDrawer();
+        }
+
+        function clearAllHistory() {
+            if (confirm("Clear all chat session history?")) {
+                localStorage.removeItem('spar_ai_chat_history');
+                startNewChat();
+                renderHistoryList();
+            }
+        }
+
+        // Photo Attachment Processing
+        function handleImageAttach(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                selectedImageData = e.target.result;
+                document.getElementById('preview-img').src = selectedImageData;
+                document.getElementById('attachment-preview').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAttachment() {
+            selectedImageData = null;
+            document.getElementById('attachment-preview').classList.add('hidden');
+            document.getElementById('camera-input').value = '';
+            document.getElementById('file-input').value = '';
+        }
+
+        // Dictation & Audio Output
+        function toggleVoiceInput() {
+            if (!recognition) return alert("Voice input is not supported in this browser.");
+            const micBtn = document.getElementById('mic-btn');
+            if (!isRecording) {
+                recognition.start();
+                isRecording = true;
+                micBtn.classList.add('text-red-500', 'animate-pulse');
+            } else {
+                recognition.stop();
+                isRecording = false;
+                micBtn.classList.remove('text-red-500', 'animate-pulse');
+            }
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+            }
+        }
+
+        // Unified Response Handler
+        async function handleSend(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+
+            if (!text && !selectedImageData) return;
+
+            if (!config.isPro && userCredits <= 0) {
+                openSubscriptionModal();
+                return;
+            }
+
+            appendMessageUI('user', text, selectedImageData);
+            saveMessageToHistory(activeChatSessionId, 'user', text, selectedImageData);
+            
+            clearAttachment();
+            input.value = '';
+
+            if (!config.isPro) {
+                userCredits--;
+                sessionStorage.setItem('spar_ai_user_credits', userCredits);
+                updateUI();
+            }
+
+            // --- 1. DIRECT AI IMAGE CREATION ENGINE ---
+            if (currentModeIndex === 2 || text.toLowerCase().startsWith('/image')) {
+                const cleanPrompt = text.replace(/\/image/gi, '').trim() || "Futuristic masterpiece artwork";
+                const loadingId = appendMessageUI('ai', '🎨 Creating high-resolution AI Image...');
+
+                const encodedPrompt = encodeURIComponent(cleanPrompt);
+                const seed = Math.floor(Math.random() * 999999);
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&nologo=true`;
+
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    const target = document.getElementById(loadingId);
+                    target.innerHTML = `
+                        <div class="space-y-2">
+                            <p class="text-xs text-gray-400">Prompt: <em>"${cleanPrompt}"</em></p>
+                            <img src="${imageUrl}" class="rounded-xl w-full max-w-md border border-[#2d2f31] shadow-lg hover:opacity-95 transition cursor-pointer" onclick="window.open('${imageUrl}', '_blank')"/>
+                            <a href="${imageUrl}" target="_blank" download="spar-ai-art.jpg" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:underline pt-1">
+                                <i class="fa-solid fa-download"></i> Download High-Res Image
+                            </a>
+                        </div>
+                    `;
+                    saveMessageToHistory(activeChatSessionId, 'ai', `Created Image: ${cleanPrompt}`);
+                };
+                img.onerror = () => {
+                    document.getElementById(loadingId).innerText = "Failed to render image. Please try again.";
+                };
+                return;
+            }
+
+            // --- 2. LIVE REAL-TIME WEB SEARCH ---
+            if (currentModeIndex === 1) {
+                const loadingId = appendMessageUI('ai', '🌐 Searching the web for real-time results...');
+                try {
+                    const searchRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(text)}&format=json&no_html=1`);
+                    const searchData = await searchRes.json();
+                    
+                    let searchContext = searchData.AbstractText || (searchData.RelatedTopics && searchData.RelatedTopics[0] ? searchData.RelatedTopics[0].Text : null);
+
+                    if (!searchContext) {
+                        searchContext = `Current Date: ${new Date().toLocaleDateString()}. Real-time query context for: ${text}`;
+                    }
+
+                    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                        method: "POST",
+                        headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            model: "llama-3.3-70b-versatile",
+                            messages: [
+                                { role: "system", content: `You are an AI with real-time web search capabilities. Grounding web data: ${searchContext}` },
+                                { role: "user", content: text }
+                            ]
+                        })
+                    });
+
+                    const data = await response.json();
+                    const aiResponse = data.choices[0].message.content;
+                    document.getElementById(loadingId).innerText = aiResponse;
+                    saveMessageToHistory(activeChatSessionId, 'ai', aiResponse);
+
+                } catch (error) {
+                    document.getElementById(loadingId).innerText = "Real-time web search encountered an error. Check connection.";
+                }
+                return;
+            }
+
+            // --- 3. STANDARD AI CHAT MODE ---
+            const loadingId = appendMessageUI('ai', 'Thinking...');
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [{ role: "user", content: text || "Process uploaded photo attachment." }]
+                    })
+                });
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+                document.getElementById(loadingId).innerText = aiResponse;
+                saveMessageToHistory(activeChatSessionId, 'ai', aiResponse);
+
+            } catch (error) {
+                document.getElementById(loadingId).innerText = "Unable to connect to model server. Check your Groq API key.";
+            }
+        }
+
+        // Render UI Chat Bubbles
+        function appendMessageUI(sender, text, image = null) {
+            const chatBox = document.getElementById('chat-box');
+            const msgDiv = document.createElement('div');
+            const msgId = 'msg-' + Date.now();
+            let imgHTML = image ? `<img src="${image}" class="max-w-xs rounded-xl mb-2 border border-[#2d2f31]"/>` : '';
+
+            if (sender === 'user') {
+                msgDiv.className = "flex items-start justify-end gap-2.5 sm:gap-3";
+                msgDiv.innerHTML = `<div class="bg-blue-600 text-white rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm max-w-[85%] whitespace-pre-wrap leading-relaxed">${imgHTML}${text}</div>`;
+            } else {
+                msgDiv.className = "flex items-start gap-2.5 sm:gap-3";
+                msgDiv.innerHTML = `
+                    <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xs shrink-0 border border-blue-500/30">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <div class="flex-1 max-w-[85%] space-y-1">
+                        <div id="${msgId}" class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-3 sm:p-3.5 text-xs sm:text-sm text-gray-200 whitespace-pre-wrap leading-relaxed">${text}</div>
+                        <button onclick="speakText(document.getElementById('${msgId}').innerText)" class="text-[10px] text-gray-500 hover:text-gray-300 flex items-center gap-1 px-1">
+                            <i class="fa-solid fa-volume-high"></i> Read aloud
+                        </button>
+                    </div>
+                `;
+            }
+
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return msgId;
+        }
+
+        // User Account Modals
+        function openAccountModal() {
+            document.getElementById('user-name-input').value = config.userName;
+            document.getElementById('account-modal').classList.remove('hidden');
+        }
+
+        function closeAccountModal() {
+            document.getElementById('account-modal').classList.add('hidden');
+        }
+
+        function saveUserProfile() {
+            const newName = document.getElementById('user-name-input').value.trim();
+            if (newName) {
+                localStorage.setItem('spar_ai_user_name', newName);
+                updateUI();
+                closeAccountModal();
+            }
+        }
+
+        // Subscription Modal
+        function openSubscriptionModal() {
+            updateUI();
+            document.getElementById('sub-modal').classList.remove('hidden');
+        }
+
+        function closeSubscriptionModal() {
+            document.getElementById('sub-modal').classList.add('hidden');
+            document.getElementById('promo-msg').classList.add('hidden');
+        }
+
+        function applyPromoCode() {
+            const codeInput = document.getElementById('promo-code-input').value.trim().toUpperCase();
+            const msg = document.getElementById('promo-msg');
+
+            if (config.validCodes.includes(codeInput)) {
+                localStorage.setItem('spar_ai_pro_active', 'true');
+                msg.className = "text-xs text-emerald-400 block";
+                msg.innerText = "Code applied successfully! You are now a PRO VIP user.";
+                setTimeout(() => { closeSubscriptionModal(); updateUI(); }, 1200);
+            } else {
+                msg.className = "text-xs text-red-400 block";
+                msg.innerText = "Invalid or expired promo code.";
+            }
+        }
+
+        window.onload = updateUI;
+    </script>
 </body>
 </html>
