@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Studio Nexus</title>
+    <title>Spar AI</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -35,7 +35,7 @@
                 <i class="fa-solid fa-bars text-lg"></i>
             </button>
             <span class="text-white font-semibold text-sm tracking-wide flex items-center gap-2">
-                <i class="fa-solid fa-sparkles text-blue-400"></i> Nexus AI
+                <i class="fa-solid fa-sparkles text-blue-400"></i> Spar
             </span>
         </div>
         <button onclick="openSubscriptionModal()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
@@ -63,7 +63,7 @@
                     </button>
                 </div>
                 <div id="history-list" class="space-y-1">
-                    <!-- Dynamic History Items Inject Here -->
+                    <!-- Dynamic History Items -->
                 </div>
             </div>
 
@@ -73,7 +73,7 @@
                     <div class="flex items-center gap-2.5">
                         <i class="fa-solid fa-crown text-amber-400"></i>
                         <div class="text-left">
-                            <p class="text-xs font-bold text-white">Nexus Pro Plan</p>
+                            <p class="text-xs font-bold text-white">Spar Pro Plan</p>
                             <p class="text-[10px] text-gray-400" id="sub-status-text">Free Tier Active</p>
                         </div>
                     </div>
@@ -82,11 +82,11 @@
 
                 <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-[#2a2b2d] cursor-pointer transition-all">
                     <div class="h-8 w-8 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 font-bold text-xs">
-                        U
+                        S
                     </div>
                     <div class="flex-1 overflow-hidden">
-                        <p class="text-xs font-semibold text-white truncate">User Account</p>
-                        <p class="text-[10px] text-gray-400 truncate">user@nexus.ai</p>
+                        <p class="text-xs font-semibold text-white truncate">Spar User</p>
+                        <p class="text-[10px] text-gray-400 truncate">user@spar.ai</p>
                     </div>
                 </div>
             </div>
@@ -100,7 +100,7 @@
         <header class="hidden md:flex items-center justify-between px-6 py-3 border-b border-gemini-border">
             <div class="flex items-center gap-3">
                 <span class="text-white font-semibold text-base tracking-wide flex items-center gap-2">
-                    <i class="fa-solid fa-sparkles text-blue-400"></i> Nexus AI 2.0
+                    <i class="fa-solid fa-sparkles text-blue-400"></i> Spar AI
                 </span>
             </div>
             <div class="flex items-center gap-3">
@@ -122,12 +122,12 @@
                     <div class="h-16 w-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto text-blue-400 text-2xl">
                         <i class="fa-solid fa-sparkles"></i>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can I help you today?</h1>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate photos, or trigger web research seamlessly.</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can Spar help you today?</h1>
+                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate art, or trigger voice input seamlessly.</p>
                 </div>
             </div>
 
-            <!-- Unified Multimodal Input Dock -->
+            <!-- Input Dock -->
             <div class="p-4 max-w-3xl w-full mx-auto">
                 <div class="bg-[#1e1f20] border border-gemini-border focus-within:border-blue-500/50 rounded-2xl p-3 shadow-xl transition-all">
                     
@@ -139,7 +139,7 @@
                         </button>
                     </div>
 
-                    <textarea id="chat-input" rows="1" placeholder="Ask Nexus, upload an image, or run web search..." 
+                    <textarea id="chat-input" rows="1" placeholder="Ask Spar anything, upload an image, or use camera..." 
                         class="w-full bg-transparent border-0 outline-none text-sm text-gray-100 placeholder-gray-500 resize-none max-h-32"
                         onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendChatMessage(); }"></textarea>
 
@@ -167,15 +167,15 @@
                         </button>
                     </div>
                 </div>
-                <p class="text-[10px] text-gray-500 text-center mt-2">Nexus AI may produce inaccurate information. Verification recommended.</p>
+                <p class="text-[10px] text-gray-500 text-center mt-2">Spar AI may produce inaccurate information. Verification recommended.</p>
             </div>
         </section>
 
-        <!-- VIEW 2: IMAGE STUDIO PRO WORKSPACE -->
+        <!-- VIEW 2: IMAGE STUDIO WORKSPACE -->
         <section id="view-studio" class="hidden flex-1 flex flex-col p-6 max-w-4xl w-full mx-auto overflow-y-auto space-y-6">
             <div class="border-b border-gemini-border pb-4">
                 <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> AI Image Studio Pro
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> Spar Image Studio
                 </h2>
                 <p class="text-xs text-gray-400 mt-1">Generate high-resolution visual assets directly from text prompts.</p>
             </div>
@@ -217,7 +217,7 @@
         <div class="bg-[#1e1f20] border border-gemini-border rounded-2xl p-4 w-full max-w-md space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b border-gemini-border pb-2">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-camera text-blue-400"></i> Optical Lens Camera Scan
+                    <i class="fa-solid fa-camera text-blue-400"></i> Spar Optical Lens Scan
                 </h3>
                 <button onclick="closeCameraModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
@@ -241,11 +241,10 @@
             
             <div class="text-center space-y-2">
                 <span class="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Upgrade Access</span>
-                <h3 class="text-xl font-bold text-white">Choose Your Nexus Plan</h3>
+                <h3 class="text-xl font-bold text-white">Choose Your Spar Plan</h3>
                 <p class="text-xs text-gray-400">Unlock advanced multimodal intelligence, faster responses, and unlimited image generation.</p>
             </div>
 
-            <!-- Subscription Cards -->
             <div class="space-y-3">
                 <div onclick="selectPlan('free')" id="plan-free" class="border border-gemini-border p-4 rounded-xl cursor-pointer hover:border-gray-500 transition-all flex justify-between items-center bg-[#131314]">
                     <div>
@@ -258,7 +257,7 @@
                 <div onclick="selectPlan('pro')" id="plan-pro" class="border-2 border-blue-500 p-4 rounded-xl cursor-pointer bg-blue-500/5 transition-all flex justify-between items-center relative">
                     <span class="absolute -top-2.5 right-4 bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">POPULAR</span>
                     <div>
-                        <p class="text-sm font-bold text-white">Nexus Pro Ultra</p>
+                        <p class="text-sm font-bold text-white">Spar Pro Ultra</p>
                         <p class="text-xs text-gray-400">Full Camera, Voice, Image Studio & Speed</p>
                     </div>
                     <span class="text-sm font-bold text-blue-400">$19.99 / mo</span>
@@ -273,12 +272,16 @@
 
     <!-- APPLICATION LOGIC LAYER -->
     <script>
+        // CONFIGURATION & API KEY
+        const GEMINI_API_KEY = "AQ.Ab8RN6JfyKuixXeRvTC1eISir-1joGMWHO_6a4BFMtlH2LAZvA"; // Replace with your active Google Gemini API key
+        const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
         // Core State Management
-        let chatHistory = JSON.parse(localStorage.getItem('nexus_history') || '[]');
+        let chatHistory = JSON.parse(localStorage.getItem('spar_history') || '[]');
         let activeAttachedImageBase64 = null;
         let isVoiceActive = false;
         let recognitionEngine = null;
-        let activePlan = localStorage.getItem('nexus_plan') || 'free';
+        let activePlan = localStorage.getItem('spar_plan') || 'free';
         let mediaStreamTrack = null;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -311,7 +314,7 @@
             document.getElementById('sidebar').classList.toggle('-translate-x-full');
         }
 
-        // CHAT ENGINE
+        // CHAT ENGINE WITH LIVE GEMINI API
         async function sendChatMessage(customText = null) {
             const inputField = document.getElementById('chat-input');
             const textPrompt = customText || inputField.value.trim();
@@ -331,41 +334,84 @@
                 </div>`;
             scroller.appendChild(userNode);
 
-            // Clear Input
-            inputField.value = "";
+            // Save image reference and reset input
             const currentImg = activeAttachedImageBase64;
+            inputField.value = "";
             removeAttachedImage();
             scroller.scrollTop = scroller.scrollHeight;
 
-            // Render AI Loading State
+            // Render AI Loading Indicator
             const loadingId = 'loading-' + Date.now();
             const aiNode = document.createElement('div');
             aiNode.className = "flex justify-start mb-4";
             aiNode.innerHTML = `
                 <div id="${loadingId}" class="bg-[#1e1f20] border border-gemini-border text-gray-300 p-3.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] flex items-center gap-2">
-                    <i class="fa-solid fa-sparkles animate-spin text-blue-400"></i> Thinking...
+                    <i class="fa-solid fa-sparkles animate-spin text-blue-400"></i> Spar is thinking...
                 </div>`;
             scroller.appendChild(aiNode);
             scroller.scrollTop = scroller.scrollHeight;
 
             // Save to Local History
-            saveHistoryItem(textPrompt);
+            saveHistoryItem(textPrompt || "Image Analysis Request");
 
-            // API Processing Placeholder - Connect to your LLM API endpoint here
-            setTimeout(() => {
+            // Execute Live Call to Gemini API
+            try {
+                const contentsParts = [];
+                
+                if (textPrompt) {
+                    contentsParts.push({ text: textPrompt });
+                }
+
+                if (currentImg) {
+                    const base64Data = currentImg.split(',')[1];
+                    const mimeType = currentImg.split(';')[0].split(':')[1] || 'image/jpeg';
+                    contentsParts.push({
+                        inline_data: {
+                            mime_type: mimeType,
+                            data: base64Data
+                        }
+                    });
+                }
+
+                const response = await fetch(GEMINI_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: contentsParts }] })
+                });
+
+                const data = await response.json();
                 const targetBubble = document.getElementById(loadingId);
-                if (targetBubble) {
-                    const aiResponse = `This is a demo AI response to: "${textPrompt}". Connect this block to your OpenAI / Gemini API endpoint to receive real-time answers.`;
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    const aiText = data.candidates[0].content.parts[0].text;
                     targetBubble.parentElement.innerHTML = `
                         <div class="bg-[#1e1f20] border border-gemini-border text-gray-200 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%] space-y-2 shadow-sm">
                             <div class="flex items-center gap-2 text-blue-400 font-bold text-xs">
-                                <i class="fa-solid fa-sparkles"></i> Nexus AI
+                                <i class="fa-solid fa-sparkles"></i> Spar AI
                             </div>
-                            <p class="leading-relaxed">${aiResponse}</p>
+                            <p class="leading-relaxed whitespace-pre-wrap">${escapeHTML(aiText)}</p>
                         </div>`;
-                    scroller.scrollTop = scroller.scrollHeight;
+                } else if (data.error) {
+                    targetBubble.parentElement.innerHTML = `
+                        <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
+                            <strong>API Error:</strong> ${escapeHTML(data.error.message || "Request failed.")}
+                        </div>`;
+                } else {
+                    targetBubble.parentElement.innerHTML = `
+                        <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
+                            Unable to process response. Please check API key status.
+                        </div>`;
                 }
-            }, 1200);
+            } catch (err) {
+                const targetBubble = document.getElementById(loadingId);
+                if (targetBubble) {
+                    targetBubble.parentElement.innerHTML = `
+                        <div class="bg-[#1e1f20] border border-red-500/50 text-red-400 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%]">
+                            Network Connection Error. Check your browser connectivity.
+                        </div>`;
+                }
+            }
+            scroller.scrollTop = scroller.scrollHeight;
         }
 
         // HISTORY MANAGEMENT
@@ -373,7 +419,7 @@
             if (!promptText) return;
             chatHistory.unshift({ id: Date.now(), text: promptText });
             if (chatHistory.length > 20) chatHistory.pop();
-            localStorage.setItem('nexus_history', JSON.stringify(chatHistory));
+            localStorage.setItem('spar_history', JSON.stringify(chatHistory));
             renderHistoryUI();
         }
 
@@ -397,7 +443,7 @@
 
         function clearHistory() {
             chatHistory = [];
-            localStorage.removeItem('nexus_history');
+            localStorage.removeItem('spar_history');
             renderHistoryUI();
         }
 
@@ -407,8 +453,8 @@
                     <div class="h-16 w-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto text-blue-400 text-2xl">
                         <i class="fa-solid fa-sparkles"></i>
                     </div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can I help you today?</h1>
-                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate photos, or trigger web research seamlessly.</p>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can Spar help you today?</h1>
+                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate art, or trigger voice input seamlessly.</p>
                 </div>`;
         }
 
@@ -517,7 +563,6 @@
             imgOutput.classList.add('hidden');
             downloadBar.classList.add('hidden');
 
-            // Connect this image URL pipeline to your backend/Pollinations/DALL-E endpoint
             const generatedUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
 
             imgOutput.src = generatedUrl;
@@ -533,16 +578,14 @@
             if (img.src) window.open(img.src, '_blank');
         }
 
-        // SUBSCRIPTION MODAL SYSTEM
+        // SUBSCRIPTION SYSTEM
         function openSubscriptionModal() { document.getElementById('modal-subscription').classList.remove('hidden'); }
         function closeSubscriptionModal() { document.getElementById('modal-subscription').classList.add('hidden'); }
 
-        function selectPlan(plan) {
-            activePlan = plan;
-        }
+        function selectPlan(plan) { activePlan = plan; }
 
         function activateSubscription() {
-            localStorage.setItem('nexus_plan', activePlan);
+            localStorage.setItem('spar_plan', activePlan);
             updatePlanUI();
             closeSubscriptionModal();
             alert("Subscription Plan Updated Successfully.");
@@ -555,7 +598,7 @@
             }
         }
 
-        // UTILITY FUNCTIONS
+        // UTILITIES
         function escapeHTML(str) {
             return str.replace(/[&<>'"]/g, 
                 tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
