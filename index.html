@@ -1,260 +1,566 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SPAR AI Studio Ultra</title>
-    <!-- Tailwind CSS Engine -->
+    <title>AI Studio Nexus</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Vector Graphics Icon Library -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Razorpay Standard Global Script Gateway Interface -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gemini: {
+                            bg: '#131314',
+                            card: '#1e1f20',
+                            border: '#2e2f31',
+                            accent: '#4b90ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-[#0b0c10] text-gray-200 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-amber-500 selection:text-slate-950">
+<body class="bg-gemini-bg text-gray-200 font-sans h-screen flex flex-col md:flex-row overflow-hidden selection:bg-blue-500 selection:text-white">
 
-    <!-- TOP GLOBAL SYSTEM HEADER NAVIGATION -->
-    <header class="bg-[#111318] border-b border-gray-800/80 px-4 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
-        <div class="flex items-center gap-2 cursor-pointer select-none" onclick="handleAdminSecretClick()">
-            <div class="h-8 w-8 bg-amber-500 rounded-xl flex items-center justify-center font-black text-slate-950 shadow-lg shadow-amber-500/10">Σ</div>
-            <div class="flex flex-col">
-                <span class="text-white font-bold text-sm tracking-wide font-mono leading-none">SPAR ULTRA</span>
-                <span class="text-[9px] text-amber-400 font-mono tracking-widest mt-0.5 uppercase">Matrix Compute v3.0</span>
-            </div>
-        </div>
-        <div class="flex items-center gap-3">
-            <button id="pro-header-btn" onclick="openCheckoutSheet()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-xs font-bold px-3 py-1.5 rounded-xl shadow-md transition-transform active:scale-95 flex items-center gap-1">
-                <i class="fa-solid fa-crown text-[11px]"></i> Upgrade
+    <!-- MOBILE HEADER -->
+    <header class="md:hidden bg-[#1e1f20] border-b border-gemini-border px-4 py-3 flex items-center justify-between z-50">
+        <div class="flex items-center gap-2">
+            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white p-1">
+                <i class="fa-solid fa-bars text-lg"></i>
             </button>
-            <div id="use-badge" onclick="handleBadgeAction()" class="bg-[#161920] border border-gray-800 text-[11px] font-semibold px-3 py-1.5 rounded-xl text-gray-400 flex items-center gap-1.5 transition-all">
-                <span id="lbl-uses-left">Free Uses Left</span>: <span id="uses-left" class="text-amber-400 font-bold font-mono">3</span>
-            </div>
+            <span class="text-white font-semibold text-sm tracking-wide flex items-center gap-2">
+                <i class="fa-solid fa-sparkles text-blue-400"></i> Nexus AI
+            </span>
         </div>
+        <button onclick="openSubscriptionModal()" class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
+            Upgrade
+        </button>
     </header>
 
-    <!-- CORE DESKTOP VIEWPORT WORKSPACE MOUNT FRAME -->
-    <main class="flex-1 max-w-2xl w-full mx-auto p-4 flex flex-col justify-stretch overflow-hidden">
-        
-        <!-- PANEL VIEW 1: ADVANCED AI NEXUS CHAT WORKSPACE -->
-        <section id="view-chat" class="flex-1 flex flex-col justify-between min-h-[65vh]">
-            <!-- Scrollable Conversation Cluster Panel -->
-            <div id="chat-scroller" class="flex-1 overflow-y-auto space-y-4 mb-4 max-h-[63vh] pr-1 pb-4 scroll-smooth">
-                <div id="chat-welcome-banner" class="bg-[#111318] border border-gray-800/60 rounded-2xl p-6 text-center space-y-2 shadow-sm mt-4">
-                    <div class="h-12 w-12 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-2 border border-amber-500/20">
-                        <i class="fa-solid fa-microchip text-amber-400 text-lg"></i>
+    <!-- SIDEBAR NAVIGATION & HISTORY LOG -->
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 w-72 bg-[#1e1f20] border-r border-gemini-border flex flex-col justify-between z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="p-4 flex flex-col h-full">
+            <!-- New Chat Button -->
+            <button onclick="startNewChat()" class="w-full bg-[#2a2b2d] hover:bg-[#353739] text-white rounded-full py-3 px-4 flex items-center justify-between border border-gemini-border transition-all shadow-sm mb-6">
+                <span class="text-sm font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-xs text-blue-400"></i> New Chat
+                </span>
+                <i class="fa-solid fa-pen-to-square text-xs text-gray-400"></i>
+            </button>
+
+            <!-- History Section -->
+            <div class="flex-1 overflow-y-auto space-y-4 pr-1">
+                <div class="flex items-center justify-between text-xs text-gray-400 font-semibold px-2">
+                    <span>Recent History</span>
+                    <button onclick="clearHistory()" class="hover:text-red-400 transition-colors" title="Clear History">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+                <div id="history-list" class="space-y-1">
+                    <!-- Dynamic History Items Inject Here -->
+                </div>
+            </div>
+
+            <!-- User Profile & Subscription -->
+            <div class="border-t border-gemini-border pt-4 mt-auto space-y-2">
+                <button onclick="openSubscriptionModal()" class="w-full bg-gradient-to-r from-blue-600/20 to-purple-600/20 hover:from-blue-600/30 hover:to-purple-600/30 border border-blue-500/30 text-blue-300 rounded-xl p-3 flex items-center justify-between transition-all">
+                    <div class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-crown text-amber-400"></i>
+                        <div class="text-left">
+                            <p class="text-xs font-bold text-white">Nexus Pro Plan</p>
+                            <p class="text-[10px] text-gray-400" id="sub-status-text">Free Tier Active</p>
+                        </div>
                     </div>
-                    <h2 id="chat-welcome-title" class="text-white font-extrabold text-base font-mono">Welcome to SPAR AI Ultra</h2>
-                    <p id="chat-welcome-desc" class="text-gray-400 text-xs leading-relaxed max-w-sm mx-auto">Quantum Engine connected. Real-time metrics and advanced mathematics calculations are online.</p>
+                    <span class="text-[10px] bg-blue-500 text-white font-bold px-2 py-0.5 rounded-full">Upgrade</span>
+                </button>
+
+                <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-[#2a2b2d] cursor-pointer transition-all">
+                    <div class="h-8 w-8 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-400 font-bold text-xs">
+                        U
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-xs font-semibold text-white truncate">User Account</p>
+                        <p class="text-[10px] text-gray-400 truncate">user@nexus.ai</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CHAT & CONTENT WORKSPACE -->
+    <main class="flex-1 flex flex-col h-full relative bg-gemini-bg overflow-hidden">
+
+        <!-- DESKTOP TOP BAR -->
+        <header class="hidden md:flex items-center justify-between px-6 py-3 border-b border-gemini-border">
+            <div class="flex items-center gap-3">
+                <span class="text-white font-semibold text-base tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-sparkles text-blue-400"></i> Nexus AI 2.0
+                </span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="switchMode('chat')" id="tab-chat" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                    <i class="fa-solid fa-message mr-1"></i> Chat
+                </button>
+                <button onclick="switchMode('studio')" id="tab-studio" class="px-4 py-1.5 rounded-full text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#1e1f20] transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Image Studio
+                </button>
+            </div>
+        </header>
+
+        <!-- VIEW 1: CHAT WORKSPACE -->
+        <section id="view-chat" class="flex-1 flex flex-col justify-between overflow-hidden relative">
+            
+            <!-- Chat Stream Scroll Area -->
+            <div id="chat-scroller" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-3xl w-full mx-auto scroll-smooth">
+                <div id="welcome-banner" class="text-center my-auto py-12 space-y-4">
+                    <div class="h-16 w-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto text-blue-400 text-2xl">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can I help you today?</h1>
+                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate photos, or trigger web research seamlessly.</p>
                 </div>
             </div>
 
-            <!-- Unified Text Submission & Optical Scanning Command Box Tray -->
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-2 flex items-center gap-2 shadow-lg shadow-black/40">
-                <button onclick="openCameraFeature()" class="h-10 w-10 text-gray-400 hover:text-amber-400 bg-[#161920] hover:bg-amber-500/5 rounded-xl flex items-center justify-center transition-all border border-gray-800/40" title="Optical Image Scanner Capture">
-                    <i class="fa-solid fa-camera text-sm"></i>
-                </button>
-                <input type="text" id="chat-input" placeholder="Ask anything, type math equations..." 
-                       class="flex-1 bg-transparent border-0 outline-none text-sm px-2 text-gray-100 placeholder-gray-500 font-sans"
-                       onkeydown="if(event.key === 'Enter') handleTextMessage()"/>
-                <button onclick="handleTextMessage()" class="bg-amber-500 hover:bg-amber-600 active:scale-95 text-slate-950 h-10 w-10 rounded-xl flex items-center justify-center transition-all shadow-md shadow-amber-500/5">
-                    <i class="fa-solid fa-paper-plane text-xs"></i>
-                </button>
+            <!-- Unified Multimodal Input Dock -->
+            <div class="p-4 max-w-3xl w-full mx-auto">
+                <div class="bg-[#1e1f20] border border-gemini-border focus-within:border-blue-500/50 rounded-2xl p-3 shadow-xl transition-all">
+                    
+                    <!-- Preview Dock for Image Attachments -->
+                    <div id="image-attachment-preview" class="hidden mb-3 relative inline-block">
+                        <img id="attached-img-element" src="" class="h-20 w-20 object-cover rounded-xl border border-gemini-border" />
+                        <button onclick="removeAttachedImage()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-[10px] shadow-md">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <textarea id="chat-input" rows="1" placeholder="Ask Nexus, upload an image, or run web search..." 
+                        class="w-full bg-transparent border-0 outline-none text-sm text-gray-100 placeholder-gray-500 resize-none max-h-32"
+                        onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendChatMessage(); }"></textarea>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-gemini-border/50 mt-2">
+                        <!-- Action Tool Icons -->
+                        <div class="flex items-center gap-1">
+                            <!-- Camera Scan -->
+                            <button onclick="openCameraModal()" class="p-2 text-gray-400 hover:text-blue-400 hover:bg-[#2a2b2d] rounded-xl transition-all" title="Camera Scan">
+                                <i class="fa-solid fa-camera"></i>
+                            </button>
+                            <!-- Image File Upload -->
+                            <label class="p-2 text-gray-400 hover:text-blue-400 hover:bg-[#2a2b2d] rounded-xl cursor-pointer transition-all" title="Attach Image">
+                                <i class="fa-solid fa-image"></i>
+                                <input type="file" id="file-input" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                            </label>
+                            <!-- Voice Input -->
+                            <button id="btn-voice" onclick="toggleVoiceRecognition()" class="p-2 text-gray-400 hover:text-red-400 hover:bg-[#2a2b2d] rounded-xl transition-all" title="Voice Input">
+                                <i class="fa-solid fa-microphone"></i>
+                            </button>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button onclick="sendChatMessage()" class="bg-blue-600 hover:bg-blue-500 text-white h-8 w-8 rounded-xl flex items-center justify-center transition-all shadow-md">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <p class="text-[10px] text-gray-500 text-center mt-2">Nexus AI may produce inaccurate information. Verification recommended.</p>
             </div>
         </section>
 
-        <!-- PANEL VIEW 2: DEDICATED TELEMETRY HISTORY WORKSPACE -->
-        <section id="view-history" class="hidden flex-1 flex flex-col gap-4">
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 flex items-center justify-between shadow-sm">
-                <div>
-                    <h3 id="history-ledger-title" class="text-white text-sm font-bold font-mono text-amber-400 flex items-center"><i class="fa-solid fa-database mr-1.5 text-[10px]"></i>Telemetry Log History</h3>
-                    <p class="text-gray-500 text-[11px] mt-0.5">Touch or click any previous log line item to restore and execute the prompt block context instantly.</p>
-                </div>
-                <button id="btn-delete-history" onclick="wipeLocalDeviceHistory()" class="text-red-400 hover:text-red-300 text-xs font-semibold bg-red-500/5 px-3 py-1.5 rounded-xl border border-red-500/10 transition-all">
-                    <i class="fa-solid fa-trash-can mr-1"></i>Purge Database Logs
-                </button>
-            </div>
-            <!-- Live Micro Ledger Injection target -->
-            <div id="account-search-history" class="bg-[#111318] border border-gray-800 rounded-2xl p-3 flex-1 space-y-2 overflow-y-auto max-h-[60vh] min-h-[40vh]">
-                <!-- Interactive clickable historical search bars mount right here dynamically -->
-            </div>
-        </section>
-
-        <!-- PANEL VIEW 3: IMAGE STUDIO PRO WORKSPACE LABORATORY -->
-        <section id="view-create" class="hidden flex-1 flex flex-col gap-4">
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4">
-                <h3 id="create-title" class="text-white text-sm font-bold font-mono flex items-center"><i class="fa-solid fa-palette text-amber-400 mr-2"></i>Image Studio Pro</h3>
-                <p id="create-desc" class="text-gray-400 text-xs mt-0.5">Transform written prompt syntax natively into high-density download-ready visual assets.</p>
+        <!-- VIEW 2: IMAGE STUDIO PRO WORKSPACE -->
+        <section id="view-studio" class="hidden flex-1 flex flex-col p-6 max-w-4xl w-full mx-auto overflow-y-auto space-y-6">
+            <div class="border-b border-gemini-border pb-4">
+                <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> AI Image Studio Pro
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Generate high-resolution visual assets directly from text prompts.</p>
             </div>
 
-            <!-- Image Composition Canvas Dynamic Workspace -->
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl aspect-square w-full flex items-center justify-center relative overflow-hidden group shadow-inner">
-                <!-- Idle state placeholder -->
-                <p id="canvas-placeholder-text" class="text-gray-600 text-xs italic font-mono select-none">Render engine idling... standing by for generation matrix.</p>
-                <!-- Image Generation Pixel Loader -->
-                <div id="generation-loader" class="hidden flex flex-col items-center gap-3 text-center z-10 bg-slate-950/80 absolute inset-0 justify-center p-4">
-                    <i class="fa-solid fa-rotate animate-spin text-amber-400 text-2xl"></i>
-                    <p id="generation-loader-text" class="text-gray-300 font-mono text-xs">Processing pixels and upscaling layers...</p>
+            <!-- Canvas Output Window -->
+            <div class="bg-[#1e1f20] border border-gemini-border rounded-2xl aspect-square max-h-[450px] w-full flex items-center justify-center relative overflow-hidden group mx-auto">
+                <div id="studio-placeholder" class="text-center p-6 space-y-2">
+                    <i class="fa-solid fa-image text-4xl text-gray-600"></i>
+                    <p class="text-xs text-gray-500 font-mono">Render engine ready. Enter a prompt below.</p>
                 </div>
-                <!-- Actual Dynamic Target Asset Graphic Output -->
-                <img id="generated-image" src="" alt="SPAR Generated Output Vector" class="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"/>
-                <!-- Micro Floating Download Overlay Link Controller -->
-                <div id="download-overlay" class="hidden absolute bottom-3 right-3">
-                    <button id="btn-save-device" onclick="triggerFileDownload()" class="bg-slate-950/90 text-white hover:bg-amber-500 hover:text-slate-950 border border-gray-800 text-[11px] font-bold px-3 py-1.5 rounded-xl shadow-2xl backdrop-blur-md transition-all flex items-center">
-                        <i class="fa-solid fa-circle-arrow-down text-sm mr-2"></i>Export to Disk
+
+                <div id="studio-loader" class="hidden flex flex-col items-center gap-3 text-center bg-slate-950/80 absolute inset-0 justify-center p-4">
+                    <i class="fa-solid fa-circle-notch animate-spin text-blue-400 text-3xl"></i>
+                    <p class="text-xs text-gray-300 font-mono">Synthesizing image layers...</p>
+                </div>
+
+                <img id="studio-output-img" src="" class="hidden w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+
+                <div id="studio-download-bar" class="hidden absolute bottom-4 right-4">
+                    <button onclick="downloadStudioImage()" class="bg-black/80 hover:bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl backdrop-blur-md border border-gemini-border transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-download"></i> Download Image
                     </button>
                 </div>
             </div>
 
-            <!-- Creation Workspace Command Textarea Controls Array -->
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-2 flex items-center gap-2 shadow-sm">
-                <input type="text" id="image-prompt" placeholder="Describe the visual asset context..." class="flex-1 bg-transparent border-0 outline-none text-sm px-2 text-gray-100 placeholder-gray-500"/>
-                <button id="btn-generate-submit" onclick="generateImage()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl transition-all shadow-md">
-                    Synthesize Asset
+            <!-- Generation Control Input -->
+            <div class="bg-[#1e1f20] border border-gemini-border rounded-2xl p-2 flex items-center gap-2">
+                <input type="text" id="studio-prompt" placeholder="Describe the image you want to generate..." 
+                    class="flex-1 bg-transparent border-0 outline-none text-sm px-3 text-gray-100 placeholder-gray-500" />
+                <button onclick="generateStudioImage()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all shadow-md">
+                    Generate
                 </button>
             </div>
         </section>
-
-        <!-- PANEL VIEW 4: SYSTEM PROFILE ACCOUNT PARAMETERS -->
-        <section id="view-account" class="hidden flex-1 flex flex-col gap-4">
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-5 flex items-center gap-4 shadow-sm">
-                <div class="h-12 w-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 font-mono text-lg font-bold">U</div>
-                <div class="flex-1 overflow-hidden">
-                    <div class="flex items-center gap-2">
-                        <h4 id="account-username" class="text-white text-sm font-bold truncate">Guest User</h4>
-                        <div id="account-subs-status"></div>
-                    </div>
-                    <p id="account-email" class="text-gray-500 text-xs truncate mt-0.5">user@example.com</p>
-                </div>
-            </div>
-
-            <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 space-y-4">
-                <h3 id="account-settings-heading" class="text-white text-xs font-bold uppercase tracking-wider text-amber-400 border-b border-gray-800 pb-2">User Profile Framework</h3>
-                
-                <!-- Translation Language Engine Selector dropdown mapping -->
-                <div class="space-y-1.5">
-                    <label id="lbl-select-lang" class="text-gray-400 text-xs font-medium">System Language Core:</label>
-                    <select id="app-language-select" onchange="changeApplicationLanguage(this.value)" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40">
-                        <option value="en">English (US Vector Script)</option>
-                        <option value="hi">हिन्दी (Devanagari Localization)</option>
-                    </select>
-                </div>
-
-                <!-- Update Name Parameters Form Field Box -->
-                <div class="space-y-1.5">
-                    <div class="flex gap-2">
-                        <input type="text" id="update-username-input" placeholder="Update Profile Name" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40"/>
-                        <button id="btn-update-name" onclick="updateProfileUsername()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium px-3 rounded-xl border border-gray-700/60 transition-all">Apply Changes</button>
-                    </div>
-                </div>
-
-                <!-- Synchronize Mail Identity Data Block -->
-                <div class="space-y-1.5">
-                    <div class="flex gap-2">
-                        <input type="email" id="update-email-input" placeholder="synchronize@gmail.com" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:border-amber-500/40"/>
-                        <button id="btn-link-email" onclick="updateProfileEmail()" class="bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs font-medium px-3 rounded-xl border border-gray-700/60 transition-all">Verify Identity Token</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
     </main>
 
-    <!-- FLOATING INTERFACE FOOTER NAVIGATION SYSTEM -->
-    <nav class="bg-[#111318] border-t border-gray-800/80 px-4 py-1.5 flex items-center justify-around sticky bottom-0 z-50 shadow-2xl backdrop-blur-lg">
-        <button id="nav-chat-btn" onclick="switchView('chat')" class="flex flex-col items-center gap-0.5 text-amber-400 p-2 transition-all">
-            <i class="fa-solid fa-comments text-base"></i>
-            <span id="nav-text-chat" class="text-[9px] font-bold font-mono tracking-wider">AI Nexus Chat</span>
-        </button>
-        <button id="nav-history-btn" onclick="switchView('history')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
-            <i class="fa-solid fa-clock-rotate-left text-base"></i>
-            <span id="nav-text-history" class="text-[9px] font-bold font-mono tracking-wider">History Ledger</span>
-        </button>
-        <button id="nav-create-btn" onclick="switchView('create')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
-            <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
-            <span id="nav-text-create" class="text-[9px] font-bold font-mono tracking-wider">Imaging Studio</span>
-        </button>
-        <button id="nav-account-btn" onclick="switchView('account')" class="flex flex-col items-center gap-0.5 text-gray-500 p-2 transition-all">
-            <i class="fa-solid fa-user-gear text-base"></i>
-            <span id="nav-text-account" class="text-[9px] font-bold font-mono tracking-wider">System Profile</span>
-        </button>
-    </nav>
+    <!-- CAMERA CAPTURE MODAL -->
+    <div id="modal-camera" class="hidden fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4">
+        <div class="bg-[#1e1f20] border border-gemini-border rounded-2xl p-4 w-full max-w-md space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b border-gemini-border pb-2">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-camera text-blue-400"></i> Optical Lens Camera Scan
+                </h3>
+                <button onclick="closeCameraModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="relative aspect-video bg-black rounded-xl overflow-hidden border border-gemini-border">
+                <video id="camera-feed" autoplay playsinline class="w-full h-full object-cover"></video>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeCameraModal()" class="flex-1 bg-[#2a2b2d] text-gray-300 rounded-xl py-2 text-xs font-semibold">Cancel</button>
+                <button onclick="captureCameraSnapshot()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white rounded-xl py-2 text-xs font-bold">Capture Photo</button>
+            </div>
+        </div>
+        <canvas id="camera-canvas" class="hidden"></canvas>
+    </div>
 
-    <!-- PREMIUM CHECKOUT AND PRICING DIALOG MODAL LAYOUT -->
-    <div id="checkout-modal" class="hidden fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-        <div class="bg-[#111318] border border-gray-800 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl p-5 space-y-4">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                <h3 class="text-white font-bold text-sm font-mono flex items-center gap-2"><i class="fa-solid fa-gem text-amber-400"></i> Premium Upgrade Core</h3>
-                <button onclick="closeCheckoutSheet()" class="text-gray-500 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+    <!-- SUBSCRIPTION PLAN MODAL -->
+    <div id="modal-subscription" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-[#1e1f20] border border-gemini-border rounded-2xl w-full max-w-md p-6 space-y-6 shadow-2xl relative">
+            <button onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <div class="text-center space-y-2">
+                <span class="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Upgrade Access</span>
+                <h3 class="text-xl font-bold text-white">Choose Your Nexus Plan</h3>
+                <p class="text-xs text-gray-400">Unlock advanced multimodal intelligence, faster responses, and unlimited image generation.</p>
             </div>
-            <div class="text-center py-2 bg-amber-500/5 rounded-xl border border-amber-500/10">
-                <span class="text-gray-400 text-xs">Total Single Payment Matrix Authorization:</span>
-                <p id="checkout-price-text" class="text-white text-2xl font-black font-mono tracking-tight mt-0.5 text-amber-400">₹299</p>
-            </div>
-            <div class="space-y-1">
-                <label class="text-gray-400 text-[11px] font-medium">Bypass Promo Access Validation Key:</label>
-                <div class="flex gap-2">
-                    <input type="text" id="checkout-coupon-input" placeholder="FREEACCESS2026" class="flex-1 bg-[#161920] border border-gray-800 rounded-xl px-3 text-xs uppercase font-mono tracking-wider text-gray-200 outline-none focus:border-amber-500/40"/>
-                    <button onclick="validateCheckoutCoupon()" class="bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold px-3 py-2 rounded-xl border border-gray-700">Apply</button>
+
+            <!-- Subscription Cards -->
+            <div class="space-y-3">
+                <div onclick="selectPlan('free')" id="plan-free" class="border border-gemini-border p-4 rounded-xl cursor-pointer hover:border-gray-500 transition-all flex justify-between items-center bg-[#131314]">
+                    <div>
+                        <p class="text-sm font-bold text-white">Free Standard</p>
+                        <p class="text-xs text-gray-400">Basic AI queries & text access</p>
+                    </div>
+                    <span class="text-sm font-bold text-white">$0 / mo</span>
+                </div>
+
+                <div onclick="selectPlan('pro')" id="plan-pro" class="border-2 border-blue-500 p-4 rounded-xl cursor-pointer bg-blue-500/5 transition-all flex justify-between items-center relative">
+                    <span class="absolute -top-2.5 right-4 bg-blue-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-full">POPULAR</span>
+                    <div>
+                        <p class="text-sm font-bold text-white">Nexus Pro Ultra</p>
+                        <p class="text-xs text-gray-400">Full Camera, Voice, Image Studio & Speed</p>
+                    </div>
+                    <span class="text-sm font-bold text-blue-400">$19.99 / mo</span>
                 </div>
             </div>
-            <button onclick="executeSecureRazorpayPurchase()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs py-3 rounded-xl transition-all shadow-lg shadow-amber-500/10 uppercase font-mono tracking-wider">
-                Initialize Secure Razorpay Terminal
+
+            <button onclick="activateSubscription()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg text-xs uppercase tracking-wider">
+                Subscribe Now
             </button>
         </div>
     </div>
 
-    <!-- SECRET ADMIN PASSWORD PROMPT MODAL -->
-    <div id="admin-auth-modal" class="hidden fixed inset-0 bg-slate-950/90 z-[999] flex items-center justify-center p-4">
-        <div class="bg-[#111318] border border-gray-800 rounded-2xl p-4 w-full max-w-xs space-y-3">
-            <h3 class="text-white text-xs font-bold font-mono uppercase tracking-wider text-amber-400">Security Gate Challenge</h3>
-            <input type="password" id="admin-passkey-field" placeholder="Enter administrative token..." class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs font-mono text-gray-200 outline-none"/>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('admin-auth-modal').classList.add('hidden')" class="flex-1 bg-gray-900 text-gray-400 text-xs rounded-xl py-2">Cancel</button>
-                <button onclick="verifyAdminPasskey()" class="flex-1 bg-amber-500 text-slate-950 font-bold text-xs rounded-xl py-2">Verify</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MAIN ADMINISTRATIVE CONFIGURATION DASHBOARD MODAL PANEL -->
-    <div id="admin-modal" class="hidden fixed inset-0 bg-slate-950/80 z-[1000] flex items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-[#111318] border border-gray-800 w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
-            <h3 class="text-red-400 font-mono font-bold text-sm tracking-wide uppercase border-b border-gray-800 pb-2 flex items-center gap-1">
-                <i class="fa-solid fa-user-shield"></i> Core Parameters Configuration Panel
-            </h3>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-gray-400 text-[11px]">System Standard Price (₹):</label>
-                    <input type="number" id="admin-price-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono"/>
-                </div>
-                <div class="space-y-1">
-                    <label class="text-gray-400 text-[11px]">Free Cycle Threshold Token:</label>
-                    <input type="number" id="admin-uses-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono"/>
-                </div>
-            </div>
-            <div class="space-y-1">
-                <label class="text-gray-400 text-[11px]">Active Coupon Passkey Designation String:</label>
-                <input type="text" id="admin-coupon-input" class="w-full bg-[#161920] border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono uppercase tracking-wider"/>
-            </div>
-            <div class="flex gap-3 pt-2">
-                <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-900 text-gray-400 hover:text-white text-xs font-bold py-2.5 rounded-xl border border-gray-800 transition-all">Terminate Stream</button>
-                <button onclick="saveAdminSettings()" class="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-extrabold text-xs py-2.5 rounded-xl transition-all shadow-md">Commit Parameters</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- FALLBACK HIDDEN PRICING MAPS TO PREVENT SYSTEM BOUNDS EXCEPTIONS -->
-    <div style="display: none !important;">
-        <span id="header-price-display">₹299</span>
-        <div id="login-modal" class="hidden"></div>
-    </div>
-
-    <!-- LOCAL APPLICATION EXECUTION LAYER SOURCE LINK MAPPING -->
-    <script src="app.js"></script>
+    <!-- APPLICATION LOGIC LAYER -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            // Safe initialize application execution cycle routine
-            initializePersistentState();
+        // Core State Management
+        let chatHistory = JSON.parse(localStorage.getItem('nexus_history') || '[]');
+        let activeAttachedImageBase64 = null;
+        let isVoiceActive = false;
+        let recognitionEngine = null;
+        let activePlan = localStorage.getItem('nexus_plan') || 'free';
+        let mediaStreamTrack = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderHistoryUI();
+            updatePlanUI();
+            setupVoiceRecognition();
         });
+
+        // VIEW NAVIGATION
+        function switchMode(mode) {
+            const chatView = document.getElementById('view-chat');
+            const studioView = document.getElementById('view-studio');
+            const chatTab = document.getElementById('tab-chat');
+            const studioTab = document.getElementById('tab-studio');
+
+            if (mode === 'chat') {
+                chatView.classList.remove('hidden');
+                studioView.classList.add('hidden');
+                chatTab.className = "px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30";
+                studioTab.className = "px-4 py-1.5 rounded-full text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#1e1f20] transition-all";
+            } else {
+                chatView.classList.add('hidden');
+                studioView.classList.remove('hidden');
+                studioTab.className = "px-4 py-1.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/30";
+                chatTab.className = "px-4 py-1.5 rounded-full text-xs font-semibold text-gray-400 hover:text-white hover:bg-[#1e1f20] transition-all";
+            }
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        }
+
+        // CHAT ENGINE
+        async function sendChatMessage(customText = null) {
+            const inputField = document.getElementById('chat-input');
+            const textPrompt = customText || inputField.value.trim();
+            
+            if (!textPrompt && !activeAttachedImageBase64) return;
+
+            document.getElementById('welcome-banner')?.classList.add('hidden');
+            const scroller = document.getElementById('chat-scroller');
+
+            // Render User Message
+            const userNode = document.createElement('div');
+            userNode.className = "flex justify-end mb-4";
+            userNode.innerHTML = `
+                <div class="bg-blue-600 text-white p-3.5 rounded-2xl rounded-tr-none text-sm max-w-[85%] shadow-md space-y-2">
+                    ${activeAttachedImageBase64 ? `<img src="${activeAttachedImageBase64}" class="h-36 w-36 object-cover rounded-lg mb-2 border border-white/20"/>` : ''}
+                    <p>${escapeHTML(textPrompt)}</p>
+                </div>`;
+            scroller.appendChild(userNode);
+
+            // Clear Input
+            inputField.value = "";
+            const currentImg = activeAttachedImageBase64;
+            removeAttachedImage();
+            scroller.scrollTop = scroller.scrollHeight;
+
+            // Render AI Loading State
+            const loadingId = 'loading-' + Date.now();
+            const aiNode = document.createElement('div');
+            aiNode.className = "flex justify-start mb-4";
+            aiNode.innerHTML = `
+                <div id="${loadingId}" class="bg-[#1e1f20] border border-gemini-border text-gray-300 p-3.5 rounded-2xl rounded-tl-none text-sm max-w-[85%] flex items-center gap-2">
+                    <i class="fa-solid fa-sparkles animate-spin text-blue-400"></i> Thinking...
+                </div>`;
+            scroller.appendChild(aiNode);
+            scroller.scrollTop = scroller.scrollHeight;
+
+            // Save to Local History
+            saveHistoryItem(textPrompt);
+
+            // API Processing Placeholder - Connect to your LLM API endpoint here
+            setTimeout(() => {
+                const targetBubble = document.getElementById(loadingId);
+                if (targetBubble) {
+                    const aiResponse = `This is a demo AI response to: "${textPrompt}". Connect this block to your OpenAI / Gemini API endpoint to receive real-time answers.`;
+                    targetBubble.parentElement.innerHTML = `
+                        <div class="bg-[#1e1f20] border border-gemini-border text-gray-200 p-4 rounded-2xl rounded-tl-none text-sm max-w-[85%] space-y-2 shadow-sm">
+                            <div class="flex items-center gap-2 text-blue-400 font-bold text-xs">
+                                <i class="fa-solid fa-sparkles"></i> Nexus AI
+                            </div>
+                            <p class="leading-relaxed">${aiResponse}</p>
+                        </div>`;
+                    scroller.scrollTop = scroller.scrollHeight;
+                }
+            }, 1200);
+        }
+
+        // HISTORY MANAGEMENT
+        function saveHistoryItem(promptText) {
+            if (!promptText) return;
+            chatHistory.unshift({ id: Date.now(), text: promptText });
+            if (chatHistory.length > 20) chatHistory.pop();
+            localStorage.setItem('nexus_history', JSON.stringify(chatHistory));
+            renderHistoryUI();
+        }
+
+        function renderHistoryUI() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = "";
+            
+            if (chatHistory.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 italic px-2">No past queries logged.</p>`;
+                return;
+            }
+
+            chatHistory.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "p-2 hover:bg-[#2a2b2d] rounded-xl cursor-pointer text-xs text-gray-300 truncate transition-all flex items-center gap-2";
+                row.onclick = () => sendChatMessage(item.text);
+                row.innerHTML = `<i class="fa-regular fa-message text-gray-500 text-[10px]"></i> <span class="truncate">${escapeHTML(item.text)}</span>`;
+                container.appendChild(row);
+            });
+        }
+
+        function clearHistory() {
+            chatHistory = [];
+            localStorage.removeItem('nexus_history');
+            renderHistoryUI();
+        }
+
+        function startNewChat() {
+            document.getElementById('chat-scroller').innerHTML = `
+                <div id="welcome-banner" class="text-center my-auto py-12 space-y-4">
+                    <div class="h-16 w-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl flex items-center justify-center mx-auto text-blue-400 text-2xl">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">How can I help you today?</h1>
+                    <p class="text-gray-400 text-xs md:text-sm max-w-md mx-auto">Ask questions, analyze images, generate photos, or trigger web research seamlessly.</p>
+                </div>`;
+        }
+
+        // CAMERA SCAN FEATURE
+        async function openCameraModal() {
+            document.getElementById('modal-camera').classList.remove('hidden');
+            try {
+                mediaStreamTrack = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                document.getElementById('camera-feed').srcObject = mediaStreamTrack;
+            } catch (err) {
+                alert("Camera access denied or unavailable.");
+                closeCameraModal();
+            }
+        }
+
+        function closeCameraModal() {
+            if (mediaStreamTrack) {
+                mediaStreamTrack.getTracks().forEach(track => track.stop());
+                mediaStreamTrack = null;
+            }
+            document.getElementById('modal-camera').classList.add('hidden');
+        }
+
+        function captureCameraSnapshot() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            activeAttachedImageBase64 = canvas.toDataURL('image/jpeg');
+            document.getElementById('attached-img-element').src = activeAttachedImageBase64;
+            document.getElementById('image-attachment-preview').classList.remove('hidden');
+            closeCameraModal();
+        }
+
+        // IMAGE FILE ATTACHMENT
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    activeAttachedImageBase64 = e.target.result;
+                    document.getElementById('attached-img-element').src = activeAttachedImageBase64;
+                    document.getElementById('image-attachment-preview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeAttachedImage() {
+            activeAttachedImageBase64 = null;
+            document.getElementById('image-attachment-preview').classList.add('hidden');
+            document.getElementById('file-input').value = "";
+        }
+
+        // VOICE INPUT PROCESSING
+        function setupVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognitionEngine = new SpeechRecognition();
+                recognitionEngine.continuous = false;
+                recognitionEngine.interimResults = false;
+
+                recognitionEngine.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('chat-input').value = transcript;
+                    toggleVoiceRecognition();
+                };
+
+                recognitionEngine.onerror = () => toggleVoiceRecognition();
+            }
+        }
+
+        function toggleVoiceRecognition() {
+            if (!recognitionEngine) {
+                alert("Speech recognition is not supported in this browser.");
+                return;
+            }
+            const btn = document.getElementById('btn-voice');
+            if (isVoiceActive) {
+                recognitionEngine.stop();
+                isVoiceActive = false;
+                btn.classList.remove('text-red-500', 'animate-pulse');
+            } else {
+                recognitionEngine.start();
+                isVoiceActive = true;
+                btn.classList.add('text-red-500', 'animate-pulse');
+            }
+        }
+
+        // IMAGE STUDIO GENERATOR
+        function generateStudioImage() {
+            const prompt = document.getElementById('studio-prompt').value.trim();
+            if (!prompt) return;
+
+            const loader = document.getElementById('studio-loader');
+            const placeholder = document.getElementById('studio-placeholder');
+            const imgOutput = document.getElementById('studio-output-img');
+            const downloadBar = document.getElementById('studio-download-bar');
+
+            placeholder.classList.add('hidden');
+            loader.classList.remove('hidden');
+            imgOutput.classList.add('hidden');
+            downloadBar.classList.add('hidden');
+
+            // Connect this image URL pipeline to your backend/Pollinations/DALL-E endpoint
+            const generatedUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random()*99999)}`;
+
+            imgOutput.src = generatedUrl;
+            imgOutput.onload = () => {
+                loader.classList.add('hidden');
+                imgOutput.classList.remove('hidden');
+                downloadBar.classList.remove('hidden');
+            };
+        }
+
+        function downloadStudioImage() {
+            const img = document.getElementById('studio-output-img');
+            if (img.src) window.open(img.src, '_blank');
+        }
+
+        // SUBSCRIPTION MODAL SYSTEM
+        function openSubscriptionModal() { document.getElementById('modal-subscription').classList.remove('hidden'); }
+        function closeSubscriptionModal() { document.getElementById('modal-subscription').classList.add('hidden'); }
+
+        function selectPlan(plan) {
+            activePlan = plan;
+        }
+
+        function activateSubscription() {
+            localStorage.setItem('nexus_plan', activePlan);
+            updatePlanUI();
+            closeSubscriptionModal();
+            alert("Subscription Plan Updated Successfully.");
+        }
+
+        function updatePlanUI() {
+            const statusText = document.getElementById('sub-status-text');
+            if (statusText) {
+                statusText.innerText = activePlan === 'pro' ? 'Pro Unlimited Active' : 'Free Tier Active';
+            }
+        }
+
+        // UTILITY FUNCTIONS
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
     </script>
 </body>
 </html>
