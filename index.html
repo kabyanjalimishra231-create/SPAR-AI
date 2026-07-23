@@ -602,6 +602,70 @@
             updateUI();
             renderHistoryList();
         };
-    </script>
+    </script><script>
+    // 1. Initialize Broadcast Sync Channel
+    const syncChannel = new BroadcastChannel('spar_ai_sync_channel');
+
+    // 2. Track Unique User Activity
+    (function trackUserActivity() {
+        let userId = localStorage.getItem('spar_ai_user_id');
+        if (!userId) {
+            userId = 'usr_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('spar_ai_user_id', userId);
+        }
+        
+        let users = JSON.parse(localStorage.getItem('spar_ai_users') || '[]');
+        if (!users.includes(userId)) {
+            users.push(userId);
+            localStorage.setItem('spar_ai_users', JSON.stringify(users));
+            syncChannel.postMessage({ type: 'NEW_USER_REGISTERED' });
+        }
+    })();
+
+    // 3. Helper Function to Submit Ratings from App to Admin
+    function submitUserRating(ratingStarCount, userComment = "") {
+        const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
+        const newRating = {
+            userId: localStorage.getItem('spar_ai_user_id'),
+            userName: localStorage.getItem('spar_ai_username') || 'App User',
+            rating: Number(ratingStarCount),
+            comment: userComment,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+        ratings.push(newRating);
+        localStorage.setItem('spar_ai_user_ratings', JSON.stringify(ratings));
+        
+        // Notify Admin Panel Live
+        syncChannel.postMessage({ type: 'NEW_RATING_SUBMITTED' });
+    }
+
+    // 4. Function to Update UI elements when Admin Panel changes
+    function applyAdminSettings() {
+        const planName = localStorage.getItem('spar_ai_plan_name');
+        const tenure = localStorage.getItem('spar_ai_tenure');
+        const price = localStorage.getItem('spar_ai_sub_price');
+        const credits = localStorage.getItem('spar_ai_free_credits');
+
+        // Target your elements in index.html if they exist
+        const planDisplay = document.getElementById('user-plan-display');
+        if (planDisplay && planName) planDisplay.innerText = `${planName} (${tenure})`;
+
+        const priceDisplay = document.getElementById('user-price-display');
+        if (priceDisplay && price) priceDisplay.innerText = price;
+
+        const creditDisplay = document.getElementById('user-credits-display');
+        if (creditDisplay && credits) creditDisplay.innerText = `${credits} Credits`;
+    }
+
+    // Listen for changes sent from admin.html in real time
+    syncChannel.onmessage = (event) => {
+        if (event.data.type === 'SETTINGS_UPDATED') {
+            applyAdminSettings();
+        }
+    };
+
+    window.addEventListener('storage', applyAdminSettings);
+    document.addEventListener('DOMContentLoaded', applyAdminSettings);
+</script>
 </body>
 </html>
