@@ -6,7 +6,7 @@
     <title>Spar AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Razorpay Checkout Script -->
+    <!-- Razorpay Payment Gateway Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         body { height: 100vh; height: 100dvh; }
@@ -30,9 +30,6 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <button onclick="openRazorpaySubscription()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-md">
-                <i class="fa-solid fa-crown text-amber-300"></i> <span>Upgrade</span>
-            </button>
             <div class="bg-[#131314] border border-[#2d2f31] px-3 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5">
                 <i class="fa-solid fa-bolt text-purple-400 text-[10px]"></i>
                 <span>Credits: <strong id="user-credits-display" class="text-purple-400">5</strong></span>
@@ -89,7 +86,7 @@
 
             <!-- FOOTER INFO BAR -->
             <div class="flex justify-between items-center text-[10px] text-gray-500 px-2">
-                <span>Plan Rate: <b id="user-price-display" class="text-gray-400">$4.99 / Month</b></span>
+                <span>Plan Rate: <b id="user-price-display" class="text-gray-400 cursor-pointer hover:text-blue-400 transition" onclick="openRazorpaySubscription()" title="Click to Subscribe">$4.99 / Month</b></span>
                 <button onclick="openRatingModal()" class="hover:text-yellow-400 transition flex items-center gap-1">
                     <i class="fa-solid fa-star text-yellow-400"></i> Leave Feedback
                 </button>
@@ -126,7 +123,7 @@
         let selectedImageData = null;
         let selectedStars = 5;
 
-        // Syncs settings configured in admin.html
+        // Syncs data configured in admin.html live without layout changes
         function syncAdminSettings() {
             const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro VIP";
             const tenure = localStorage.getItem('spar_ai_tenure') || "1 Month";
@@ -143,18 +140,17 @@
             if (pr) pr.innerText = price;
         }
 
-        // Razorpay Payment Integration Trigger
+        // Razorpay Payment Integration (Uses Key saved from admin.html)
         function openRazorpaySubscription() {
             const razorpayKey = localStorage.getItem('spar_ai_razorpay_key') || "";
             const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro VIP";
             const priceDisplay = localStorage.getItem('spar_ai_sub_price') || "499";
             
             if (!razorpayKey) {
-                alert("Payment gateway key is not set. Please add your Razorpay Key ID in admin.html");
+                alert("Payment gateway key is not configured. Please enter your Razorpay Key ID in admin.html");
                 return;
             }
 
-            // Extract numeric value from string (e.g., "$4.99" or "499" -> 49900 in paise)
             let rawNumeric = priceDisplay.replace(/[^0-9.]/g, '');
             let amountInSubunits = rawNumeric ? Math.round(parseFloat(rawNumeric) * 100) : 49900;
 
@@ -178,6 +174,7 @@
             rzp.open();
         }
 
+        // Tracks unique app users for Admin stats
         function registerUserSession() {
             let userId = localStorage.getItem('spar_ai_user_id');
             if (!userId) {
@@ -192,6 +189,7 @@
             }
         }
 
+        // Image Selection Handler
         function handleImageSelect(event) {
             const file = event.target.files[0];
             if (file) {
@@ -212,6 +210,7 @@
             document.getElementById('image-preview-box').classList.add('hidden');
         }
 
+        // Message Handler
         function handleSendMessage() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
@@ -239,6 +238,7 @@
             }, 500);
         }
 
+        // Rating Feedback Logic
         function openRatingModal() { 
             document.getElementById('rating-modal').classList.remove('hidden'); 
             document.getElementById('rating-modal').classList.add('flex'); 
