@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spar AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,80 +15,76 @@
 </head>
 <body class="bg-[#131314] text-gray-100 font-sans flex flex-col justify-between overflow-hidden antialiased">
 
-    <!-- HEADER / NAVBAR -->
-    <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-4 py-2.5 flex justify-between items-center shrink-0 z-20">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md">
+    <!-- HEADER / NAVIGATION -->
+    <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-3 sm:px-4 py-2.5 flex justify-between items-center z-20 shrink-0">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/30">
                 <i class="fa-solid fa-sparkles"></i>
             </div>
             <div>
-                <span class="font-bold text-base text-gray-100">Spar AI</span>
-                <!-- DYNAMICALLY UPDATED FROM ADMIN -->
-                <span id="user-plan-badge" class="text-[10px] bg-blue-600/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full ml-2">Pro (1 Month)</span>
+                <span class="font-bold text-base sm:text-lg text-gray-100 tracking-wide">Spar AI</span>
+                <span id="user-plan-badge" class="hidden sm:inline-block text-[10px] bg-blue-600/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full ml-2">Pro (1 Month)</span>
             </div>
         </div>
 
-        <div class="flex items-center gap-3 text-xs">
-            <!-- DYNAMIC CREDITS FROM ADMIN -->
-            <div class="bg-[#131314] border border-[#2d2f31] px-3 py-1.5 rounded-full text-gray-300">
-                Credits: <span id="user-credits-display" class="text-purple-400 font-bold">5</span>
+        <div class="flex items-center gap-2">
+            <div class="bg-[#131314] border border-[#2d2f31] px-3 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt text-purple-400 text-[10px]"></i>
+                <span>Credits: <strong id="user-credits-display" class="text-purple-400">5</strong></span>
             </div>
-            <a href="admin.html" class="px-3 py-1.5 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 rounded-full transition flex items-center gap-1.5">
+            <a href="admin.html" class="px-3 py-1.5 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 rounded-full text-xs font-semibold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Admin</span>
             </a>
         </div>
     </header>
 
-    <!-- CHAT MESSAGES CONTAINER -->
-    <main id="chat-container" class="flex-1 w-full max-w-4xl mx-auto p-4 overflow-y-auto space-y-4">
-        <!-- Welcome Message -->
+    <!-- MAIN CHAT AREA -->
+    <main id="chat-container" class="flex-1 w-full max-w-4xl mx-auto p-3 sm:p-5 flex flex-col min-h-0 overflow-y-auto space-y-4">
         <div class="bg-[#1e1f20] border border-[#2d2f31] p-4 rounded-2xl space-y-2">
-            <h2 class="font-bold text-lg text-blue-400">Welcome to Spar AI!</h2>
+            <h2 class="font-bold text-base text-blue-400 flex items-center gap-2">
+                <i class="fa-solid fa-robot"></i> Spar AI Assistant
+            </h2>
             <p class="text-xs text-gray-300 leading-relaxed">
-                Ask questions, generate text, or attach an image to perform an **Image Search & Visual Analysis**.
+                Welcome! Type your prompt below or attach an image to initiate image processing and visual search.
             </p>
         </div>
     </main>
 
-    <!-- INPUT & IMAGE SEARCH CONTROLS -->
+    <!-- INPUT CONTROLS -->
     <footer class="p-3 sm:p-4 bg-[#131314] border-t border-[#2d2f31] shrink-0">
         <div class="max-w-4xl mx-auto space-y-2">
             
-            <!-- IMAGE PREVIEW CONTAINER -->
+            <!-- IMAGE PREVIEW THUMBNAIL -->
             <div id="image-preview-box" class="hidden flex items-center gap-2 bg-[#1e1f20] border border-[#2d2f31] p-2 rounded-xl w-max">
-                <img id="image-preview-thumb" src="" class="w-12 h-12 object-cover rounded-lg">
+                <img id="image-preview-thumb" src="" class="w-10 h-10 object-cover rounded-lg">
                 <div class="text-xs">
-                    <span class="block text-gray-200 font-medium truncate max-w-[150px]" id="image-file-name">Image attached</span>
-                    <span class="text-[10px] text-blue-400">Ready for visual search</span>
+                    <span id="image-file-name" class="block text-gray-200 font-medium truncate max-w-[140px]">Image attached</span>
+                    <span class="text-[10px] text-blue-400">Ready for search</span>
                 </div>
                 <button onclick="removeAttachedImage()" class="text-gray-400 hover:text-red-400 ml-2 p-1">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- INPUT BAR -->
+            <!-- CHAT INPUT BAR -->
             <div class="flex items-center gap-2 bg-[#1e1f20] border border-[#2d2f31] rounded-2xl px-3 py-2 focus-within:border-blue-500 transition">
                 
-                <!-- Hidden Image Input -->
                 <input type="file" id="image-file-input" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
                 
-                <!-- IMAGE ATTACH BUTTON -->
-                <button onclick="document.getElementById('image-file-input').click()" title="Attach Image for Visual Search" class="text-gray-400 hover:text-blue-400 p-2 transition">
-                    <i class="fa-solid fa-image text-lg"></i>
+                <button onclick="document.getElementById('image-file-input').click()" title="Attach Image" class="text-gray-400 hover:text-blue-400 p-2 transition">
+                    <i class="fa-solid fa-image text-base"></i>
                 </button>
 
-                <!-- TEXT PROMPT INPUT -->
-                <input id="user-input" type="text" placeholder="Ask anything or search with an image..." class="flex-1 bg-transparent text-sm text-gray-100 focus:outline-none px-2">
+                <input id="user-input" type="text" placeholder="Ask anything or search with image..." class="flex-1 bg-transparent text-xs sm:text-sm text-gray-100 focus:outline-none px-2" onkeypress="if(event.key==='Enter') handleSendMessage()">
 
-                <!-- SUBMIT BUTTON -->
                 <button onclick="handleSendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-xl transition flex items-center justify-center">
                     <i class="fa-solid fa-paper-plane text-xs"></i>
                 </button>
             </div>
 
-            <!-- FOOTER RATING PROMPT -->
+            <!-- FOOTER INFO BAR -->
             <div class="flex justify-between items-center text-[10px] text-gray-500 px-2">
-                <span>Current Plan Rate: <b id="user-price-display" class="text-gray-400">$4.99 / Month</b></span>
+                <span>Plan Rate: <b id="user-price-display" class="text-gray-400">$4.99 / Month</b></span>
                 <button onclick="openRatingModal()" class="hover:text-yellow-400 transition flex items-center gap-1">
                     <i class="fa-solid fa-star text-yellow-400"></i> Leave Feedback
                 </button>
@@ -97,12 +93,12 @@
         </div>
     </footer>
 
-    <!-- RATING MODAL (Sends Ratings directly to admin.html) -->
+    <!-- RATING MODAL -->
     <div id="rating-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1f20] border border-[#2d2f31] p-5 rounded-2xl max-w-sm w-full space-y-4">
-            <h3 class="font-bold text-sm text-gray-100">Rate Your Experience</h3>
+            <h3 class="font-bold text-sm text-gray-100">Rate Spar AI</h3>
             
-            <div class="flex justify-center gap-2 text-2xl text-yellow-400" id="star-rating-box">
+            <div class="flex justify-center gap-2 text-xl text-yellow-400">
                 <i class="fa-solid fa-star cursor-pointer" onclick="setRating(1)"></i>
                 <i class="fa-solid fa-star cursor-pointer" onclick="setRating(2)"></i>
                 <i class="fa-solid fa-star cursor-pointer" onclick="setRating(3)"></i>
@@ -110,7 +106,7 @@
                 <i class="fa-solid fa-star cursor-pointer" onclick="setRating(5)"></i>
             </div>
 
-            <textarea id="rating-comment" placeholder="Write feedback for admin..." class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none"></textarea>
+            <textarea id="rating-comment" placeholder="Your feedback..." class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none"></textarea>
 
             <div class="flex gap-2">
                 <button onclick="closeRatingModal()" class="flex-1 py-2 bg-[#2d2f31] text-xs rounded-xl">Cancel</button>
@@ -119,24 +115,30 @@
         </div>
     </div>
 
+    <!-- FUNCTIONAL LOGIC -->
     <script>
         const syncChannel = new BroadcastChannel('spar_ai_sync_channel');
         let selectedImageData = null;
         let selectedStars = 5;
 
-        // 1. DYNAMIC ADMIN SYNC: Reads directly from localStorage on load & update
+        // Syncs data changed in admin.html to index.html immediately
         function syncAdminSettings() {
             const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro VIP";
             const tenure = localStorage.getItem('spar_ai_tenure') || "1 Month";
             const price = localStorage.getItem('spar_ai_sub_price') || "$4.99 / Month";
             const credits = localStorage.getItem('spar_ai_free_credits') || "5";
 
-            document.getElementById('user-plan-badge').innerText = `${planName} (${tenure})`;
-            document.getElementById('user-credits-display').innerText = credits;
-            document.getElementById('user-price-display').innerText = price;
+            const badge = document.getElementById('user-plan-badge');
+            if (badge) badge.innerText = `${planName} (${tenure})`;
+            
+            const creds = document.getElementById('user-credits-display');
+            if (creds) creds.innerText = credits;
+
+            const pr = document.getElementById('user-price-display');
+            if (pr) pr.innerText = price;
         }
 
-        // 2. TRACK USER REGISTRATION
+        // Tracks unique app users for Admin statistics
         function registerUserSession() {
             let userId = localStorage.getItem('spar_ai_user_id');
             if (!userId) {
@@ -151,7 +153,7 @@
             }
         }
 
-        // 3. IMAGE ATTACHMENT & SEARCH HANDLING
+        // Image Selection Handler
         function handleImageSelect(event) {
             const file = event.target.files[0];
             if (file) {
@@ -172,7 +174,7 @@
             document.getElementById('image-preview-box').classList.add('hidden');
         }
 
-        // 4. CHAT & MESSAGE SUBMISSION
+        // Message Handler
         function handleSendMessage() {
             const input = document.getElementById('user-input');
             const message = input.value.trim();
@@ -180,32 +182,35 @@
 
             const chatContainer = document.getElementById('chat-container');
 
-            // Render User Message Card
             const userCard = document.createElement('div');
             userCard.className = "bg-[#1e1f20] border border-[#2d2f31] p-3 rounded-2xl ml-auto max-w-[85%] space-y-2";
             
-            let imgHTML = selectedImageData ? `<img src="${selectedImageData}" class="max-h-48 rounded-lg border border-[#2d2f31]">` : '';
-            userCard.innerHTML = `${imgHTML}<p class="text-sm text-gray-100">${message}</p>`;
+            let imgHTML = selectedImageData ? `<img src="${selectedImageData}" class="max-h-48 rounded-lg border border-[#2d2f31] mb-2">` : '';
+            userCard.innerHTML = `${imgHTML}<p class="text-xs sm:text-sm text-gray-100">${message}</p>`;
             chatContainer.appendChild(userCard);
 
-            // Clear Input
             input.value = '';
             removeAttachedImage();
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
-            // Simulated AI Response
             setTimeout(() => {
                 const aiCard = document.createElement('div');
                 aiCard.className = "bg-[#131314] border border-[#2d2f31] p-3 rounded-2xl mr-auto max-w-[85%] text-xs text-gray-300";
-                aiCard.innerText = imgHTML ? "Image received! Analyzing image details and running visual search..." : "Processing your response...";
+                aiCard.innerText = imgHTML ? "Image received. Performing visual search..." : "Response generated successfully.";
                 chatContainer.appendChild(aiCard);
                 chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 600);
+            }, 500);
         }
 
-        // 5. RATING SUBMISSION SYSTEM
-        function openRatingModal() { document.getElementById('rating-modal').classList.remove('hidden'); document.getElementById('rating-modal').classList.add('flex'); }
-        function closeRatingModal() { document.getElementById('rating-modal').classList.add('hidden'); document.getElementById('rating-modal').classList.remove('flex'); }
+        // Rating Feedback Logic
+        function openRatingModal() { 
+            document.getElementById('rating-modal').classList.remove('hidden'); 
+            document.getElementById('rating-modal').classList.add('flex'); 
+        }
+        function closeRatingModal() { 
+            document.getElementById('rating-modal').classList.add('hidden'); 
+            document.getElementById('rating-modal').classList.remove('flex'); 
+        }
         function setRating(stars) { selectedStars = stars; }
 
         function submitRating() {
@@ -215,18 +220,17 @@
             ratings.push({
                 userName: 'App User',
                 rating: selectedStars,
-                comment: comment || 'No details provided.',
+                comment: comment || 'No written comment.',
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
             });
 
             localStorage.setItem('spar_ai_user_ratings', JSON.stringify(ratings));
             syncChannel.postMessage({ type: 'RATING_SUBMITTED' });
             
-            alert("Thank you! Your feedback has been sent directly to the Admin Panel.");
+            alert("Feedback saved to Admin panel!");
             closeRatingModal();
         }
 
-        // Real-time Event Listeners
         syncChannel.onmessage = () => syncAdminSettings();
         window.addEventListener('storage', syncAdminSettings);
         
