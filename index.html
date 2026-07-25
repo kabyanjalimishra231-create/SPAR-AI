@@ -648,43 +648,7 @@ function applyPromoCode() {
     }
 }
 
-function initiateRazorpayPayment() {
-    const config = getSystemConfig();
 
-    if (!config.razorpayKey) {
-        alert("Razorpay API Key is not configured in the Admin Panel.");
-        return;
-    }
-
-    const numericPrice = parseInt(config.priceDisplay.replace(/[^0-9]/g, '')) || 499;
-
-    const options = {
-        "key": config.razorpayKey, 
-        "amount": numericPrice * 100,
-        "currency": "INR",
-        "name": "Spar AI",
-        "description": "Pro VIP Subscription Upgrade",
-        "handler": function (response) {
-            if (response.razorpay_payment_id) {
-                localStorage.setItem('spar_ai_pro_active', 'true');
-                alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-                updateUI();
-                closeSubscriptionModal();
-            }
-        },
-        "prefill": {
-            "name": config.userName
-        },
-        "theme": {
-            "color": "#2563eb"
-        }
-    };
-
-    const rzp = new Razorpay(options);
-    rzp.on('payment.failed', function (response){
-        alert("Payment Failed: " + response.error.description);
-    });
-    rzp.open();
 } </script>
 <script>
 // ==========================================
