@@ -1,7 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en" class="h-full">
-<head>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<head><script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spar AI - Complete Multimodal Platform</title>
@@ -687,5 +686,86 @@ function initiateRazorpayPayment() {
     });
     rzp.open();
 } </script>
+<script>
+// ==========================================
+// SPAR AI - DIRECT ADMIN INTEGRATION BRIDGE
+// ==========================================
+const SparAdminBridge = {
+    getRazorpayKey: () => localStorage.getItem('spar_ai_razorpay_key') || '',
+    getFreeCredits: () => parseInt(localStorage.getItem('spar_ai_free_credits') || '5', 10),
+    getSubscriptionPrice: () => localStorage.getItem('spar_ai_sub_price') || '₹499',
+    getValidPromos: () => JSON.parse(localStorage.getItem('spar_ai_promo_codes') || '["PRO-UNLIMITED-2026", "VIP-SPAR-AI"]'),
+    isProUser: () => localStorage.getItem('spar_ai_pro_active') === 'true',
+
+    // Initialize free credit balance if new user
+    init() {
+        if (localStorage.getItem('spar_ai_user_credits') === null) {
+            localStorage.setItem('spar_ai_user_credits', this.getFreeCredits());
+        }
+    },
+
+    // Call this before sending a chat prompt or generating an image
+    deductCredit() {
+        if (this.isProUser()) return true; // VIP Unlimited
+        
+        let credits = parseInt(localStorage.getItem('spar_ai_user_credits') || '0', 10);
+        if (credits > 0) {
+            credits -= 1;
+            localStorage.setItem('spar_ai_user_credits', credits);
+            return true;
+        }
+        return false; // Out of credits
+    },
+
+    // Call this when a user rates a response
+    submitRating(stars, responseSnippet) {
+        const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
+        ratings.push({
+            userName: "App User",
+            rating: parseInt(stars, 10),
+            responseSnippet: responseSnippet || "User feedback",
+            timestamp: new Date().toLocaleString(),
+            sessionId: "SESS-" + Math.floor(1000 + Math.random() * 9000)
+        });
+        localStorage.setItem('spar_ai_user_ratings', JSON.stringify(ratings));
+    },
+
+    // Call this when user submits promo code
+    applyPromoCode(code) {
+        const clean = code.trim().toUpperCase();
+        if (this.getValidPromos().includes(clean)) {
+            localStorage.setItem('spar_ai_pro_active', 'true');
+            return { success: true, message: "PRO VIP Status Activated!" };
+        }
+        return { success: false, message: "Invalid Promo Code." };
+    },
+
+    // Call this to trigger Razorpay payment with Admin Key
+    openRazorpayCheckout() {
+        const key = this.getRazorpayKey();
+        if (!key) {
+            alert("Razorpay Key is not configured in Admin Control Panel!");
+            return;
+        }
+        const options = {
+            key: key,
+            amount: 49900,
+            currency: "INR",
+            name: "Spar AI Pro",
+            description: "Unlimited VIP Access",
+            handler: function () {
+                localStorage.setItem('spar_ai_pro_active', 'true');
+                alert("Payment successful! VIP Activated.");
+            }
+        };
+        new Razorpay(options).open();
+    }
+};
+
+// Initialize bridge on startup
+document.addEventListener('DOMContentLoaded', () => {
+    SparAdminBridge.init();
+});
+</script>
 </body>
 </html>
