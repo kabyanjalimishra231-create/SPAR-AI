@@ -1,0 +1,200 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spar AI - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#0f172a] text-slate-100 font-sans min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-6xl mx-auto space-y-6">
+        
+        <!-- HEADER -->
+        <div class="flex justify-between items-center bg-[#1e293b] p-5 rounded-2xl border border-slate-700 shadow-xl">
+            <div>
+                <h1 class="text-xl font-bold text-blue-400 flex items-center gap-2">
+                    <i class="fa-solid fa-gauge-high"></i> Spar AI Admin Control Panel
+                </h1>
+                <p class="text-xs text-slate-400">Manage user ratings, subscription plans, tenure options, promo codes, and free tier limits.</p>
+            </div>
+            <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-left"></i> Open App
+            </a>
+        </div>
+
+        <!-- ANALYTICAL STATS CARDS -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
+                <span class="text-slate-400 text-xs block">Average Rating</span>
+                <span id="stat-avg-rating" class="text-2xl font-bold text-yellow-400">0.0 ★</span>
+            </div>
+            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
+                <span class="text-slate-400 text-xs block">Total Feedback Received</span>
+                <span id="stat-total-ratings" class="text-2xl font-bold text-blue-400">0</span>
+            </div>
+            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
+                <span class="text-slate-400 text-xs block">Active Plan & Tenure</span>
+                <span id="stat-plan-tenure" class="text-base font-bold text-emerald-400">Pro (Monthly)</span>
+            </div>
+            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
+                <span class="text-slate-400 text-xs block">Free Tier Limit</span>
+                <span id="stat-free-credits" class="text-2xl font-bold text-purple-400">5 Credits</span>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- FEEDBACK & RATINGS FEED (2 COLS) -->
+            <div class="lg:col-span-2 bg-[#1e293b] border border-slate-700 rounded-2xl p-5 space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-star text-yellow-400"></i> User Ratings & Feedback Feed
+                    </h2>
+                    <button onclick="clearRatings()" class="text-xs text-red-400 hover:underline">Clear Ratings</button>
+                </div>
+                
+                <div id="ratings-container" class="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                    <!-- Dynamic Ratings Rendered Here -->
+                </div>
+            </div>
+
+            <!-- SYSTEM & SUBSCRIPTION SETTINGS (1 COL) -->
+            <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-5 space-y-5">
+                
+                <!-- SUBSCRIPTION PLAN CONTROL -->
+                <div class="space-y-3 border-b border-slate-700 pb-4">
+                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-crown text-amber-400"></i> Subscription & Pricing Plan
+                    </h2>
+
+                    <div class="space-y-2.5 text-xs">
+                        <div>
+                            <label class="text-slate-400 block mb-1">Plan Name</label>
+                            <input id="admin-plan-name" type="text" placeholder="e.g. Spar Pro VIP" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="text-slate-400 block mb-1">Subscription Tenure</label>
+                            <select id="admin-tenure-select" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                                <option value="1 Month">1 Month</option>
+                                <option value="3 Months">3 Months</option>
+                                <option value="6 Months">6 Months</option>
+                                <option value="1 Year">1 Year</option>
+                                <option value="Lifetime Pass">Lifetime Pass</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="text-slate-400 block mb-1">Plan Price ($ USD or local currency)</label>
+                            <input id="admin-price-input" type="text" placeholder="$4.99 / month" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+
+                        <div>
+                            <label class="text-slate-400 block mb-1">Active Promo Codes (Comma Separated)</label>
+                            <input id="admin-promos-input" type="text" placeholder="PRO-2026, VIPPASS" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FREE TIER SETTINGS -->
+                <div class="space-y-3 text-xs">
+                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-yellow-400"></i> Free Tier Limits
+                    </h2>
+                    <div>
+                        <label class="text-slate-400 block mb-1">Free Credits Allocation</label>
+                        <input id="admin-credits-input" type="number" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white focus:outline-none focus:border-blue-500">
+                    </div>
+
+                    <button onclick="saveAdminSettings()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 font-bold text-white rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Admin Configuration
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        function loadAdminData() {
+            // Load Ratings
+            const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
+            const container = document.getElementById('ratings-container');
+            container.innerHTML = '';
+
+            if (ratings.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic">No user feedback submitted yet.</p>`;
+                document.getElementById('stat-avg-rating').innerText = '0.0 ★';
+                document.getElementById('stat-total-ratings').innerText = '0';
+            } else {
+                let sum = 0;
+                ratings.reverse().forEach(r => {
+                    sum += r.rating;
+                    const card = document.createElement('div');
+                    card.className = "bg-[#0f172a] p-3.5 rounded-xl border border-slate-700/80 space-y-1.5 text-xs";
+                    card.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-blue-400">${r.userName || 'Anonymous'}</span>
+                            <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                        </div>
+                        <p class="text-slate-300">"${r.responseSnippet}"</p>
+                        <span class="text-[10px] text-slate-500 block">${r.timestamp} | Session: ${r.sessionId}</span>
+                    `;
+                    container.appendChild(card);
+                });
+
+                const avg = (sum / ratings.length).toFixed(1);
+                document.getElementById('stat-avg-rating').innerText = `${avg} ★`;
+                document.getElementById('stat-total-ratings').innerText = ratings.length;
+            }
+
+            // Load Subscription Settings
+            const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro VIP";
+            const tenure = localStorage.getItem('spar_ai_tenure') || "1 Month";
+            const subPrice = localStorage.getItem('spar_ai_sub_price') || "$4.99 / Month";
+            const promoCodes = JSON.parse(localStorage.getItem('spar_ai_promo_codes') || '["PRO-UNLIMITED-2026", "VIP-SPAR-AI"]');
+            const freeCredits = localStorage.getItem('spar_ai_free_credits') || "5";
+
+            document.getElementById('admin-plan-name').value = planName;
+            document.getElementById('admin-tenure-select').value = tenure;
+            document.getElementById('admin-price-input').value = subPrice;
+            document.getElementById('admin-promos-input').value = promoCodes.join(', ');
+            document.getElementById('admin-credits-input').value = freeCredits;
+
+            document.getElementById('stat-plan-tenure').innerText = `${planName} (${tenure})`;
+            document.getElementById('stat-free-credits').innerText = `${freeCredits} Credits`;
+        }
+
+        function saveAdminSettings() {
+            const planName = document.getElementById('admin-plan-name').value.trim();
+            const tenure = document.getElementById('admin-tenure-select').value;
+            const price = document.getElementById('admin-price-input').value.trim();
+            const promos = document.getElementById('admin-promos-input').value.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+            const credits = document.getElementById('admin-credits-input').value;
+
+            localStorage.setItem('spar_ai_plan_name', planName);
+            localStorage.setItem('spar_ai_tenure', tenure);
+            localStorage.setItem('spar_ai_sub_price', price);
+            localStorage.setItem('spar_ai_promo_codes', JSON.stringify(promos));
+            localStorage.setItem('spar_ai_free_credits', credits);
+
+            alert("Subscription Plan, Tenure, and Admin Settings saved successfully!");
+            loadAdminData();
+        }
+
+        function clearRatings() {
+            if (confirm("Are you sure you want to delete all user ratings?")) {
+                localStorage.removeItem('spar_ai_user_ratings');
+                loadAdminData();
+            }
+        }
+
+        window.onload = loadAdminData;
+    </script>
+</body>
+</html>
