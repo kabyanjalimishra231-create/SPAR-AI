@@ -1,6 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en" class="h-full">
-<head><script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<head>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Spar AI - Complete Multimodal Platform</title>
@@ -142,52 +143,34 @@
         </div>
     </div>
 
-    <!-- SUBSCRIPTION MODAL -->
-   <!-- ADD/REPLACE INSIDE <div id="sub-modal"> -->
-<div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl relative">
-    <button onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
-    <div class="text-center space-y-1">
-        <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-500/30">
-            <i class="fa-solid fa-crown"></i>
-        </div>
-        <h3 class="text-lg font-bold text-gray-100">Upgrade to Spar AI Pro</h3>
-        <p class="text-xs text-gray-400">Unlimited image vision, live web searches, and AI artwork.</p>
-    </div>
-    
-    <div class="bg-[#131314] border border-[#2d2f31] p-3.5 rounded-xl flex justify-between items-center">
-        <div>
-            <h4 class="font-bold text-xs sm:text-sm text-gray-200">Pro VIP Pass</h4>
-            <p class="text-[10px] text-gray-500">Unlimited usage & premium vision engines</p>
-        </div>
-        <span id="modal-price-display" class="text-base font-extrabold text-emerald-400">₹499</span>
-    </div>
-
-    <!-- Razorpay Payment Button -->
-    <button onclick="initiateRazorpayPayment()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
-        <i class="fa-solid fa-credit-card"></i> Pay with Razorpay
-    </button>
-
-    <!-- Promo Code Section -->
-    <div class="space-y-2 pt-2 border-t border-[#2d2f31]">
-        <label class="text-xs text-gray-400 font-medium">Have a Promo Code?</label>
-        <div class="flex gap-2">
-            <input id="promo-code-input" type="text" placeholder="PRO-UNLIMITED-2026" class="flex-1 bg-[#131314] border border-[#2d2f31] text-xs text-gray-100 p-2.5 rounded-xl uppercase focus:outline-none focus:border-amber-500">
-            <button onclick="applyPromoCode()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-black font-bold text-xs rounded-xl transition shrink-0">Redeem</button>
-        </div>
-        <p id="promo-msg" class="text-xs hidden"></p>
-    </div>
-</div>
+    <!-- SUBSCRIPTION MODAL (FIXED CONTAINER & ID) -->
+    <div id="sub-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] rounded-2xl p-5 sm:p-6 max-w-md w-full space-y-4 shadow-2xl relative">
+            <button onclick="closeSubscriptionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-sm"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="text-center space-y-1">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-xl border border-amber-500/30">
+                    <i class="fa-solid fa-crown"></i>
+                </div>
                 <h3 class="text-lg font-bold text-gray-100">Upgrade to Spar AI Pro</h3>
                 <p class="text-xs text-gray-400">Unlimited image vision, live web searches, and AI artwork.</p>
             </div>
+            
             <div class="bg-[#131314] border border-[#2d2f31] p-3.5 rounded-xl flex justify-between items-center">
                 <div>
                     <h4 class="font-bold text-xs sm:text-sm text-gray-200">Pro VIP Pass</h4>
                     <p class="text-[10px] text-gray-500">Unlimited usage & premium vision engines</p>
                 </div>
-                <span id="modal-price-display" class="text-base font-extrabold text-emerald-400">$4.99</span>
+                <span id="modal-price-display" class="text-base font-extrabold text-emerald-400">₹499</span>
             </div>
-            <div class="space-y-2">
+
+            <!-- Razorpay Payment Button -->
+            <button onclick="initiateRazorpayPayment()" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-2 shadow-lg">
+                <i class="fa-solid fa-credit-card"></i> Pay with Razorpay
+            </button>
+
+            <!-- Promo Code Section -->
+            <div class="space-y-2 pt-2 border-t border-[#2d2f31]">
                 <label class="text-xs text-gray-400 font-medium">Have a Promo Code?</label>
                 <div class="flex gap-2">
                     <input id="promo-code-input" type="text" placeholder="PRO-UNLIMITED-2026" class="flex-1 bg-[#131314] border border-[#2d2f31] text-xs text-gray-100 p-2.5 rounded-xl uppercase focus:outline-none focus:border-amber-500">
@@ -198,8 +181,8 @@
         </div>
     </div>
 
+    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Set API key securely or load from local environment
         let GROQ_API_KEY = localStorage.getItem('groq_api_key') || "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";
 
         let currentModeIndex = 0;
@@ -227,7 +210,7 @@
 
         function getSystemConfig() {
             const freeCreditsLimit = parseInt(localStorage.getItem('spar_ai_free_credits') || "5");
-            const priceDisplay = localStorage.getItem('spar_ai_sub_price') || "$4.99";
+            const priceDisplay = localStorage.getItem('spar_ai_sub_price') || "₹499";
             const validCodes = JSON.parse(localStorage.getItem('spar_ai_promo_codes')) || ["PRO-UNLIMITED-2026", "VIP-SPAR-AI"];
             const isPro = localStorage.getItem('spar_ai_pro_active') === 'true';
             const userName = localStorage.getItem('spar_ai_user_name') || "User";
@@ -388,7 +371,6 @@
         }
 
         // RATING SYSTEM LOGIC
-        // RATING SYSTEM LOGIC
         function saveRating(msgId, stars) {
             const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
             const responseElement = document.getElementById(msgId);
@@ -403,7 +385,6 @@
 
             localStorage.setItem('spar_ai_user_ratings', JSON.stringify(ratings));
 
-            // Visual feedback on star click
             const ratingContainer = document.getElementById(`rating-${msgId}`);
             if (ratingContainer) {
                 ratingContainer.innerHTML = `<span class="text-xs text-emerald-400 font-semibold"><i class="fa-solid fa-circle-check"></i> Thank you for rating (${stars}/5)!</span>`;
@@ -474,22 +455,18 @@
             const activeMode = modes[currentModeIndex].name;
             const currentImg = selectedImageData;
 
-            // Render user message & save
             appendMessageUI('user', query, currentImg);
             saveMessageToHistory(activeChatSessionId, 'user', query, currentImg);
 
-            // Reset inputs
             input.value = '';
             clearAttachment();
 
-            // Deduct credits for free users
             if (!config.isPro) {
                 userCredits--;
                 sessionStorage.setItem('spar_ai_user_credits', userCredits);
                 updateUI();
             }
 
-            // Route based on active mode
             if (activeMode === "Image Mode") {
                 await generateAiArt(query);
             } else {
@@ -498,7 +475,6 @@
         }
 
         async function fetchGroqAiResponse(prompt, imageBase64, mode) {
-            const tempId = 'loading-' + Date.now();
             appendMessageUI('assistant', 'Thinking...');
 
             try {
@@ -521,7 +497,6 @@
                     messagesPayload.push({ role: "user", content: prompt });
                 }
 
-                // Call Groq API
                 const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
                     headers: {
@@ -537,7 +512,7 @@
 
                 const data = await response.json();
                 const chatBox = document.getElementById('chat-box');
-                chatBox.lastElementChild.remove(); // Remove loading state
+                chatBox.lastElementChild.remove();
 
                 if (data.choices && data.choices[0]) {
                     const reply = data.choices[0].message.content;
@@ -549,7 +524,7 @@
             } catch (err) {
                 console.error(err);
                 const chatBox = document.getElementById('chat-box');
-                chatBox.lastElementChild.remove();
+                if (chatBox.lastElementChild) chatBox.lastElementChild.remove();
                 appendMessageUI('assistant', 'Sorry, I encountered an error. Please verify your connection or API configuration.');
             }
         }
@@ -619,8 +594,8 @@
 
         function initiateRazorpayPayment() {
             const options = {
-                "key": "rzp_test_YOUR_KEY_HERE", // Replace with your live/test Razorpay Key ID
-                "amount": 49900, // ₹499 in paise
+                "key": "rzp_test_YOUR_KEY_HERE",
+                "amount": 49900,
                 "currency": "INR",
                 "name": "Spar AI",
                 "description": "Pro VIP Subscription",
