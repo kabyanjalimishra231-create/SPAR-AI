@@ -2,121 +2,489 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Live Broadcast & AI Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gemini AI & Live Studio</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <!-- Google Font: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 20px; }
-    .container { max-width: 900px; margin: 0 auto; }
-    .card { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    input, textarea, button { width: 100%; padding: 10px; margin: 6px 0; border-radius: 4px; border: none; box-sizing: border-box; }
-    button { background: #3b82f6; color: white; cursor: pointer; font-weight: bold; }
-    button:hover { background: #2563eb; }
-    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-    .live { background: #ef4444; color: white; }
-    .offline { background: #64748b; color: white; }
-    .chat-box { height: 200px; overflow-y: scroll; border: 1px solid #334155; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
-    .msg { margin-bottom: 8px; background: #334155; padding: 8px; border-radius: 6px; }
-    .msg-actions { font-size: 11px; float: right; cursor: pointer; color: #94a3b8; }
-    iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
-    .modal.active { display: flex; }
-    .modal-content { background: #1e293b; padding: 24px; border-radius: 8px; width: 90%; max-width: 400px; }
+    * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body {
+      background-color: #131314;
+      color: #e3e2e6;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Mobile Frame Canvas */
+    .app-frame {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      max-height: 900px;
+      background-color: #1e1f20;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    @media (min-width: 481px) {
+      .app-frame {
+        border-radius: 36px;
+        height: 92vh;
+        border: 1px solid #2d2f31;
+      }
+    }
+
+    /* Top App Bar */
+    .app-header {
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e1f20;
+      z-index: 10;
+    }
+
+    .brand-title {
+      font-size: 20px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 50%, #7cacf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .user-pill {
+      background: #2d2f31;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      color: #c4c6d0;
+      border: 1px solid #3c4043;
+      cursor: pointer;
+    }
+
+    /* Navigation Pills Tabs */
+    .tab-bar {
+      display: flex;
+      padding: 0 16px 12px 16px;
+      gap: 8px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tab-bar::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: #2d2f31;
+      color: #c4c6d0;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: #a8c7fa;
+      color: #041e49;
+      font-weight: 600;
+    }
+
+    /* Scrollable Content Viewport */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .content-area::-webkit-scrollbar { display: none; }
+
+    .view-panel { display: none; flex-direction: column; gap: 16px; }
+    .view-panel.active { display: flex; }
+
+    /* Cards - Gemini Dark Aesthetic */
+    .card {
+      background: #131314;
+      border-radius: 20px;
+      padding: 18px;
+      border: 1px solid #2d2f31;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #e3e2e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-badge {
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .status-badge.live { background: #f2b8b5; color: #601410; }
+    .status-badge.offline { background: #3c4043; color: #c4c6d0; }
+
+    iframe { width: 100%; height: 220px; border: none; border-radius: 16px; margin-top: 8px; }
+
+    /* Action Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #a8c7fa, #7cacf8);
+      color: #041e49;
+      border: none;
+      padding: 12px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+    }
+
+    .btn-secondary {
+      background: #2d2f31;
+      color: #e3e2e6;
+      border: 1px solid #3c4043;
+      padding: 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Output Box */
+    .ai-output-box {
+      background: #1e1f20;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e3e2e6;
+      min-height: 80px;
+      border: 1px solid #2d2f31;
+      white-space: pre-wrap;
+    }
+
+    /* Chat Messages */
+    .chat-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    .chat-msg {
+      background: #1e1f20;
+      padding: 12px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.4;
+      border: 1px solid #2d2f31;
+      position: relative;
+    }
+    .chat-msg .author { color: #a8c7fa; font-weight: 600; margin-bottom: 4px; font-size: 12px; }
+    .chat-msg .actions { position: absolute; top: 10px; right: 12px; font-size: 11px; color: #8e918f; cursor: pointer; }
+
+    /* Gemini Bottom Dock Input */
+    .bottom-dock {
+      padding: 12px 16px 20px 16px;
+      background: #1e1f20;
+      border-top: 1px solid #2d2f31;
+    }
+
+    .dock-pill {
+      background: #131314;
+      border-radius: 28px;
+      padding: 6px 8px 6px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #2d2f31;
+    }
+
+    .dock-pill textarea {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #e3e2e6;
+      font-size: 14px;
+      resize: none;
+      height: 24px;
+      outline: none;
+    }
+
+    .dock-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #2d2f31;
+      border: none;
+      color: #a8c7fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .dock-btn.send { background: #a8c7fa; color: #041e49; }
+
+    /* Image Attachment Chip */
+    .image-chip {
+      display: none;
+      background: #2d2f31;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #a8c7fa;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    /* Gemini Modal Sheet */
+    .modal-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: flex-end;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .bottom-sheet {
+      background: #1e1f20;
+      width: 100%;
+      border-radius: 28px 28px 0 0;
+      padding: 24px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+      border-top: 1px solid #2d2f31;
+    }
+
+    .sheet-handle {
+      width: 32px;
+      height: 4px;
+      background: #444746;
+      border-radius: 2px;
+      margin: 0 auto 16px auto;
+    }
+
+    .input-dark {
+      width: 100%;
+      background: #131314;
+      border: 1px solid #2d2f31;
+      color: #e3e2e6;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin: 8px 0;
+    }
   </style>
 </head>
 <body>
-<div class="container">
+
+<div class="app-frame">
   
-  <!-- USER AUTH -->
-  <div class="card" id="authSection">
-    <h2>User Account</h2>
-    <input type="text" id="usernameInput" placeholder="Enter Username">
-    <button onclick="loginUser()">Set Account Name</button>
+  <!-- TOP HEADER -->
+  <div class="app-header">
+    <div class="brand-title">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0Z" fill="url(#gemini-grad)"/><defs><linearGradient id="gemini-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#91B5FF"/><stop offset="1" stop-color="#E599FF"/></linearGradient></defs></svg>
+      Gemini Studio
+    </div>
+    <div class="user-pill" id="userPill" onclick="openAuthModal()">
+      <span>👤 Guest</span>
+    </div>
   </div>
 
-  <!-- LIVE STREAM -->
-  <div class="card">
-    <h2>
-      Live Stream 
-      <span id="liveStatus" class="status-badge offline">OFFLINE</span>
-    </h2>
-    <p id="streamDescription">No active broadcast.</p>
-    <div id="playerContainer"></div>
-    <button onclick="openSubModal()" style="background:#f59e0b; margin-top:10px;">⭐ Get Subscription Pass</button>
+  <!-- NAVIGATION TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">✨ AI Assistant</button>
+    <button class="tab-btn" onclick="switchTab('live-tab', this)">🔴 Live Stream</button>
+    <button class="tab-btn" onclick="switchTab('chat-tab', this)">💬 Community</button>
   </div>
 
-  <!-- AI ASSISTANT -->
-  <div class="card">
-    <h2>AI Search & Assistant</h2>
-    <label>Upload Image for Vision Search:</label>
-    <input type="file" id="imageInput" accept="image/*">
-    <button onclick="startVoiceSearch()" style="background:#10b981;">🎤 Voice Search</button>
-    <textarea id="promptInput" placeholder="Ask AI, perform image search, or type 'Generate image of...'"></textarea>
-    <button onclick="processAIRequest()">Submit Request</button>
-    <button onclick="speakResponse()" style="background:#8b5cf6;">🔊 Read AI Response</button>
-    <div id="aiOutput" style="margin-top:15px; padding:10px; background:#0f172a; border-radius:4px;"></div>
+  <!-- VIEWPORT CONTENT -->
+  <div class="content-area">
+
+    <!-- 1. AI ASSISTANT VIEW -->
+    <div id="ai-tab" class="view-panel active">
+      <div id="imageChip" class="image-chip">
+        <span id="imageChipName">Image attached</span>
+        <span onclick="clearAttachedImage()" style="cursor:pointer; font-weight:bold;">×</span>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>AI Response</span>
+          <button class="btn-secondary" onclick="speakResponse()" style="padding:4px 10px; font-size:11px;">🔊 Read</button>
+        </div>
+        <div class="ai-output-box" id="aiOutput">Hello! Ask me a question, attach an image to analyze, or ask me to 'Generate image of...'</div>
+      </div>
+    </div>
+
+    <!-- 2. LIVE STREAM VIEW -->
+    <div id="live-tab" class="view-panel">
+      <div class="card">
+        <div class="card-title">
+          <span>Broadcast</span>
+          <span id="liveBadge" class="status-badge offline">OFFLINE</span>
+        </div>
+        <div id="streamDescription" style="font-size:13px; color:#c4c6d0;">No live event right now.</div>
+        <div id="playerContainer"></div>
+      </div>
+
+      <div class="card" style="text-align:center;">
+        <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Unlock Premium Pass</div>
+        <div style="font-size:12px; color:#8e918f; margin-bottom:14px;">Access uninterrupted streams and exclusive features</div>
+        <button class="btn-primary" onclick="openSubModal()">⭐ Get Subscription</button>
+      </div>
+    </div>
+
+    <!-- 3. COMMUNITY CHAT VIEW -->
+    <div id="chat-tab" class="view-panel">
+      <div class="card">
+        <div class="card-title">Live Chat</div>
+        <div class="chat-stream" id="chatStream"></div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- CHAT HISTORY -->
-  <div class="card">
-    <h2>Chat & Community</h2>
-    <div class="chat-box" id="chatBox"></div>
-    <input type="text" id="chatMsgInput" placeholder="Type a message...">
-    <button onclick="sendChatMessage()">Send Message</button>
+  <!-- FLOATING GEMINI BOTTOM DOCK -->
+  <div class="bottom-dock">
+    <div class="dock-pill">
+      <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
+      <button class="dock-btn" onclick="document.getElementById('imageInput').click()" title="Attach Image">📷</button>
+      <button class="dock-btn" onclick="startVoiceSearch()" title="Voice Input">🎤</button>
+      <textarea id="promptInput" placeholder="Ask Gemini or type a message..."></textarea>
+      <button class="dock-btn send" onclick="handlePrimarySend()" title="Send">➔</button>
+    </div>
   </div>
 
 </div>
 
-<!-- SUBSCRIPTION & RAZORPAY MODAL -->
-<div id="subModal" class="modal">
-  <div class="modal-content">
-    <h3 id="planTitle">Subscription Plan</h3>
-    <p style="color:#94a3b8;">Tenure: <span id="planTenureText" style="color:#f8fafc; font-weight:bold;">-</span></p>
-    <p style="font-size:20px; font-weight:bold; color:#10b981;">Price: ₹<span id="finalPriceText">0</span></p>
+<!-- USER AUTH BOTTOM SHEET -->
+<div id="authModal" class="modal-overlay">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <h3 style="margin-top:0; color:#e3e2e6;">User Account</h3>
+    <input type="text" id="usernameInput" class="input-dark" placeholder="Enter Username">
+    <button class="btn-primary" onclick="loginUser()" style="margin-top:10px;">Save Profile</button>
+    <button class="btn-secondary" onclick="closeAuthModal()" style="width:100%; margin-top:8px;">Cancel</button>
+  </div>
+</div>
 
-    <label>Promo Code:</label>
-    <div style="display:flex; gap:6px;">
-      <input type="text" id="userPromoInput" placeholder="Enter Promo Code" style="text-transform:uppercase;">
-      <button onclick="applyPromoCode()" style="width:auto; padding:0 16px;">Apply</button>
-    </div>
-    <p id="promoMsg" style="font-size:12px; margin:4px 0 12px 0;"></p>
+<!-- SUBSCRIPTION SHEET -->
+<div id="subModal" class="modal-overlay">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="planTitle" style="margin-top:0; color:#e3e2e6;">Premium Pass</h3>
+    <div style="font-size:13px; color:#8e918f;">Tenure: <span id="planTenureText" style="color:#e3e2e6; font-weight:600;">-</span></div>
+    <div style="font-size:24px; font-weight:700; color:#a8c7fa; margin:10px 0;">₹<span id="finalPriceText">0</span></div>
 
-    <button onclick="payWithRazorpay()" style="background:#10b981; padding:12px; font-size:16px;">Pay with Razorpay</button>
-    <button onclick="closeSubModal()" style="background:#64748b; margin-top:6px;">Close</button>
+    <input type="text" id="userPromoInput" class="input-dark" placeholder="PROMO CODE" style="text-transform:uppercase;">
+    <button class="btn-secondary" onclick="applyPromoCode()" style="width:100%; margin-bottom:8px;">Apply Code</button>
+    <div id="promoMsg" style="font-size:12px; margin-bottom:12px;"></div>
+
+    <button class="btn-primary" onclick="payWithRazorpay()">Pay with Razorpay</button>
+    <button class="btn-secondary" onclick="closeSubModal()" style="width:100%; margin-top:8px;">Close</button>
   </div>
 </div>
 
 <script>
   const GROQ_API_KEY = "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";
   let currentUser = localStorage.getItem('username') || 'Guest';
-
+  let activeTab = 'ai-tab';
+  let selectedImageFile = null;
   let originalPrice = 0;
   let currentFinalPrice = 0;
 
   function initApp() {
-    if (localStorage.getItem('username')) {
-      document.getElementById('authSection').innerHTML = `<h3>Logged in as: <b>${currentUser}</b></h3> <button onclick="logout()">Logout</button>`;
-    }
+    updateUserPill();
     loadLiveData();
     renderChatHistory();
   }
+
+  function updateUserPill() {
+    document.getElementById('userPill').innerHTML = `<span>👤 ${currentUser}</span>`;
+  }
+
+  function openAuthModal() { document.getElementById('authModal').classList.add('active'); }
+  function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
 
   function loginUser() {
     const val = document.getElementById('usernameInput').value.trim();
     if (val) {
       localStorage.setItem('username', val);
       currentUser = val;
-      location.reload();
+      updateUserPill();
+      closeAuthModal();
+      renderChatHistory();
     }
   }
 
-  function logout() {
-    localStorage.removeItem('username');
-    location.reload();
+  function switchTab(tabId, btn) {
+    activeTab = tabId;
+    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
   }
 
+  // IMAGE ATTACHMENT
+  function handleImageSelect(event) {
+    if (event.target.files && event.target.files[0]) {
+      selectedImageFile = event.target.files[0];
+      document.getElementById('imageChipName').innerText = selectedImageFile.name;
+      document.getElementById('imageChip').style.display = 'inline-flex';
+      switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
+    }
+  }
+
+  function clearAttachedImage() {
+    selectedImageFile = null;
+    document.getElementById('imageInput').value = '';
+    document.getElementById('imageChip').style.display = 'none';
+  }
+
+  // DOCK SEND CONTROLLER
+  function handlePrimarySend() {
+    const text = document.getElementById('promptInput').value.trim();
+    if (!text && !selectedImageFile) return;
+
+    if (activeTab === 'chat-tab') {
+      sendChatMessage(text);
+      document.getElementById('promptInput').value = '';
+    } else {
+      processAIRequest(text);
+    }
+  }
+
+  // LIVE STREAM DATA
   function loadLiveData() {
     const liveData = JSON.parse(localStorage.getItem('liveDetails')) || { isLive: false, url: '', description: '' };
-    const badge = document.getElementById('liveStatus');
+    const badge = document.getElementById('liveBadge');
     const desc = document.getElementById('streamDescription');
     const player = document.getElementById('playerContainer');
 
@@ -133,158 +501,38 @@
     }
   }
 
-  // SUBSCRIPTION & RAZORPAY LOGIC
-  function openSubModal() {
-    const planData = JSON.parse(localStorage.getItem('subPlanDetails')) || { name: 'Premium Pass', price: 499, tenure: '1 Month' };
-    document.getElementById('planTitle').innerText = planData.name;
-    document.getElementById('planTenureText').innerText = planData.tenure;
-    
-    originalPrice = planData.price;
-    currentFinalPrice = planData.price;
-    document.getElementById('finalPriceText').innerText = currentFinalPrice;
-    document.getElementById('promoMsg').innerText = '';
-    document.getElementById('userPromoInput').value = '';
-
-    document.getElementById('subModal').classList.add('active');
-  }
-
-  function closeSubModal() {
-    document.getElementById('subModal').classList.remove('active');
-  }
-
-  function applyPromoCode() {
-    const codeEntered = document.getElementById('userPromoInput').value.trim().toUpperCase();
-    const promoData = JSON.parse(localStorage.getItem('promoDetails'));
-    const msgEl = document.getElementById('promoMsg');
-
-    if (promoData && codeEntered === promoData.code) {
-      const discountAmount = (originalPrice * promoData.discount) / 100;
-      currentFinalPrice = Math.max(0, originalPrice - discountAmount);
-      document.getElementById('finalPriceText').innerText = currentFinalPrice.toFixed(2);
-      msgEl.style.color = '#10b981';
-      msgEl.innerText = `Success! ${promoData.discount}% discount applied.`;
-    } else {
-      msgEl.style.color = '#ef4444';
-      msgEl.innerText = 'Invalid Promo Code!';
-    }
-  }
-
-  function payWithRazorpay() {
-    const razorpayKey = localStorage.getItem('razorpayKey');
-    if (!razorpayKey) {
-      alert("Razorpay API Key is not configured by Admin!");
-      return;
-    }
-
-    const options = {
-      "key": razorpayKey,
-      "amount": currentFinalPrice * 100, // Amount in paise
-      "currency": "INR",
-      "name": "Live Broadcast Subscription",
-      "description": document.getElementById('planTitle').innerText,
-      "handler": function (response) {
-        alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-        closeSubModal();
-      },
-      "prefill": { "name": currentUser }
-    };
-
-    const rzp = new Razorpay(options);
-    rzp.open();
-  }
-
-  // CHAT HISTORY
-  function getChatHistory() { return JSON.parse(localStorage.getItem('chatHistory')) || []; }
-
-  function sendChatMessage() {
-    const msgInput = document.getElementById('chatMsgInput');
-    if (!msgInput.value.trim()) return;
-    const history = getChatHistory();
-    history.push({ id: Date.now(), user: currentUser, text: msgInput.value });
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    msgInput.value = '';
-    renderChatHistory();
-  }
-
-  function renderChatHistory() {
-    const history = getChatHistory();
-    const chatBox = document.getElementById('chatBox');
-    chatBox.innerHTML = '';
-    history.forEach(item => {
-      const isOwner = item.user === currentUser;
-      const actions = isOwner ? `<span class="msg-actions" onclick="deleteMessage(${item.id})">Delete</span><span class="msg-actions" onclick="editMessage(${item.id})" style="margin-right:8px;">Edit</span>` : '';
-      chatBox.innerHTML += `<div class="msg">${actions}<strong>${item.user}:</strong> ${item.text}</div>`;
-    });
-  }
-
-  function editMessage(id) {
-    const history = getChatHistory();
-    const msg = history.find(m => m.id === id);
-    if (msg) {
-      const newText = prompt("Edit your message:", msg.text);
-      if (newText) {
-        msg.text = newText;
-        localStorage.setItem('chatHistory', JSON.stringify(history));
-        renderChatHistory();
-      }
-    }
-  }
-
-  function deleteMessage(id) {
-    let history = getChatHistory();
-    history = history.filter(m => m.id !== id);
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    renderChatHistory();
-  }
-
-  // AI & VOICE FUNCTIONS
-  function startVoiceSearch() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Browser does not support Voice Recognition");
-    const recognition = new SpeechRecognition();
-    recognition.start();
-    recognition.onresult = (event) => {
-      document.getElementById('promptInput').value = event.results[0][0].transcript;
-      processAIRequest();
-    };
-  }
-
-  function speakResponse() {
-    const text = document.getElementById('aiOutput').innerText;
-    if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-  }
-
-  async function processAIRequest() {
-    const prompt = document.getElementById('promptInput').value;
-    const imageInput = document.getElementById('imageInput').files[0];
+  // AI & VISION API
+  async function processAIRequest(promptText) {
+    switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
     const out = document.getElementById('aiOutput');
-    out.innerHTML = "Processing...";
+    out.innerText = "Thinking...";
 
-    if (prompt.toLowerCase().startsWith("generate image")) {
-      const cleanPrompt = encodeURIComponent(prompt);
-      out.innerHTML = `<img src="https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=500&nologo=true" style="width:100%; border-radius:6px;" />`;
+    document.getElementById('promptInput').value = '';
+
+    if (promptText.toLowerCase().startsWith("generate image")) {
+      const cleanPrompt = encodeURIComponent(promptText);
+      out.innerHTML = `<img src="https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=500&nologo=true" style="width:100%; border-radius:12px; margin-top:8px;" />`;
+      clearAttachedImage();
       return;
     }
 
     try {
       let payload = {
-        model: imageInput ? "qwen-2.5-vl-7b-instruct" : "llama-3.3-70b-versatile",
+        model: selectedImageFile ? "qwen-2.5-vl-7b-instruct" : "llama-3.3-70b-versatile",
         messages: []
       };
 
-      if (imageInput) {
-        const base64Img = await convertBase64(imageInput);
+      if (selectedImageFile) {
+        const base64Img = await convertBase64(selectedImageFile);
         payload.messages.push({
           role: "user",
           content: [
-            { type: "text", text: prompt || "Describe this image in detail." },
+            { type: "text", text: promptText || "Describe this image in detail." },
             { type: "image_url", image_url: { url: base64Img } }
           ]
         });
       } else {
-        payload.messages.push({ role: "user", content: prompt });
+        payload.messages.push({ role: "user", content: promptText });
       }
 
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -297,7 +545,112 @@
       out.innerText = data.choices[0].message.content;
     } catch (err) {
       out.innerText = "Error: " + err.message;
+    } finally {
+      clearAttachedImage();
     }
+  }
+
+  // VOICE & TTS
+  function startVoiceSearch() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert("Browser does not support Voice Recognition");
+    const recognition = new SpeechRecognition();
+    recognition.start();
+    recognition.onresult = (event) => {
+      document.getElementById('promptInput').value = event.results[0][0].transcript;
+      handlePrimarySend();
+    };
+  }
+
+  function speakResponse() {
+    const text = document.getElementById('aiOutput').innerText;
+    if (!text) return;
+    const utterance = new SpeechSynthesisUtterance(text);
+    window.speechSynthesis.speak(utterance);
+  }
+
+  // COMMUNITY CHAT
+  function getChatHistory() { return JSON.parse(localStorage.getItem('chatHistory')) || []; }
+
+  function sendChatMessage(text) {
+    if (!text) return;
+    const history = getChatHistory();
+    history.push({ id: Date.now(), user: currentUser, text: text });
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+    renderChatHistory();
+  }
+
+  function renderChatHistory() {
+    const history = getChatHistory();
+    const stream = document.getElementById('chatStream');
+    stream.innerHTML = '';
+    history.forEach(item => {
+      const isOwner = item.user === currentUser;
+      const actions = isOwner ? `<div class="actions"><span onclick="deleteMsg(${item.id})">Delete</span></div>` : '';
+      stream.innerHTML += `
+        <div class="chat-msg">
+          ${actions}
+          <div class="author">${item.user}</div>
+          <div>${item.text}</div>
+        </div>
+      `;
+    });
+  }
+
+  function deleteMsg(id) {
+    let history = getChatHistory();
+    history = history.filter(m => m.id !== id);
+    localStorage.setItem('chatHistory', JSON.stringify(history));
+    renderChatHistory();
+  }
+
+  // SUBSCRIPTION & RAZORPAY
+  function openSubModal() {
+    const planData = JSON.parse(localStorage.getItem('subPlanDetails')) || { name: 'Premium Pass', price: 499, tenure: '1 Month' };
+    document.getElementById('planTitle').innerText = planData.name;
+    document.getElementById('planTenureText').innerText = planData.tenure;
+    originalPrice = planData.price;
+    currentFinalPrice = planData.price;
+    document.getElementById('finalPriceText').innerText = currentFinalPrice;
+    document.getElementById('subModal').classList.add('active');
+  }
+
+  function closeSubModal() { document.getElementById('subModal').classList.remove('active'); }
+
+  function applyPromoCode() {
+    const codeEntered = document.getElementById('userPromoInput').value.trim().toUpperCase();
+    const promoData = JSON.parse(localStorage.getItem('promoDetails'));
+    const msgEl = document.getElementById('promoMsg');
+
+    if (promoData && codeEntered === promoData.code) {
+      const discountAmount = (originalPrice * promoData.discount) / 100;
+      currentFinalPrice = Math.max(0, originalPrice - discountAmount);
+      document.getElementById('finalPriceText').innerText = currentFinalPrice.toFixed(2);
+      msgEl.style.color = '#a8c7fa';
+      msgEl.innerText = `Success! ${promoData.discount}% discount applied.`;
+    } else {
+      msgEl.style.color = '#f2b8b5';
+      msgEl.innerText = 'Invalid Promo Code!';
+    }
+  }
+
+  function payWithRazorpay() {
+    const razorpayKey = localStorage.getItem('razorpayKey');
+    if (!razorpayKey) return alert("Razorpay API Key is not configured in Admin panel!");
+
+    const options = {
+      "key": razorpayKey,
+      "amount": currentFinalPrice * 100,
+      "currency": "INR",
+      "name": "Gemini Studio Subscription",
+      "description": document.getElementById('planTitle').innerText,
+      "handler": function (response) {
+        alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+        closeSubModal();
+      },
+      "prefill": { "name": currentUser }
+    };
+    new Razorpay(options).open();
   }
 
   function convertBase64(file) {
