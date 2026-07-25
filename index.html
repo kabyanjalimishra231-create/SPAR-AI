@@ -20,6 +20,9 @@
     <!-- HEADER / NAVIGATION -->
     <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-3 sm:px-4 py-2.5 flex justify-between items-center z-20 shrink-0">
         <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="toggleHistoryDrawer()" class="text-gray-400 hover:text-white text-base p-1.5 rounded-lg bg-[#131314] border border-[#2d2f31]" title="Chat History">
+                <i class="fa-solid fa-bars"></i>
+            </button>
             <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/30">
                 <i class="fa-solid fa-sparkles"></i>
             </div>
@@ -30,8 +33,13 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <!-- ACCOUNT / USER IDENTITY -->
-            <div id="user-account-badge" class="bg-[#131314] border border-[#2d2f31] px-2.5 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5 cursor-pointer hover:border-gray-500 transition" onclick="showAccountDetails()">
+            <!-- NEW CHAT BUTTON -->
+            <button onclick="createNewChatSession()" title="New Chat" class="px-2.5 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white rounded-full text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Chat</span>
+            </button>
+
+            <!-- ACCOUNT / USER CREATION & IDENTITY BUTTON -->
+            <div id="user-account-badge" class="bg-[#131314] border border-[#2d2f31] px-2.5 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5 cursor-pointer hover:border-blue-500 transition" onclick="openAuthModal()">
                 <i class="fa-solid fa-circle-user text-blue-400 text-xs"></i>
                 <span id="user-account-id" class="text-[11px] font-medium text-gray-200">Account</span>
             </div>
@@ -42,17 +50,33 @@
                 <span>Credits: <strong id="user-credits-display" class="text-purple-400">5</strong></span>
             </div>
 
-            <!-- CLEAR HISTORY BUTTON -->
-            <button onclick="clearChatHistory()" title="Clear Chat History" class="px-2.5 py-1.5 bg-[#2d2f31] hover:bg-red-900/40 hover:text-red-300 text-gray-300 rounded-full text-xs transition flex items-center gap-1">
-                <i class="fa-solid fa-trash-can text-[11px]"></i>
-            </button>
-
             <!-- ADMIN LINK -->
             <a href="admin.html" class="px-3 py-1.5 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 rounded-full text-xs font-semibold transition flex items-center gap-1.5">
                 <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Admin</span>
             </a>
         </div>
     </header>
+
+    <!-- SIDE DRAWER FOR CHAT HISTORY & MANAGEMENT -->
+    <div id="history-drawer" class="fixed inset-y-0 left-0 w-72 bg-[#1e1f20] border-r border-[#2d2f31] z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-4 border-b border-[#2d2f31] flex justify-between items-center">
+            <h3 class="font-bold text-sm text-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Saved Chats
+            </h3>
+            <button onclick="toggleHistoryDrawer()" class="text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div id="history-list" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <!-- Saved Chat items with Rename/Delete buttons will render here -->
+        </div>
+        <div class="p-3 border-t border-[#2d2f31]">
+            <button onclick="createNewChatSession()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-medium transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Start New Chat
+            </button>
+        </div>
+    </div>
+    <div id="drawer-backdrop" onclick="toggleHistoryDrawer()" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
 
     <!-- MAIN CHAT AREA -->
     <main id="chat-container" class="flex-1 w-full max-w-4xl mx-auto p-3 sm:p-5 flex flex-col min-h-0 overflow-y-auto space-y-4">
@@ -61,10 +85,10 @@
                 <i class="fa-solid fa-robot"></i> Spar AI Assistant
             </h2>
             <p class="text-xs text-gray-300 leading-relaxed">
-                Welcome back! Type your prompt below or attach an image to initiate image processing and visual search.
+                Powered by Groq High-Speed Inference. Ask anything or attach an image below.
             </p>
         </div>
-        <!-- Dynamic History and Messages Render Here -->
+        <!-- Active Chat Messages Render Here -->
     </main>
 
     <!-- INPUT CONTROLS -->
@@ -110,6 +134,41 @@
         </div>
     </footer>
 
+    <!-- AUTH / USER ACCOUNT MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] p-5 rounded-2xl max-w-sm w-full space-y-4">
+            <div class="flex justify-between items-center border-b border-[#2d2f31] pb-2">
+                <h3 id="auth-title" class="font-bold text-sm text-gray-100">User Account</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="account-info-view" class="space-y-3">
+                <div class="bg-[#131314] p-3 rounded-xl border border-[#2d2f31] text-xs space-y-1">
+                    <p class="text-gray-400">Logged in as:</p>
+                    <p id="current-username-display" class="font-bold text-blue-400 text-sm"></p>
+                </div>
+                <button onclick="switchAuthTab('signup')" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl transition">
+                    Create New Account
+                </button>
+                <button onclick="switchAuthTab('login')" class="w-full py-2 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 font-semibold text-xs rounded-xl transition">
+                    Switch / Login Account
+                </button>
+            </div>
+
+            <div id="account-form-view" class="hidden space-y-3">
+                <input id="auth-username" type="text" placeholder="Enter Username / Email" class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none focus:border-blue-500">
+                <input id="auth-password" type="password" placeholder="Enter Password" class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none focus:border-blue-500">
+                
+                <div class="flex gap-2 pt-2">
+                    <button onclick="switchAuthTab('info')" class="flex-1 py-2 bg-[#2d2f31] text-xs rounded-xl">Cancel</button>
+                    <button id="auth-submit-btn" onclick="submitAuthForm()" class="flex-1 py-2 bg-blue-600 text-xs font-bold rounded-xl">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- RATING MODAL -->
     <div id="rating-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
         <div class="bg-[#1e1f20] border border-[#2d2f31] p-5 rounded-2xl max-w-sm w-full space-y-4">
@@ -134,38 +193,110 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
+        const GROQ_API_KEY = "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";
+
         const syncChannel = new BroadcastChannel('spar_ai_sync_channel');
         let selectedImageData = null;
         let selectedStars = 5;
+        let currentChatId = null;
+        let currentAuthMode = 'signup';
 
-        // 1. ACCOUNT & SESSION SYSTEM
-        function registerUserSession() {
-            let userId = localStorage.getItem('spar_ai_user_id');
-            if (!userId) {
-                userId = 'usr_' + Math.random().toString(36).substr(2, 6);
-                localStorage.setItem('spar_ai_user_id', userId);
+        // 1. ACCOUNT AUTHENTICATION & MANAGEMENT
+        function initUserSession() {
+            let activeUser = localStorage.getItem('spar_ai_active_user');
+            if (!activeUser) {
+                activeUser = 'Guest_' + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('spar_ai_active_user', activeUser);
+                
+                // Store in user list
+                let userAccounts = JSON.parse(localStorage.getItem('spar_ai_user_accounts') || '{}');
+                userAccounts[activeUser] = { password: '', credits: "5" };
+                localStorage.setItem('spar_ai_user_accounts', JSON.stringify(userAccounts));
             }
-            let userEmail = localStorage.getItem('spar_ai_user_email') || `${userId}@spar.ai`;
-            localStorage.setItem('spar_ai_user_email', userEmail);
 
             const accEl = document.getElementById('user-account-id');
-            if (accEl) accEl.innerText = userId;
+            if (accEl) accEl.innerText = activeUser;
 
             let users = JSON.parse(localStorage.getItem('spar_ai_users') || '[]');
-            if (!users.includes(userId)) {
-                users.push(userId);
+            if (!users.includes(activeUser)) {
+                users.push(activeUser);
                 localStorage.setItem('spar_ai_users', JSON.stringify(users));
                 syncChannel.postMessage({ type: 'USER_UPDATED' });
             }
         }
 
-        function showAccountDetails() {
-            const userId = localStorage.getItem('spar_ai_user_id');
-            const userEmail = localStorage.getItem('spar_ai_user_email');
-            const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro";
-            const credits = localStorage.getItem('spar_ai_free_credits') || "5";
+        function openAuthModal() {
+            const activeUser = localStorage.getItem('spar_ai_active_user') || 'Guest';
+            document.getElementById('current-username-display').innerText = activeUser;
+            switchAuthTab('info');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.add('flex');
+        }
 
-            alert(`User Account Info:\n-------------------\nUser ID: ${userId}\nEmail: ${userEmail}\nCurrent Plan: ${planName}\nAvailable Credits: ${credits}`);
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('flex');
+        }
+
+        function switchAuthTab(mode) {
+            currentAuthMode = mode;
+            const infoView = document.getElementById('account-info-view');
+            const formView = document.getElementById('account-form-view');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const title = document.getElementById('auth-title');
+
+            if (mode === 'info') {
+                infoView.classList.remove('hidden');
+                formView.classList.add('hidden');
+                title.innerText = "User Account";
+            } else if (mode === 'signup') {
+                infoView.classList.add('hidden');
+                formView.classList.remove('hidden');
+                title.innerText = "Create New Account";
+                submitBtn.innerText = "Register";
+            } else if (mode === 'login') {
+                infoView.classList.add('hidden');
+                formView.classList.remove('hidden');
+                title.innerText = "Login / Switch Account";
+                submitBtn.innerText = "Login";
+            }
+        }
+
+        function submitAuthForm() {
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+
+            if (!username || !password) {
+                alert("Please fill in both username and password!");
+                return;
+            }
+
+            let accounts = JSON.parse(localStorage.getItem('spar_ai_user_accounts') || '{}');
+
+            if (currentAuthMode === 'signup') {
+                if (accounts[username]) {
+                    alert("Account username already exists! Choose another or log in.");
+                    return;
+                }
+                accounts[username] = { password: password, credits: "5" };
+                localStorage.setItem('spar_ai_user_accounts', JSON.stringify(accounts));
+                localStorage.setItem('spar_ai_active_user', username);
+                alert("Account created successfully!");
+            } else if (currentAuthMode === 'login') {
+                if (!accounts[username] || accounts[username].password !== password) {
+                    alert("Invalid username or password!");
+                    return;
+                }
+                localStorage.setItem('spar_ai_active_user', username);
+                alert("Logged in successfully!");
+            }
+
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+            closeAuthModal();
+            initUserSession();
+            loadAdminSettings();
+            createNewChatSession();
         }
 
         // 2. ADMIN SETTINGS LOAD & SYNC
@@ -187,18 +318,144 @@
 
         syncChannel.onmessage = () => loadAdminSettings();
 
-        // 3. CHAT HISTORY PERSISTENCE
-        function saveMessageToHistory(role, content, imageData = null) {
-            let history = JSON.parse(localStorage.getItem('spar_ai_chat_history') || '[]');
-            history.push({ role, content, imageData, timestamp: new Date().toISOString() });
-            localStorage.setItem('spar_ai_chat_history', JSON.stringify(history));
+        // 3. CHAT SESSIONS & HISTORY PER USER
+        function getUserChatStorageKey() {
+            const activeUser = localStorage.getItem('spar_ai_active_user') || 'Guest';
+            return `spar_ai_chats_${activeUser}`;
         }
 
-        function loadChatHistory() {
-            let history = JSON.parse(localStorage.getItem('spar_ai_chat_history') || '[]');
-            const chatContainer = document.getElementById('chat-container');
+        function getStoredChats() {
+            return JSON.parse(localStorage.getItem(getUserChatStorageKey()) || '[]');
+        }
 
-            history.forEach(msg => {
+        function saveStoredChats(chats) {
+            localStorage.setItem(getUserChatStorageKey(), JSON.stringify(chats));
+            renderHistoryDrawerList();
+        }
+
+        function createNewChatSession() {
+            const chats = getStoredChats();
+            const newChat = {
+                id: 'chat_' + Date.now(),
+                title: 'New Conversation',
+                messages: [],
+                createdAt: new Date().toISOString()
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveStoredChats(chats);
+            renderActiveChat();
+            if (!document.getElementById('history-drawer').classList.contains('-translate-x-full')) {
+                toggleHistoryDrawer();
+            }
+        }
+
+        function switchChatSession(chatId) {
+            currentChatId = chatId;
+            renderActiveChat();
+            toggleHistoryDrawer();
+        }
+
+        function renameChatSession(chatId, event) {
+            event.stopPropagation();
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === chatId);
+            if (!chat) return;
+
+            const newTitle = prompt("Enter a new name for this chat:", chat.title);
+            if (newTitle && newTitle.trim()) {
+                chat.title = newTitle.trim();
+                saveStoredChats(chats);
+            }
+        }
+
+        function deleteChatSession(chatId, event) {
+            event.stopPropagation();
+            if (!confirm("Are you sure you want to delete this chat?")) return;
+
+            let chats = getStoredChats();
+            chats = chats.filter(c => c.id !== chatId);
+
+            if (currentChatId === chatId) {
+                currentChatId = chats.length > 0 ? chats[0].id : null;
+            }
+
+            saveStoredChats(chats);
+            
+            if (!currentChatId) {
+                createNewChatSession();
+            } else {
+                renderActiveChat();
+            }
+        }
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('history-drawer');
+            const backdrop = document.getElementById('drawer-backdrop');
+            drawer.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        function renderHistoryDrawerList() {
+            const chats = getStoredChats();
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (chats.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No saved conversations</p>`;
+                return;
+            }
+
+            chats.forEach(chat => {
+                const isActive = chat.id === currentChatId;
+                const item = document.createElement('div');
+                item.className = `p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${isActive ? 'bg-blue-600/20 border border-blue-500/30 text-blue-400' : 'bg-[#131314] border border-[#2d2f31] text-gray-300 hover:border-gray-500'}`;
+                item.onclick = () => switchChatSession(chat.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate pr-2">
+                        <i class="fa-regular fa-message text-[11px]"></i>
+                        <span class="truncate font-medium">${chat.title}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="renameChatSession('${chat.id}', event)" class="p-1 text-gray-400 hover:text-blue-400 transition" title="Rename Chat">
+                            <i class="fa-solid fa-pen text-[10px]"></i>
+                        </button>
+                        <button onclick="deleteChatSession('${chat.id}', event)" class="p-1 text-gray-400 hover:text-red-400 transition" title="Delete Chat">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderActiveChat() {
+            const chats = getStoredChats();
+            let currentChat = chats.find(c => c.id === currentChatId);
+
+            if (!currentChat && chats.length > 0) {
+                currentChat = chats[0];
+                currentChatId = currentChat.id;
+            } else if (!currentChat) {
+                createNewChatSession();
+                return;
+            }
+
+            const chatContainer = document.getElementById('chat-container');
+            
+            chatContainer.innerHTML = `
+                <div class="bg-[#1e1f20] border border-[#2d2f31] p-4 rounded-2xl space-y-2 shrink-0">
+                    <h2 class="font-bold text-base text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> Spar AI Assistant
+                    </h2>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Powered by Groq High-Speed Inference. Ask anything or attach an image below.
+                    </p>
+                </div>
+            `;
+
+            currentChat.messages.forEach(msg => {
                 if (msg.role === 'user') {
                     const userCard = document.createElement('div');
                     userCard.className = "bg-[#1e1f20] border border-[#2d2f31] p-3 rounded-2xl ml-auto max-w-[85%] space-y-2 shrink-0";
@@ -212,14 +469,23 @@
                     chatContainer.appendChild(aiCard);
                 }
             });
+
             chatContainer.scrollTop = chatContainer.scrollHeight;
+            renderHistoryDrawerList();
         }
 
-        function clearChatHistory() {
-            if (confirm("Are you sure you want to clear your chat history?")) {
-                localStorage.removeItem('spar_ai_chat_history');
-                location.reload();
+        function appendMessageToCurrentChat(role, content, imageData = null) {
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            chat.messages.push({ role, content, imageData, timestamp: new Date().toISOString() });
+            
+            if (chat.messages.length === 1 && role === 'user') {
+                chat.title = content.length > 25 ? content.substring(0, 25) + '...' : content;
             }
+
+            saveStoredChats(chats);
         }
 
         // 4. RAZORPAY SUBSCRIPTION
@@ -275,13 +541,12 @@
             document.getElementById('image-preview-box').classList.add('hidden');
         }
 
-        // 6. REAL AI RESPONSE WITH CUSTOM API KEY SUPPORT
+        // 6. GROQ API ENGINE INTEGRATION
         async function handleSendMessage() {
             const input = document.getElementById('user-input');
             const userPrompt = input.value.trim();
             if (!userPrompt && !selectedImageData) return;
 
-            // Credit Check
             let currentCredits = localStorage.getItem('spar_ai_free_credits') || "5";
             if (currentCredits !== "Unlimited") {
                 let numCredits = parseInt(currentCredits);
@@ -295,72 +560,60 @@
 
             const chatContainer = document.getElementById('chat-container');
 
-            // Render User Message
             const userCard = document.createElement('div');
             userCard.className = "bg-[#1e1f20] border border-[#2d2f31] p-3 rounded-2xl ml-auto max-w-[85%] space-y-2 shrink-0";
             let imgHTML = selectedImageData ? `<img src="${selectedImageData}" class="max-h-48 rounded-lg border border-[#2d2f31] mb-2">` : '';
             userCard.innerHTML = `${imgHTML}<p class="text-xs sm:text-sm text-gray-100">${userPrompt || 'Analyze attached image'}</p>`;
             chatContainer.appendChild(userCard);
 
-            const promptToSend = userPrompt || "Please describe and analyze this image.";
+            const promptToSend = userPrompt || "Please analyze this image.";
             const attachedImgCopy = selectedImageData;
 
             input.value = '';
             removeAttachedImage();
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
-            // Save User Input to Local History
-            saveMessageToHistory('user', promptToSend, attachedImgCopy);
+            appendMessageToCurrentChat('user', promptToSend, attachedImgCopy);
 
-            // Render Thinking AI Card
             const aiCard = document.createElement('div');
             aiCard.className = "bg-[#131314] border border-[#2d2f31] p-3 rounded-2xl mr-auto max-w-[85%] text-xs text-gray-300 leading-relaxed space-y-2 shrink-0";
             aiCard.innerHTML = `<span class="inline-flex items-center gap-2 text-blue-400 font-medium"><i class="fa-solid fa-spinner fa-spin"></i> Thinking...</span>`;
             chatContainer.appendChild(aiCard);
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
-            // Fetch Saved API Key from Admin (Gemini or OpenAI or Custom Key)
-            const customApiKey = localStorage.getItem('spar_ai_custom_api_key') || localStorage.getItem('spar_ai_openai_key') || localStorage.getItem('spar_ai_gemini_key');
-
             try {
-                let aiTextResponse = "";
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${GROQ_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [
+                            { role: "system", content: "You are Spar AI, an intelligent, helpful AI assistant." },
+                            { role: "user", content: promptToSend }
+                        ],
+                        temperature: 0.7
+                    })
+                });
 
-                if (customApiKey) {
-                    // Custom OpenAI-compatible API Endpoint Call
-                    const apiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${customApiKey}`
-                        },
-                        body: JSON.stringify({
-                            model: "gpt-3.5-turbo",
-                            messages: [{ role: "user", content: promptToSend }]
-                        })
-                    });
-                    const data = await apiRes.json();
-                    if (data.choices && data.choices[0]) {
-                        aiTextResponse = data.choices[0].message.content;
-                    } else {
-                        throw new Error("Invalid API key or response");
-                    }
-                } else {
-                    // Default High-speed Free Engine
-                    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptToSend)}?model=openai`);
-                    if (!response.ok) throw new Error("API request failed");
-                    aiTextResponse = await response.text();
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || "Groq API error");
                 }
 
-                const formattedResponse = aiTextResponse.replace(/\n/g, '<br>');
-                aiCard.innerHTML = formattedResponse;
+                const data = await response.json();
+                const aiResponseText = data.choices[0].message.content;
+                const formattedResponse = aiResponseText.replace(/\n/g, '<br>');
 
-                // Save Response to Chat History
-                saveMessageToHistory('assistant', formattedResponse);
+                aiCard.innerHTML = formattedResponse;
+                appendMessageToCurrentChat('assistant', formattedResponse);
 
             } catch (err) {
-                const errHTML = `<span class="text-red-400"><i class="fa-solid fa-circle-exclamation"></i> Could not generate response. Please check your API key in Admin panel or network connection.</span>`;
+                const errHTML = `<span class="text-red-400"><i class="fa-solid fa-circle-exclamation"></i> Error: ${err.message || 'Could not connect to AI endpoint.'}</span>`;
                 aiCard.innerHTML = errHTML;
-                saveMessageToHistory('assistant', errHTML);
+                appendMessageToCurrentChat('assistant', errHTML);
             }
 
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -382,7 +635,7 @@
             const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
             
             ratings.push({
-                userName: localStorage.getItem('spar_ai_user_id') || 'App User',
+                userName: localStorage.getItem('spar_ai_active_user') || 'App User',
                 rating: selectedStars,
                 comment: comment || 'No comment provided.',
                 timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -396,9 +649,16 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            registerUserSession();
+            initUserSession();
             loadAdminSettings();
-            loadChatHistory();
+            
+            const chats = getStoredChats();
+            if (chats.length === 0) {
+                createNewChatSession();
+            } else {
+                currentChatId = chats[0].id;
+                renderActiveChat();
+            }
         });
         window.addEventListener('storage', loadAdminSettings);
     </script>
