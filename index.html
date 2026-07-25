@@ -1,837 +1,666 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SPAR AI & Live Studio</title>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <!-- Google Font: Inter -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-    
-    body {
-      background-color: #131314;
-      color: #e3e2e6;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    /* Mobile Frame Canvas */
-    .app-frame {
-      width: 100%;
-      max-width: 480px;
-      height: 100vh;
-      max-height: 900px;
-      background-color: #1e1f20;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    @media (min-width: 481px) {
-      .app-frame {
-        border-radius: 36px;
-        height: 92vh;
-        border: 1px solid #2d2f31;
-      }
-    }
-
-    /* Top App Bar */
-    .app-header {
-      padding: 16px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #1e1f20;
-      z-index: 10;
-    }
-
-    .brand-title {
-      font-size: 20px;
-      font-weight: 600;
-      background: linear-gradient(135deg, #a8c7fa 0%, #d3e3fd 50%, #7cacf8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .user-pill {
-      background: #2d2f31;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      color: #c4c6d0;
-      border: 1px solid #3c4043;
-      cursor: pointer;
-    }
-
-    /* Navigation Pills Tabs */
-    .tab-bar {
-      display: flex;
-      padding: 0 16px 12px 16px;
-      gap: 8px;
-      overflow-x: auto;
-      scrollbar-width: none;
-    }
-    .tab-bar::-webkit-scrollbar { display: none; }
-
-    .tab-btn {
-      background: #2d2f31;
-      color: #c4c6d0;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .tab-btn.active {
-      background: #a8c7fa;
-      color: #041e49;
-      font-weight: 600;
-    }
-
-    /* Scrollable Content Viewport */
-    .content-area {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .content-area::-webkit-scrollbar { display: none; }
-
-    .view-panel { display: none; flex-direction: column; gap: 16px; }
-    .view-panel.active { display: flex; }
-
-    /* Cards - Dark Aesthetic */
-    .card {
-      background: #131314;
-      border-radius: 20px;
-      padding: 18px;
-      border: 1px solid #2d2f31;
-    }
-
-    .card-title {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 12px;
-      color: #e3e2e6;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .status-badge {
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .status-badge.live { background: #f2b8b5; color: #601410; }
-    .status-badge.offline { background: #3c4043; color: #c4c6d0; }
-
-    iframe { width: 100%; height: 220px; border: none; border-radius: 16px; margin-top: 8px; }
-
-    /* Action Buttons */
-    .btn-primary {
-      background: linear-gradient(135deg, #a8c7fa, #7cacf8);
-      color: #041e49;
-      border: none;
-      padding: 12px;
-      border-radius: 24px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      width: 100%;
-      text-align: center;
-    }
-
-    .btn-secondary {
-      background: #2d2f31;
-      color: #e3e2e6;
-      border: 1px solid #3c4043;
-      padding: 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .btn-danger {
-      background: #3c1e1e;
-      color: #f2b8b5;
-      border: 1px solid #601410;
-      padding: 6px 12px;
-      border-radius: 16px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    /* Question & Response Boxes */
-    .user-question-box {
-      background: #2d2f31;
-      border-radius: 16px;
-      padding: 12px 14px;
-      font-size: 13px;
-      color: #a8c7fa;
-      border-left: 4px solid #7cacf8;
-      margin-bottom: 12px;
-      display: none;
-    }
-
-    .attached-preview-img {
-      max-width: 100%;
-      max-height: 180px;
-      border-radius: 12px;
-      margin-top: 8px;
-      border: 1px solid #3c4043;
-    }
-
-    .ai-output-box {
-      background: #1e1f20;
-      border-radius: 16px;
-      padding: 14px;
-      font-size: 14px;
-      line-height: 1.5;
-      color: #e3e2e6;
-      min-height: 80px;
-      border: 1px solid #2d2f31;
-      white-space: pre-wrap;
-    }
-
-    /* History List Items */
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 550px;
-      overflow-y: auto;
-    }
-
-    .history-card {
-      background: #1e1f20;
-      border: 1px solid #2d2f31;
-      border-radius: 16px;
-      padding: 12px 14px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .history-card:hover { background: #252729; }
-    .history-q { font-size: 13px; font-weight: 600; color: #a8c7fa; margin-bottom: 4px; }
-    .history-a { font-size: 12px; color: #c4c6d0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-
-    /* Community Chat Messages */
-    .chat-stream {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 380px;
-      overflow-y: auto;
-    }
-    .chat-msg {
-      background: #1e1f20;
-      padding: 12px 14px;
-      border-radius: 16px;
-      font-size: 13px;
-      line-height: 1.4;
-      border: 1px solid #2d2f31;
-      position: relative;
-    }
-    .chat-msg .author { color: #a8c7fa; font-weight: 600; margin-bottom: 4px; font-size: 12px; }
-    .chat-msg .actions { position: absolute; top: 10px; right: 12px; font-size: 11px; color: #8e918f; cursor: pointer; }
-
-    /* Bottom Dock Input */
-    .bottom-dock {
-      padding: 12px 16px 20px 16px;
-      background: #1e1f20;
-      border-top: 1px solid #2d2f31;
-    }
-
-    .dock-pill {
-      background: #131314;
-      border-radius: 28px;
-      padding: 6px 8px 6px 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid #2d2f31;
-    }
-
-    .dock-pill textarea {
-      flex: 1;
-      background: transparent;
-      border: none;
-      color: #e3e2e6;
-      font-size: 14px;
-      resize: none;
-      height: 24px;
-      outline: none;
-    }
-
-    .dock-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: #2d2f31;
-      border: none;
-      color: #a8c7fa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-    .dock-btn.send { background: #a8c7fa; color: #041e49; }
-
-    /* Image Attachment Chip */
-    .image-chip {
-      display: none;
-      background: #2d2f31;
-      padding: 6px 12px;
-      border-radius: 14px;
-      font-size: 12px;
-      color: #a8c7fa;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      border: 1px solid #3c4043;
-    }
-
-    /* Modal Sheet */
-    .modal-overlay {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 100;
-      align-items: flex-end;
-    }
-    .modal-overlay.active { display: flex; }
-    
-    .bottom-sheet {
-      background: #1e1f20;
-      width: 100%;
-      border-radius: 28px 28px 0 0;
-      padding: 24px;
-      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-      border-top: 1px solid #2d2f31;
-    }
-
-    .sheet-handle {
-      width: 32px;
-      height: 4px;
-      background: #444746;
-      border-radius: 2px;
-      margin: 0 auto 16px auto;
-    }
-
-    .input-dark {
-      width: 100%;
-      background: #131314;
-      border: 1px solid #2d2f31;
-      color: #e3e2e6;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      margin: 8px 0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Spar AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Razorpay Payment Gateway Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { height: 100vh; height: 100dvh; }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #2d2f31; border-radius: 10px; }
+    </style>
 </head>
-<body>
+<body class="bg-[#131314] text-gray-100 font-sans flex flex-col justify-between overflow-hidden antialiased">
 
-<div class="app-frame">
-  
-  <!-- TOP HEADER -->
-  <div class="app-header">
-    <div class="brand-title">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0Z" fill="url(#spar-grad)"/><defs><linearGradient id="spar-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#91B5FF"/><stop offset="1" stop-color="#E599FF"/></linearGradient></defs></svg>
-      SPAR AI
-    </div>
-    <div class="user-pill" id="userPill" onclick="openAuthModal()">
-      <span>👤 Guest</span>
-    </div>
-  </div>
-
-  <!-- NAVIGATION TABS -->
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">✨ SPAR Assistant</button>
-    <button class="tab-btn" onclick="switchTab('history-tab', this)">📜 History</button>
-    <button class="tab-btn" onclick="switchTab('live-tab', this)">🔴 Live Stream</button>
-    <button class="tab-btn" onclick="switchTab('chat-tab', this)">💬 Community</button>
-  </div>
-
-  <!-- VIEWPORT CONTENT -->
-  <div class="content-area">
-
-    <!-- 1. AI ASSISTANT VIEW -->
-    <div id="ai-tab" class="view-panel active">
-      <div id="imageChip" class="image-chip">
-        <span id="imageChipName">📷 Image attached</span>
-        <span onclick="clearAttachedImage()" style="cursor:pointer; font-weight:bold; margin-left:auto;">×</span>
-      </div>
-
-      <div class="card">
-        <!-- Display Active User Question & Attached Image -->
-        <div id="userQuestionBox" class="user-question-box">
-          <strong style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Your Question:</strong>
-          <div id="userQuestionText" style="margin-top:2px;"></div>
-          <div id="userQuestionImageContainer"></div>
+    <!-- HEADER / NAVIGATION -->
+    <header class="border-b border-[#2d2f31] bg-[#1e1f20] px-3 sm:px-4 py-2.5 flex justify-between items-center z-20 shrink-0">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <button onclick="toggleHistoryDrawer()" class="text-gray-400 hover:text-white text-base p-1.5 rounded-lg bg-[#131314] border border-[#2d2f31]" title="Chat History">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm border border-blue-500/30">
+                <i class="fa-solid fa-sparkles"></i>
+            </div>
+            <div>
+                <span class="font-bold text-base sm:text-lg text-gray-100 tracking-wide">Spar AI</span>
+                <span id="user-plan-badge" class="hidden sm:inline-block text-[10px] bg-blue-600/20 text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-full ml-2">Spar AI Pro (1 Month)</span>
+            </div>
         </div>
 
-        <div class="card-title">
-          <span>AI Response</span>
-          <button class="btn-secondary" onclick="speakResponse()" style="padding:4px 10px; font-size:11px;">🔊 Read</button>
+        <div class="flex items-center gap-2">
+            <!-- NEW CHAT BUTTON -->
+            <button onclick="createNewChatSession()" title="New Chat" class="px-2.5 py-1.5 bg-blue-600/20 border border-blue-500/30 text-blue-400 hover:bg-blue-600 hover:text-white rounded-full text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">New Chat</span>
+            </button>
+
+            <!-- ACCOUNT / USER CREATION & IDENTITY BUTTON -->
+            <div id="user-account-badge" class="bg-[#131314] border border-[#2d2f31] px-2.5 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5 cursor-pointer hover:border-blue-500 transition" onclick="openAuthModal()">
+                <i class="fa-solid fa-circle-user text-blue-400 text-xs"></i>
+                <span id="user-account-id" class="text-[11px] font-medium text-gray-200">Account</span>
+            </div>
+
+            <!-- CREDITS DISPLAY -->
+            <div class="bg-[#131314] border border-[#2d2f31] px-3 py-1 rounded-full text-xs text-gray-300 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt text-purple-400 text-[10px]"></i>
+                <span>Credits: <strong id="user-credits-display" class="text-purple-400">5</strong></span>
+            </div>
+
+            <!-- ADMIN LINK -->
+            <a href="admin.html" class="px-3 py-1.5 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 rounded-full text-xs font-semibold transition flex items-center gap-1.5">
+                <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Admin</span>
+            </a>
         </div>
-        <div class="ai-output-box" id="aiOutput">Hello! Ask me anything, attach an image to ask questions about it, or type 'Generate image of...' to create artwork!</div>
-      </div>
-    </div>
+    </header>
 
-    <!-- 2. HISTORY MANAGEMENT VIEW -->
-    <div id="history-tab" class="view-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>AI Chat History</span>
-          <button class="btn-danger" onclick="clearAIHistory()">🗑️ Clear All</button>
+    <!-- SIDE DRAWER FOR CHAT HISTORY & MANAGEMENT -->
+    <div id="history-drawer" class="fixed inset-y-0 left-0 w-72 bg-[#1e1f20] border-r border-[#2d2f31] z-50 transform -translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-4 border-b border-[#2d2f31] flex justify-between items-center">
+            <h3 class="font-bold text-sm text-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Saved Chats
+            </h3>
+            <button onclick="toggleHistoryDrawer()" class="text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
-        <div class="history-list" id="aiHistoryList">
-          <div style="font-size:13px; color:#8e918f; text-align:center; padding:20px 0;">No saved history yet.</div>
+        <div id="history-list" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <!-- Saved Chat items with Rename/Delete buttons will render here -->
         </div>
-      </div>
-    </div>
-
-    <!-- 3. LIVE STREAM VIEW -->
-    <div id="live-tab" class="view-panel">
-      <div class="card">
-        <div class="card-title">
-          <span>Broadcast</span>
-          <span id="liveBadge" class="status-badge offline">OFFLINE</span>
+        <div class="p-3 border-t border-[#2d2f31]">
+            <button onclick="createNewChatSession()" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-medium transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus"></i> Start New Chat
+            </button>
         </div>
-        <div id="streamDescription" style="font-size:13px; color:#c4c6d0;">No live event right now.</div>
-        <div id="playerContainer"></div>
-      </div>
+    </div>
+    <div id="drawer-backdrop" onclick="toggleHistoryDrawer()" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
 
-      <div class="card" style="text-align:center;">
-        <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Unlock Premium Pass</div>
-        <div style="font-size:12px; color:#8e918f; margin-bottom:14px;">Access uninterrupted streams and exclusive features</div>
-        <button class="btn-primary" onclick="openSubModal()">⭐ Get Subscription</button>
-      </div>
+    <!-- MAIN CHAT AREA -->
+    <main id="chat-container" class="flex-1 w-full max-w-4xl mx-auto p-3 sm:p-5 flex flex-col min-h-0 overflow-y-auto space-y-4">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] p-4 rounded-2xl space-y-2 shrink-0">
+            <h2 class="font-bold text-base text-blue-400 flex items-center gap-2">
+                <i class="fa-solid fa-robot"></i> Spar AI Assistant
+            </h2>
+            <p class="text-xs text-gray-300 leading-relaxed">
+                Powered by Groq High-Speed Inference. Ask anything or attach an image below.
+            </p>
+        </div>
+        <!-- Active Chat Messages Render Here -->
+    </main>
+
+    <!-- INPUT CONTROLS -->
+    <footer class="p-3 sm:p-4 bg-[#131314] border-t border-[#2d2f31] shrink-0">
+        <div class="max-w-4xl mx-auto space-y-2">
+            
+            <!-- IMAGE PREVIEW THUMBNAIL -->
+            <div id="image-preview-box" class="hidden flex items-center gap-2 bg-[#1e1f20] border border-[#2d2f31] p-2 rounded-xl w-max">
+                <img id="image-preview-thumb" src="" class="w-10 h-10 object-cover rounded-lg">
+                <div class="text-xs">
+                    <span id="image-file-name" class="block text-gray-200 font-medium truncate max-w-[140px]">Image attached</span>
+                    <span class="text-[10px] text-blue-400">Ready for search</span>
+                </div>
+                <button onclick="removeAttachedImage()" class="text-gray-400 hover:text-red-400 ml-2 p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- CHAT INPUT BAR -->
+            <div class="flex items-center gap-2 bg-[#1e1f20] border border-[#2d2f31] rounded-2xl px-3 py-2 focus-within:border-blue-500 transition">
+                
+                <input type="file" id="image-file-input" accept="image/*" class="hidden" onchange="handleImageSelect(event)">
+                
+                <button onclick="document.getElementById('image-file-input').click()" title="Attach Image" class="text-gray-400 hover:text-blue-400 p-2 transition">
+                    <i class="fa-solid fa-image text-base"></i>
+                </button>
+
+                <input id="user-input" type="text" placeholder="Ask anything or search with image..." class="flex-1 bg-transparent text-xs sm:text-sm text-gray-100 focus:outline-none px-2" onkeypress="if(event.key==='Enter') handleSendMessage()">
+
+                <button id="send-btn" onclick="handleSendMessage()" class="bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-xl transition flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                </button>
+            </div>
+
+            <!-- FOOTER INFO BAR -->
+            <div class="flex justify-between items-center text-[10px] text-gray-500 px-2">
+                <span>Plan Rate: <b id="user-price-display" class="text-gray-400 cursor-pointer hover:text-blue-400 transition" onclick="openRazorpaySubscription()" title="Click to Subscribe">$4.99 / Month</b></span>
+                <button onclick="openRatingModal()" class="hover:text-yellow-400 transition flex items-center gap-1">
+                    <i class="fa-solid fa-star text-yellow-400"></i> Leave Feedback
+                </button>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- AUTH / USER ACCOUNT MODAL -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] p-5 rounded-2xl max-w-sm w-full space-y-4">
+            <div class="flex justify-between items-center border-b border-[#2d2f31] pb-2">
+                <h3 id="auth-title" class="font-bold text-sm text-gray-100">User Account</h3>
+                <button onclick="closeAuthModal()" class="text-gray-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="account-info-view" class="space-y-3">
+                <div class="bg-[#131314] p-3 rounded-xl border border-[#2d2f31] text-xs space-y-1">
+                    <p class="text-gray-400">Logged in as:</p>
+                    <p id="current-username-display" class="font-bold text-blue-400 text-sm"></p>
+                </div>
+                <button onclick="switchAuthTab('signup')" class="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl transition">
+                    Create New Account
+                </button>
+                <button onclick="switchAuthTab('login')" class="w-full py-2 bg-[#2d2f31] hover:bg-gray-700 text-gray-200 font-semibold text-xs rounded-xl transition">
+                    Switch / Login Account
+                </button>
+            </div>
+
+            <div id="account-form-view" class="hidden space-y-3">
+                <input id="auth-username" type="text" placeholder="Enter Username / Email" class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none focus:border-blue-500">
+                <input id="auth-password" type="password" placeholder="Enter Password" class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none focus:border-blue-500">
+                
+                <div class="flex gap-2 pt-2">
+                    <button onclick="switchAuthTab('info')" class="flex-1 py-2 bg-[#2d2f31] text-xs rounded-xl">Cancel</button>
+                    <button id="auth-submit-btn" onclick="submitAuthForm()" class="flex-1 py-2 bg-blue-600 text-xs font-bold rounded-xl">Submit</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- 4. COMMUNITY CHAT VIEW -->
-    <div id="chat-tab" class="view-panel">
-      <div class="card">
-        <div class="card-title">Live Chat</div>
-        <div class="chat-stream" id="chatStream"></div>
-      </div>
+    <!-- RATING MODAL -->
+    <div id="rating-modal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50 p-4">
+        <div class="bg-[#1e1f20] border border-[#2d2f31] p-5 rounded-2xl max-w-sm w-full space-y-4">
+            <h3 class="font-bold text-sm text-gray-100">Rate Spar AI</h3>
+            
+            <div class="flex justify-center gap-2 text-xl text-yellow-400">
+                <i class="fa-solid fa-star cursor-pointer" onclick="setRating(1)"></i>
+                <i class="fa-solid fa-star cursor-pointer" onclick="setRating(2)"></i>
+                <i class="fa-solid fa-star cursor-pointer" onclick="setRating(3)"></i>
+                <i class="fa-solid fa-star cursor-pointer" onclick="setRating(4)"></i>
+                <i class="fa-solid fa-star cursor-pointer" onclick="setRating(5)"></i>
+            </div>
+
+            <textarea id="rating-comment" placeholder="Your feedback..." class="w-full bg-[#131314] border border-[#2d2f31] text-xs p-2.5 rounded-xl text-gray-100 focus:outline-none"></textarea>
+
+            <div class="flex gap-2">
+                <button onclick="closeRatingModal()" class="flex-1 py-2 bg-[#2d2f31] text-xs rounded-xl">Cancel</button>
+                <button onclick="submitRating()" class="flex-1 py-2 bg-blue-600 text-xs font-bold rounded-xl">Submit</button>
+            </div>
+        </div>
     </div>
 
-  </div>
+    <!-- SCRIPT LOGIC -->
+    <script>
+        const GROQ_API_KEY = "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";
 
-  <!-- FLOATING BOTTOM DOCK -->
-  <div class="bottom-dock">
-    <div class="dock-pill">
-      <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
-      <button class="dock-btn" onclick="document.getElementById('imageInput').click()" title="Attach Image">📷</button>
-      <button class="dock-btn" onclick="startVoiceSearch()" title="Voice Input">🎤</button>
-      <textarea id="promptInput" placeholder="Ask SPAR AI or type a message..."></textarea>
-      <button class="dock-btn send" onclick="handlePrimarySend()" title="Send">➔</button>
-    </div>
-  </div>
+        const syncChannel = new BroadcastChannel('spar_ai_sync_channel');
+        let selectedImageData = null;
+        let selectedStars = 5;
+        let currentChatId = null;
+        let currentAuthMode = 'signup';
 
-</div>
+        // 1. ACCOUNT AUTHENTICATION & MANAGEMENT
+        function initUserSession() {
+            let activeUser = localStorage.getItem('spar_ai_active_user');
+            if (!activeUser) {
+                activeUser = 'Guest_' + Math.random().toString(36).substr(2, 5);
+                localStorage.setItem('spar_ai_active_user', activeUser);
+                
+                // Store in user list
+                let userAccounts = JSON.parse(localStorage.getItem('spar_ai_user_accounts') || '{}');
+                userAccounts[activeUser] = { password: '', credits: "5" };
+                localStorage.setItem('spar_ai_user_accounts', JSON.stringify(userAccounts));
+            }
 
-<!-- USER AUTH BOTTOM SHEET -->
-<div id="authModal" class="modal-overlay">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <h3 style="margin-top:0; color:#e3e2e6;">User Account</h3>
-    <input type="text" id="usernameInput" class="input-dark" placeholder="Enter Username">
-    <button class="btn-primary" onclick="loginUser()" style="margin-top:10px;">Save Profile</button>
-    <button class="btn-secondary" onclick="closeAuthModal()" style="width:100%; margin-top:8px;">Cancel</button>
-  </div>
-</div>
+            const accEl = document.getElementById('user-account-id');
+            if (accEl) accEl.innerText = activeUser;
 
-<!-- SUBSCRIPTION SHEET -->
-<div id="subModal" class="modal-overlay">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <h3 id="planTitle" style="margin-top:0; color:#e3e2e6;">Premium Pass</h3>
-    <div style="font-size:13px; color:#8e918f;">Tenure: <span id="planTenureText" style="color:#e3e2e6; font-weight:600;">-</span></div>
-    <div style="font-size:24px; font-weight:700; color:#a8c7fa; margin:10px 0;">₹<span id="finalPriceText">0</span></div>
+            let users = JSON.parse(localStorage.getItem('spar_ai_users') || '[]');
+            if (!users.includes(activeUser)) {
+                users.push(activeUser);
+                localStorage.setItem('spar_ai_users', JSON.stringify(users));
+                syncChannel.postMessage({ type: 'USER_UPDATED' });
+            }
+        }
 
-    <input type="text" id="userPromoInput" class="input-dark" placeholder="PROMO CODE" style="text-transform:uppercase;">
-    <button class="btn-secondary" onclick="applyPromoCode()" style="width:100%; margin-bottom:8px;">Apply Code</button>
-    <div id="promoMsg" style="font-size:12px; margin-bottom:12px;"></div>
+        function openAuthModal() {
+            const activeUser = localStorage.getItem('spar_ai_active_user') || 'Guest';
+            document.getElementById('current-username-display').innerText = activeUser;
+            switchAuthTab('info');
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-modal').classList.add('flex');
+        }
 
-    <button class="btn-primary" onclick="payWithRazorpay()">Pay with Razorpay</button>
-    <button class="btn-secondary" onclick="closeSubModal()" style="width:100%; margin-top:8px;">Close</button>
-  </div>
-</div>
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('auth-modal').classList.remove('flex');
+        }
 
-<script>
-  const GROQ_API_KEY = "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";
-  let currentUser = localStorage.getItem('username') || 'Guest';
-  let activeTab = 'ai-tab';
-  let selectedImageFile = null;
-  let selectedImageBase64 = null;
-  let originalPrice = 0;
-  let currentFinalPrice = 0;
+        function switchAuthTab(mode) {
+            currentAuthMode = mode;
+            const infoView = document.getElementById('account-info-view');
+            const formView = document.getElementById('account-form-view');
+            const submitBtn = document.getElementById('auth-submit-btn');
+            const title = document.getElementById('auth-title');
 
-  function initApp() {
-    updateUserPill();
-    loadLiveData();
-    renderChatHistory();
-    renderAIHistory();
-  }
+            if (mode === 'info') {
+                infoView.classList.remove('hidden');
+                formView.classList.add('hidden');
+                title.innerText = "User Account";
+            } else if (mode === 'signup') {
+                infoView.classList.add('hidden');
+                formView.classList.remove('hidden');
+                title.innerText = "Create New Account";
+                submitBtn.innerText = "Register";
+            } else if (mode === 'login') {
+                infoView.classList.add('hidden');
+                formView.classList.remove('hidden');
+                title.innerText = "Login / Switch Account";
+                submitBtn.innerText = "Login";
+            }
+        }
 
-  function updateUserPill() {
-    document.getElementById('userPill').innerHTML = `<span>👤 ${currentUser}</span>`;
-  }
+        function submitAuthForm() {
+            const username = document.getElementById('auth-username').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
 
-  function openAuthModal() { document.getElementById('authModal').classList.add('active'); }
-  function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
+            if (!username || !password) {
+                alert("Please fill in both username and password!");
+                return;
+            }
 
-  function loginUser() {
-    const val = document.getElementById('usernameInput').value.trim();
-    if (val) {
-      localStorage.setItem('username', val);
-      currentUser = val;
-      updateUserPill();
-      closeAuthModal();
-      renderChatHistory();
-    }
-  }
+            let accounts = JSON.parse(localStorage.getItem('spar_ai_user_accounts') || '{}');
 
-  function switchTab(tabId, btn) {
-    activeTab = tabId;
-    document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    
-    document.getElementById(tabId).classList.add('active');
-    btn.classList.add('active');
+            if (currentAuthMode === 'signup') {
+                if (accounts[username]) {
+                    alert("Account username already exists! Choose another or log in.");
+                    return;
+                }
+                accounts[username] = { password: password, credits: "5" };
+                localStorage.setItem('spar_ai_user_accounts', JSON.stringify(accounts));
+                localStorage.setItem('spar_ai_active_user', username);
+                alert("Account created successfully!");
+            } else if (currentAuthMode === 'login') {
+                if (!accounts[username] || accounts[username].password !== password) {
+                    alert("Invalid username or password!");
+                    return;
+                }
+                localStorage.setItem('spar_ai_active_user', username);
+                alert("Logged in successfully!");
+            }
 
-    if (tabId === 'history-tab') {
-      renderAIHistory();
-    }
-  }
+            document.getElementById('auth-username').value = '';
+            document.getElementById('auth-password').value = '';
+            closeAuthModal();
+            initUserSession();
+            loadAdminSettings();
+            createNewChatSession();
+        }
 
-  // IMAGE ATTACHMENT CONTROLLER
-  async function handleImageSelect(event) {
-    if (event.target.files && event.target.files[0]) {
-      selectedImageFile = event.target.files[0];
-      selectedImageBase64 = await convertBase64(selectedImageFile);
-      
-      document.getElementById('imageChipName').innerText = "📷 " + selectedImageFile.name;
-      document.getElementById('imageChip').style.display = 'inline-flex';
-      switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
-    }
-  }
+        // 2. ADMIN SETTINGS LOAD & SYNC
+        function loadAdminSettings() {
+            const planName = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro";
+            const tenure   = localStorage.getItem('spar_ai_tenure') || "1 Month";
+            const price    = localStorage.getItem('spar_ai_sub_price') || "$4.99 / Month";
+            const credits  = localStorage.getItem('spar_ai_free_credits') || "5";
 
-  function clearAttachedImage() {
-    selectedImageFile = null;
-    selectedImageBase64 = null;
-    document.getElementById('imageInput').value = '';
-    document.getElementById('imageChip').style.display = 'none';
-  }
+            const planBadge = document.getElementById('user-plan-badge');
+            if (planBadge) planBadge.textContent = `${planName} (${tenure})`;
 
-  // DOCK SEND CONTROLLER
-  function handlePrimarySend() {
-    const text = document.getElementById('promptInput').value.trim();
-    if (!text && !selectedImageFile) return;
+            const creditDisplay = document.getElementById('user-credits-display');
+            if (creditDisplay) creditDisplay.textContent = credits;
 
-    if (activeTab === 'chat-tab') {
-      sendChatMessage(text);
-      document.getElementById('promptInput').value = '';
-    } else {
-      processAIRequest(text);
-    }
-  }
+            const priceDisplay = document.getElementById('user-price-display');
+            if (priceDisplay) priceDisplay.textContent = price;
+        }
 
-  // LIVE STREAM DATA
-  function loadLiveData() {
-    const liveData = JSON.parse(localStorage.getItem('liveDetails')) || { isLive: false, url: '', description: '' };
-    const badge = document.getElementById('liveBadge');
-    const desc = document.getElementById('streamDescription');
-    const player = document.getElementById('playerContainer');
+        syncChannel.onmessage = () => loadAdminSettings();
 
-    if (liveData.isLive) {
-      badge.textContent = 'LIVE';
-      badge.className = 'status-badge live';
-      desc.textContent = liveData.description;
-      player.innerHTML = `<iframe src="${liveData.url}" allowfullscreen></iframe>`;
-    } else {
-      badge.textContent = 'OFFLINE';
-      badge.className = 'status-badge offline';
-      desc.textContent = 'Stream is currently offline.';
-      player.innerHTML = '';
-    }
-  }
+        // 3. CHAT SESSIONS & HISTORY PER USER
+        function getUserChatStorageKey() {
+            const activeUser = localStorage.getItem('spar_ai_active_user') || 'Guest';
+            return `spar_ai_chats_${activeUser}`;
+        }
 
-  // AI, VISION & IMAGE GENERATION API
-  async function processAIRequest(promptText) {
-    switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
-    
-    const questionBox = document.getElementById('userQuestionBox');
-    const questionText = document.getElementById('userQuestionText');
-    const questionImgContainer = document.getElementById('userQuestionImageContainer');
-    
-    // Display Question Box
-    questionText.innerText = promptText || (selectedImageFile ? "Analyze this attached image" : "");
-    if (selectedImageBase64) {
-      questionImgContainer.innerHTML = `<img src="${selectedImageBase64}" class="attached-preview-img" />`;
-    } else {
-      questionImgContainer.innerHTML = '';
-    }
-    questionBox.style.display = 'block';
+        function getStoredChats() {
+            return JSON.parse(localStorage.getItem(getUserChatStorageKey()) || '[]');
+        }
 
-    const out = document.getElementById('aiOutput');
-    out.innerText = "Thinking...";
+        function saveStoredChats(chats) {
+            localStorage.setItem(getUserChatStorageKey(), JSON.stringify(chats));
+            renderHistoryDrawerList();
+        }
 
-    const currentBase64 = selectedImageBase64;
-    document.getElementById('promptInput').value = '';
+        function createNewChatSession() {
+            const chats = getStoredChats();
+            const newChat = {
+                id: 'chat_' + Date.now(),
+                title: 'New Conversation',
+                messages: [],
+                createdAt: new Date().toISOString()
+            };
+            chats.unshift(newChat);
+            currentChatId = newChat.id;
+            saveStoredChats(chats);
+            renderActiveChat();
+            if (!document.getElementById('history-drawer').classList.contains('-translate-x-full')) {
+                toggleHistoryDrawer();
+            }
+        }
 
-    // 1. IMAGE GENERATION REQUEST
-    if (promptText.toLowerCase().includes("generate image") || promptText.toLowerCase().startsWith("create image")) {
-      const cleanPrompt = encodeURIComponent(promptText);
-      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=500&nologo=true`;
-      out.innerHTML = `<img src="${imageUrl}" style="width:100%; border-radius:12px; margin-top:8px;" />`;
-      
-      saveAIToHistory(promptText, "[Image Generated]", null, imageUrl);
-      clearAttachedImage();
-      return;
-    }
+        function switchChatSession(chatId) {
+            currentChatId = chatId;
+            renderActiveChat();
+            toggleHistoryDrawer();
+        }
 
-    // 2. VISION OR TEXT COMPLETION REQUEST
-    try {
-      let payload = {
-        model: currentBase64 ? "qwen-2.5-vl-7b-instruct" : "llama-3.3-70b-versatile",
-        messages: []
-      };
+        function renameChatSession(chatId, event) {
+            event.stopPropagation();
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === chatId);
+            if (!chat) return;
 
-      if (currentBase64) {
-        payload.messages.push({
-          role: "user",
-          content: [
-            { type: "text", text: promptText || "Describe this image in detail and answer any visible context." },
-            { type: "image_url", image_url: { url: currentBase64 } }
-          ]
+            const newTitle = prompt("Enter a new name for this chat:", chat.title);
+            if (newTitle && newTitle.trim()) {
+                chat.title = newTitle.trim();
+                saveStoredChats(chats);
+            }
+        }
+
+        function deleteChatSession(chatId, event) {
+            event.stopPropagation();
+            if (!confirm("Are you sure you want to delete this chat?")) return;
+
+            let chats = getStoredChats();
+            chats = chats.filter(c => c.id !== chatId);
+
+            if (currentChatId === chatId) {
+                currentChatId = chats.length > 0 ? chats[0].id : null;
+            }
+
+            saveStoredChats(chats);
+            
+            if (!currentChatId) {
+                createNewChatSession();
+            } else {
+                renderActiveChat();
+            }
+        }
+
+        function toggleHistoryDrawer() {
+            const drawer = document.getElementById('history-drawer');
+            const backdrop = document.getElementById('drawer-backdrop');
+            drawer.classList.toggle('-translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
+        function renderHistoryDrawerList() {
+            const chats = getStoredChats();
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (chats.length === 0) {
+                container.innerHTML = `<p class="text-xs text-gray-500 text-center py-4">No saved conversations</p>`;
+                return;
+            }
+
+            chats.forEach(chat => {
+                const isActive = chat.id === currentChatId;
+                const item = document.createElement('div');
+                item.className = `p-2.5 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${isActive ? 'bg-blue-600/20 border border-blue-500/30 text-blue-400' : 'bg-[#131314] border border-[#2d2f31] text-gray-300 hover:border-gray-500'}`;
+                item.onclick = () => switchChatSession(chat.id);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate pr-2">
+                        <i class="fa-regular fa-message text-[11px]"></i>
+                        <span class="truncate font-medium">${chat.title}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="renameChatSession('${chat.id}', event)" class="p-1 text-gray-400 hover:text-blue-400 transition" title="Rename Chat">
+                            <i class="fa-solid fa-pen text-[10px]"></i>
+                        </button>
+                        <button onclick="deleteChatSession('${chat.id}', event)" class="p-1 text-gray-400 hover:text-red-400 transition" title="Delete Chat">
+                            <i class="fa-solid fa-trash-can text-[10px]"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderActiveChat() {
+            const chats = getStoredChats();
+            let currentChat = chats.find(c => c.id === currentChatId);
+
+            if (!currentChat && chats.length > 0) {
+                currentChat = chats[0];
+                currentChatId = currentChat.id;
+            } else if (!currentChat) {
+                createNewChatSession();
+                return;
+            }
+
+            const chatContainer = document.getElementById('chat-container');
+            
+            chatContainer.innerHTML = `
+                <div class="bg-[#1e1f20] border border-[#2d2f31] p-4 rounded-2xl space-y-2 shrink-0">
+                    <h2 class="font-bold text-base text-blue-400 flex items-center gap-2">
+                        <i class="fa-solid fa-robot"></i> Spar AI Assistant
+                    </h2>
+                    <p class="text-xs text-gray-300 leading-relaxed">
+                        Powered by Groq High-Speed Inference. Ask anything or attach an image below.
+                    </p>
+                </div>
+            `;
+
+            currentChat.messages.forEach(msg => {
+                if (msg.role === 'user') {
+                    const userCard = document.createElement('div');
+                    userCard.className = "bg-[#1e1f20] border border-[#2d2f31] p-3 rounded-2xl ml-auto max-w-[85%] space-y-2 shrink-0";
+                    let imgHTML = msg.imageData ? `<img src="${msg.imageData}" class="max-h-48 rounded-lg border border-[#2d2f31] mb-2">` : '';
+                    userCard.innerHTML = `${imgHTML}<p class="text-xs sm:text-sm text-gray-100">${msg.content}</p>`;
+                    chatContainer.appendChild(userCard);
+                } else {
+                    const aiCard = document.createElement('div');
+                    aiCard.className = "bg-[#131314] border border-[#2d2f31] p-3 rounded-2xl mr-auto max-w-[85%] text-xs text-gray-300 leading-relaxed space-y-2 shrink-0";
+                    aiCard.innerHTML = msg.content;
+                    chatContainer.appendChild(aiCard);
+                }
+            });
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            renderHistoryDrawerList();
+        }
+
+        function appendMessageToCurrentChat(role, content, imageData = null) {
+            const chats = getStoredChats();
+            const chat = chats.find(c => c.id === currentChatId);
+            if (!chat) return;
+
+            chat.messages.push({ role, content, imageData, timestamp: new Date().toISOString() });
+            
+            if (chat.messages.length === 1 && role === 'user') {
+                chat.title = content.length > 25 ? content.substring(0, 25) + '...' : content;
+            }
+
+            saveStoredChats(chats);
+        }
+
+        // 4. RAZORPAY SUBSCRIPTION
+        function openRazorpaySubscription() {
+            const razorpayKey = localStorage.getItem('spar_ai_razorpay_key');
+            const planName    = localStorage.getItem('spar_ai_plan_name') || "Spar AI Pro";
+            const rawPrice    = localStorage.getItem('spar_ai_sub_price') || "4.99";
+
+            if (!razorpayKey) {
+                alert("Please configure your Razorpay Key ID in admin.html first!");
+                return;
+            }
+
+            const numericAmount = parseFloat(rawPrice.replace(/[^0-9.]/g, '')) || 4.99;
+            const amountInSubunits = Math.round(numericAmount * 100);
+
+            const options = {
+                "key": razorpayKey,
+                "amount": amountInSubunits,
+                "currency": "INR",
+                "name": "Spar AI",
+                "description": `${planName} Subscription`,
+                "handler": function (response) {
+                    alert("Payment successful! ID: " + response.razorpay_payment_id);
+                    localStorage.setItem('spar_ai_free_credits', 'Unlimited');
+                    loadAdminSettings();
+                },
+                "theme": { "color": "#2563eb" }
+            };
+
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+
+        // 5. ATTACHMENT HANDLERS
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    selectedImageData = e.target.result;
+                    document.getElementById('image-preview-thumb').src = selectedImageData;
+                    document.getElementById('image-file-name').innerText = file.name;
+                    document.getElementById('image-preview-box').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeAttachedImage() {
+            selectedImageData = null;
+            document.getElementById('image-file-input').value = '';
+            document.getElementById('image-preview-box').classList.add('hidden');
+        }
+
+        // 6. GROQ API ENGINE INTEGRATION
+        async function handleSendMessage() {
+            const input = document.getElementById('user-input');
+            const userPrompt = input.value.trim();
+            if (!userPrompt && !selectedImageData) return;
+
+            let currentCredits = localStorage.getItem('spar_ai_free_credits') || "5";
+            if (currentCredits !== "Unlimited") {
+                let numCredits = parseInt(currentCredits);
+                if (isNaN(numCredits) || numCredits <= 0) {
+                    alert("You have run out of credits! Please subscribe to get Unlimited access.");
+                    return;
+                }
+                localStorage.setItem('spar_ai_free_credits', (numCredits - 1).toString());
+                loadAdminSettings();
+            }
+
+            const chatContainer = document.getElementById('chat-container');
+
+            const userCard = document.createElement('div');
+            userCard.className = "bg-[#1e1f20] border border-[#2d2f31] p-3 rounded-2xl ml-auto max-w-[85%] space-y-2 shrink-0";
+            let imgHTML = selectedImageData ? `<img src="${selectedImageData}" class="max-h-48 rounded-lg border border-[#2d2f31] mb-2">` : '';
+            userCard.innerHTML = `${imgHTML}<p class="text-xs sm:text-sm text-gray-100">${userPrompt || 'Analyze attached image'}</p>`;
+            chatContainer.appendChild(userCard);
+
+            const promptToSend = userPrompt || "Please analyze this image.";
+            const attachedImgCopy = selectedImageData;
+
+            input.value = '';
+            removeAttachedImage();
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            appendMessageToCurrentChat('user', promptToSend, attachedImgCopy);
+
+            const aiCard = document.createElement('div');
+            aiCard.className = "bg-[#131314] border border-[#2d2f31] p-3 rounded-2xl mr-auto max-w-[85%] text-xs text-gray-300 leading-relaxed space-y-2 shrink-0";
+            aiCard.innerHTML = `<span class="inline-flex items-center gap-2 text-blue-400 font-medium"><i class="fa-solid fa-spinner fa-spin"></i> Thinking...</span>`;
+            chatContainer.appendChild(aiCard);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${GROQ_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.3-70b-versatile",
+                        messages: [
+                            { role: "system", content: "You are Spar AI, an intelligent, helpful AI assistant." },
+                            { role: "user", content: promptToSend }
+                        ],
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.error?.message || "Groq API error");
+                }
+
+                const data = await response.json();
+                const aiResponseText = data.choices[0].message.content;
+                const formattedResponse = aiResponseText.replace(/\n/g, '<br>');
+
+                aiCard.innerHTML = formattedResponse;
+                appendMessageToCurrentChat('assistant', formattedResponse);
+
+            } catch (err) {
+                const errHTML = `<span class="text-red-400"><i class="fa-solid fa-circle-exclamation"></i> Error: ${err.message || 'Could not connect to AI endpoint.'}</span>`;
+                aiCard.innerHTML = errHTML;
+                appendMessageToCurrentChat('assistant', errHTML);
+            }
+
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // 7. RATING MODAL HANDLERS
+        function openRatingModal() { 
+            document.getElementById('rating-modal').classList.remove('hidden'); 
+            document.getElementById('rating-modal').classList.add('flex'); 
+        }
+        function closeRatingModal() { 
+            document.getElementById('rating-modal').classList.add('hidden'); 
+            document.getElementById('rating-modal').classList.remove('flex'); 
+        }
+        function setRating(stars) { selectedStars = stars; }
+
+        function submitRating() {
+            const comment = document.getElementById('rating-comment').value.trim();
+            const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
+            
+            ratings.push({
+                userName: localStorage.getItem('spar_ai_active_user') || 'App User',
+                rating: selectedStars,
+                comment: comment || 'No comment provided.',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            localStorage.setItem('spar_ai_user_ratings', JSON.stringify(ratings));
+            syncChannel.postMessage({ type: 'RATING_SUBMITTED' });
+            
+            alert("Feedback saved!");
+            closeRatingModal();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initUserSession();
+            loadAdminSettings();
+            
+            const chats = getStoredChats();
+            if (chats.length === 0) {
+                createNewChatSession();
+            } else {
+                currentChatId = chats[0].id;
+                renderActiveChat();
+            }
         });
-      } else {
-        payload.messages.push({ role: "user", content: promptText });
-      }
-
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${GROQ_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json();
-      const aiResponse = data.choices[0].message.content;
-      out.innerText = aiResponse;
-
-      // Save Query into History
-      saveAIToHistory(promptText || "Image Analysis Question", aiResponse, currentBase64, null);
-
-    } catch (err) {
-      out.innerText = "Error: " + err.message;
-    } finally {
-      clearAttachedImage();
-    }
-  }
-
-  // AI HISTORY MANAGEMENT
-  function getAIHistory() { return JSON.parse(localStorage.getItem('spar_ai_history')) || []; }
-
-  function saveAIToHistory(question, answer, attachedImg, genImg) {
-    const history = getAIHistory();
-    history.unshift({ 
-      id: Date.now(), 
-      question: question, 
-      answer: answer,
-      attachedImg: attachedImg,
-      genImg: genImg 
-    });
-    localStorage.setItem('spar_ai_history', JSON.stringify(history));
-  }
-
-  function renderAIHistory() {
-    const history = getAIHistory();
-    const container = document.getElementById('aiHistoryList');
-    if (history.length === 0) {
-      container.innerHTML = '<div style="font-size:13px; color:#8e918f; text-align:center; padding:20px 0;">No chat history saved yet.</div>';
-      return;
-    }
-
-    container.innerHTML = '';
-    history.forEach((item, idx) => {
-      container.innerHTML += `
-        <div class="history-card" onclick="loadHistoryItem(${idx})">
-          <div class="history-q">❓ ${item.question}</div>
-          <div class="history-a">${item.answer}</div>
-        </div>
-      `;
-    });
-  }
-
-  function loadHistoryItem(index) {
-    const item = getAIHistory()[index];
-    if (!item) return;
-
-    document.getElementById('userQuestionText').innerText = item.question;
-    const imgContainer = document.getElementById('userQuestionImageContainer');
-
-    if (item.attachedImg) {
-      imgContainer.innerHTML = `<img src="${item.attachedImg}" class="attached-preview-img" />`;
-    } else {
-      imgContainer.innerHTML = '';
-    }
-    document.getElementById('userQuestionBox').style.display = 'block';
-
-    if (item.genImg) {
-      document.getElementById('aiOutput').innerHTML = `<img src="${item.genImg}" style="width:100%; border-radius:12px; margin-top:8px;" />`;
-    } else {
-      document.getElementById('aiOutput').innerText = item.answer;
-    }
-
-    switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
-  }
-
-  function clearAIHistory() {
-    if (confirm("Are you sure you want to clear all saved AI chat history?")) {
-      localStorage.removeItem('spar_ai_history');
-      renderAIHistory();
-    }
-  }
-
-  // VOICE & TTS
-  function startVoiceSearch() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert("Browser does not support Voice Recognition");
-    const recognition = new SpeechRecognition();
-    recognition.start();
-    recognition.onresult = (event) => {
-      document.getElementById('promptInput').value = event.results[0][0].transcript;
-      handlePrimarySend();
-    };
-  }
-
-  function speakResponse() {
-    const text = document.getElementById('aiOutput').innerText;
-    if (!text) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-  }
-
-  // COMMUNITY CHAT
-  function getChatHistory() { return JSON.parse(localStorage.getItem('chatHistory')) || []; }
-
-  function sendChatMessage(text) {
-    if (!text) return;
-    const history = getChatHistory();
-    history.push({ id: Date.now(), user: currentUser, text: text });
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    renderChatHistory();
-  }
-
-  function renderChatHistory() {
-    const history = getChatHistory();
-    const stream = document.getElementById('chatStream');
-    stream.innerHTML = '';
-    history.forEach(item => {
-      const isOwner = item.user === currentUser;
-      const actions = isOwner ? `<div class="actions"><span onclick="deleteMsg(${item.id})">Delete</span></div>` : '';
-      stream.innerHTML += `
-        <div class="chat-msg">
-          ${actions}
-          <div class="author">${item.user}</div>
-          <div>${item.text}</div>
-        </div>
-      `;
-    });
-  }
-
-  function deleteMsg(id) {
-    let history = getChatHistory();
-    history = history.filter(m => m.id !== id);
-    localStorage.setItem('chatHistory', JSON.stringify(history));
-    renderChatHistory();
-  }
-
-  // SUBSCRIPTION & RAZORPAY
-  function openSubModal() {
-    const planData = JSON.parse(localStorage.getItem('subPlanDetails')) || { name: 'Premium Pass', price: 499, tenure: '1 Month' };
-    document.getElementById('planTitle').innerText = planData.name;
-    document.getElementById('planTenureText').innerText = planData.tenure;
-    originalPrice = planData.price;
-    currentFinalPrice = planData.price;
-    document.getElementById('finalPriceText').innerText = currentFinalPrice;
-    document.getElementById('subModal').classList.add('active');
-  }
-
-  function closeSubModal() { document.getElementById('subModal').classList.remove('active'); }
-
-  function applyPromoCode() {
-    const codeEntered = document.getElementById('userPromoInput').value.trim().toUpperCase();
-    const promoData = JSON.parse(localStorage.getItem('promoDetails'));
-    const msgEl = document.getElementById('promoMsg');
-
-    if (promoData && codeEntered === promoData.code) {
-      const discountAmount = (originalPrice * promoData.discount) / 100;
-      currentFinalPrice = Math.max(0, originalPrice - discountAmount);
-      document.getElementById('finalPriceText').innerText = currentFinalPrice.toFixed(2);
-      msgEl.style.color = '#a8c7fa';
-      msgEl.innerText = `Success! ${promoData.discount}% discount applied.`;
-    } else {
-      msgEl.style.color = '#f2b8b5';
-      msgEl.innerText = 'Invalid Promo Code!';
-    }
-  }
-
-  function payWithRazorpay() {
-    const razorpayKey = localStorage.getItem('razorpayKey');
-    if (!razorpayKey) return alert("Razorpay API Key is not configured in Admin panel!");
-
-    const options = {
-      "key": razorpayKey,
-      "amount": currentFinalPrice * 100,
-      "currency": "INR",
-      "name": "SPAR AI Subscription",
-      "description": document.getElementById('planTitle').innerText,
-      "handler": function (response) {
-        alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-        closeSubModal();
-      },
-      "prefill": { "name": currentUser }
-    };
-    new Razorpay(options).open();
-  }
-
-  function convertBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (err) => reject(err);
-    });
-  }
-
-  initApp();
-</script>
+        window.addEventListener('storage', loadAdminSettings);
+    </script>
 </body>
 </html>
