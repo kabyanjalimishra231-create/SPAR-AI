@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gemini AI & Live Studio</title>
+  <title>SPAR AI & Live Studio</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <!-- Google Font: Inter -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -117,7 +117,7 @@
     .view-panel { display: none; flex-direction: column; gap: 16px; }
     .view-panel.active { display: flex; }
 
-    /* Cards - Gemini Dark Aesthetic */
+    /* Cards - Dark Aesthetic */
     .card {
       background: #131314;
       border-radius: 20px;
@@ -171,7 +171,36 @@
       cursor: pointer;
     }
 
-    /* Output Box */
+    .btn-danger {
+      background: #3c1e1e;
+      color: #f2b8b5;
+      border: 1px solid #601410;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* Question & Response Boxes */
+    .user-question-box {
+      background: #2d2f31;
+      border-radius: 16px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #a8c7fa;
+      border-left: 4px solid #7cacf8;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .attached-preview-img {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: 12px;
+      margin-top: 8px;
+      border: 1px solid #3c4043;
+    }
+
     .ai-output-box {
       background: #1e1f20;
       border-radius: 16px;
@@ -184,7 +213,28 @@
       white-space: pre-wrap;
     }
 
-    /* Chat Messages */
+    /* History List Items */
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 550px;
+      overflow-y: auto;
+    }
+
+    .history-card {
+      background: #1e1f20;
+      border: 1px solid #2d2f31;
+      border-radius: 16px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .history-card:hover { background: #252729; }
+    .history-q { font-size: 13px; font-weight: 600; color: #a8c7fa; margin-bottom: 4px; }
+    .history-a { font-size: 12px; color: #c4c6d0; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    /* Community Chat Messages */
     .chat-stream {
       display: flex;
       flex-direction: column;
@@ -204,7 +254,7 @@
     .chat-msg .author { color: #a8c7fa; font-weight: 600; margin-bottom: 4px; font-size: 12px; }
     .chat-msg .actions { position: absolute; top: 10px; right: 12px; font-size: 11px; color: #8e918f; cursor: pointer; }
 
-    /* Gemini Bottom Dock Input */
+    /* Bottom Dock Input */
     .bottom-dock {
       padding: 12px 16px 20px 16px;
       background: #1e1f20;
@@ -252,16 +302,17 @@
     .image-chip {
       display: none;
       background: #2d2f31;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: 14px;
+      font-size: 12px;
       color: #a8c7fa;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 8px;
+      border: 1px solid #3c4043;
     }
 
-    /* Gemini Modal Sheet */
+    /* Modal Sheet */
     .modal-overlay {
       display: none;
       position: absolute;
@@ -308,8 +359,8 @@
   <!-- TOP HEADER -->
   <div class="app-header">
     <div class="brand-title">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0Z" fill="url(#gemini-grad)"/><defs><linearGradient id="gemini-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#91B5FF"/><stop offset="1" stop-color="#E599FF"/></linearGradient></defs></svg>
-      Gemini Studio
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 0C12 6.62742 6.62742 12 0 12C6.62742 12 12 17.3726 12 24C12 17.3726 17.3726 12 24 12C17.3726 12 12 6.62742 12 0Z" fill="url(#spar-grad)"/><defs><linearGradient id="spar-grad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#91B5FF"/><stop offset="1" stop-color="#E599FF"/></linearGradient></defs></svg>
+      SPAR AI
     </div>
     <div class="user-pill" id="userPill" onclick="openAuthModal()">
       <span>👤 Guest</span>
@@ -318,7 +369,8 @@
 
   <!-- NAVIGATION TABS -->
   <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">✨ AI Assistant</button>
+    <button class="tab-btn active" onclick="switchTab('ai-tab', this)">✨ SPAR Assistant</button>
+    <button class="tab-btn" onclick="switchTab('history-tab', this)">📜 History</button>
     <button class="tab-btn" onclick="switchTab('live-tab', this)">🔴 Live Stream</button>
     <button class="tab-btn" onclick="switchTab('chat-tab', this)">💬 Community</button>
   </div>
@@ -329,20 +381,40 @@
     <!-- 1. AI ASSISTANT VIEW -->
     <div id="ai-tab" class="view-panel active">
       <div id="imageChip" class="image-chip">
-        <span id="imageChipName">Image attached</span>
-        <span onclick="clearAttachedImage()" style="cursor:pointer; font-weight:bold;">×</span>
+        <span id="imageChipName">📷 Image attached</span>
+        <span onclick="clearAttachedImage()" style="cursor:pointer; font-weight:bold; margin-left:auto;">×</span>
       </div>
 
       <div class="card">
+        <!-- Display Active User Question & Attached Image -->
+        <div id="userQuestionBox" class="user-question-box">
+          <strong style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; opacity:0.8;">Your Question:</strong>
+          <div id="userQuestionText" style="margin-top:2px;"></div>
+          <div id="userQuestionImageContainer"></div>
+        </div>
+
         <div class="card-title">
           <span>AI Response</span>
           <button class="btn-secondary" onclick="speakResponse()" style="padding:4px 10px; font-size:11px;">🔊 Read</button>
         </div>
-        <div class="ai-output-box" id="aiOutput">Hello! Ask me a question, attach an image to analyze, or ask me to 'Generate image of...'</div>
+        <div class="ai-output-box" id="aiOutput">Hello! Ask me anything, attach an image to ask questions about it, or type 'Generate image of...' to create artwork!</div>
       </div>
     </div>
 
-    <!-- 2. LIVE STREAM VIEW -->
+    <!-- 2. HISTORY MANAGEMENT VIEW -->
+    <div id="history-tab" class="view-panel">
+      <div class="card">
+        <div class="card-title">
+          <span>AI Chat History</span>
+          <button class="btn-danger" onclick="clearAIHistory()">🗑️ Clear All</button>
+        </div>
+        <div class="history-list" id="aiHistoryList">
+          <div style="font-size:13px; color:#8e918f; text-align:center; padding:20px 0;">No saved history yet.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. LIVE STREAM VIEW -->
     <div id="live-tab" class="view-panel">
       <div class="card">
         <div class="card-title">
@@ -360,7 +432,7 @@
       </div>
     </div>
 
-    <!-- 3. COMMUNITY CHAT VIEW -->
+    <!-- 4. COMMUNITY CHAT VIEW -->
     <div id="chat-tab" class="view-panel">
       <div class="card">
         <div class="card-title">Live Chat</div>
@@ -370,13 +442,13 @@
 
   </div>
 
-  <!-- FLOATING GEMINI BOTTOM DOCK -->
+  <!-- FLOATING BOTTOM DOCK -->
   <div class="bottom-dock">
     <div class="dock-pill">
       <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)">
       <button class="dock-btn" onclick="document.getElementById('imageInput').click()" title="Attach Image">📷</button>
       <button class="dock-btn" onclick="startVoiceSearch()" title="Voice Input">🎤</button>
-      <textarea id="promptInput" placeholder="Ask Gemini or type a message..."></textarea>
+      <textarea id="promptInput" placeholder="Ask SPAR AI or type a message..."></textarea>
       <button class="dock-btn send" onclick="handlePrimarySend()" title="Send">➔</button>
     </div>
   </div>
@@ -416,6 +488,7 @@
   let currentUser = localStorage.getItem('username') || 'Guest';
   let activeTab = 'ai-tab';
   let selectedImageFile = null;
+  let selectedImageBase64 = null;
   let originalPrice = 0;
   let currentFinalPrice = 0;
 
@@ -423,6 +496,7 @@
     updateUserPill();
     loadLiveData();
     renderChatHistory();
+    renderAIHistory();
   }
 
   function updateUserPill() {
@@ -450,13 +524,19 @@
     
     document.getElementById(tabId).classList.add('active');
     btn.classList.add('active');
+
+    if (tabId === 'history-tab') {
+      renderAIHistory();
+    }
   }
 
-  // IMAGE ATTACHMENT
-  function handleImageSelect(event) {
+  // IMAGE ATTACHMENT CONTROLLER
+  async function handleImageSelect(event) {
     if (event.target.files && event.target.files[0]) {
       selectedImageFile = event.target.files[0];
-      document.getElementById('imageChipName').innerText = selectedImageFile.name;
+      selectedImageBase64 = await convertBase64(selectedImageFile);
+      
+      document.getElementById('imageChipName').innerText = "📷 " + selectedImageFile.name;
       document.getElementById('imageChip').style.display = 'inline-flex';
       switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
     }
@@ -464,6 +544,7 @@
 
   function clearAttachedImage() {
     selectedImageFile = null;
+    selectedImageBase64 = null;
     document.getElementById('imageInput').value = '';
     document.getElementById('imageChip').style.display = 'none';
   }
@@ -501,34 +582,53 @@
     }
   }
 
-  // AI & VISION API
+  // AI, VISION & IMAGE GENERATION API
   async function processAIRequest(promptText) {
     switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
+    
+    const questionBox = document.getElementById('userQuestionBox');
+    const questionText = document.getElementById('userQuestionText');
+    const questionImgContainer = document.getElementById('userQuestionImageContainer');
+    
+    // Display Question Box
+    questionText.innerText = promptText || (selectedImageFile ? "Analyze this attached image" : "");
+    if (selectedImageBase64) {
+      questionImgContainer.innerHTML = `<img src="${selectedImageBase64}" class="attached-preview-img" />`;
+    } else {
+      questionImgContainer.innerHTML = '';
+    }
+    questionBox.style.display = 'block';
+
     const out = document.getElementById('aiOutput');
     out.innerText = "Thinking...";
 
+    const currentBase64 = selectedImageBase64;
     document.getElementById('promptInput').value = '';
 
-    if (promptText.toLowerCase().startsWith("generate image")) {
+    // 1. IMAGE GENERATION REQUEST
+    if (promptText.toLowerCase().includes("generate image") || promptText.toLowerCase().startsWith("create image")) {
       const cleanPrompt = encodeURIComponent(promptText);
-      out.innerHTML = `<img src="https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=500&nologo=true" style="width:100%; border-radius:12px; margin-top:8px;" />`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=500&nologo=true`;
+      out.innerHTML = `<img src="${imageUrl}" style="width:100%; border-radius:12px; margin-top:8px;" />`;
+      
+      saveAIToHistory(promptText, "[Image Generated]", null, imageUrl);
       clearAttachedImage();
       return;
     }
 
+    // 2. VISION OR TEXT COMPLETION REQUEST
     try {
       let payload = {
-        model: selectedImageFile ? "qwen-2.5-vl-7b-instruct" : "llama-3.3-70b-versatile",
+        model: currentBase64 ? "qwen-2.5-vl-7b-instruct" : "llama-3.3-70b-versatile",
         messages: []
       };
 
-      if (selectedImageFile) {
-        const base64Img = await convertBase64(selectedImageFile);
+      if (currentBase64) {
         payload.messages.push({
           role: "user",
           content: [
-            { type: "text", text: promptText || "Describe this image in detail." },
-            { type: "image_url", image_url: { url: base64Img } }
+            { type: "text", text: promptText || "Describe this image in detail and answer any visible context." },
+            { type: "image_url", image_url: { url: currentBase64 } }
           ]
         });
       } else {
@@ -542,11 +642,80 @@
       });
 
       const data = await res.json();
-      out.innerText = data.choices[0].message.content;
+      const aiResponse = data.choices[0].message.content;
+      out.innerText = aiResponse;
+
+      // Save Query into History
+      saveAIToHistory(promptText || "Image Analysis Question", aiResponse, currentBase64, null);
+
     } catch (err) {
       out.innerText = "Error: " + err.message;
     } finally {
       clearAttachedImage();
+    }
+  }
+
+  // AI HISTORY MANAGEMENT
+  function getAIHistory() { return JSON.parse(localStorage.getItem('spar_ai_history')) || []; }
+
+  function saveAIToHistory(question, answer, attachedImg, genImg) {
+    const history = getAIHistory();
+    history.unshift({ 
+      id: Date.now(), 
+      question: question, 
+      answer: answer,
+      attachedImg: attachedImg,
+      genImg: genImg 
+    });
+    localStorage.setItem('spar_ai_history', JSON.stringify(history));
+  }
+
+  function renderAIHistory() {
+    const history = getAIHistory();
+    const container = document.getElementById('aiHistoryList');
+    if (history.length === 0) {
+      container.innerHTML = '<div style="font-size:13px; color:#8e918f; text-align:center; padding:20px 0;">No chat history saved yet.</div>';
+      return;
+    }
+
+    container.innerHTML = '';
+    history.forEach((item, idx) => {
+      container.innerHTML += `
+        <div class="history-card" onclick="loadHistoryItem(${idx})">
+          <div class="history-q">❓ ${item.question}</div>
+          <div class="history-a">${item.answer}</div>
+        </div>
+      `;
+    });
+  }
+
+  function loadHistoryItem(index) {
+    const item = getAIHistory()[index];
+    if (!item) return;
+
+    document.getElementById('userQuestionText').innerText = item.question;
+    const imgContainer = document.getElementById('userQuestionImageContainer');
+
+    if (item.attachedImg) {
+      imgContainer.innerHTML = `<img src="${item.attachedImg}" class="attached-preview-img" />`;
+    } else {
+      imgContainer.innerHTML = '';
+    }
+    document.getElementById('userQuestionBox').style.display = 'block';
+
+    if (item.genImg) {
+      document.getElementById('aiOutput').innerHTML = `<img src="${item.genImg}" style="width:100%; border-radius:12px; margin-top:8px;" />`;
+    } else {
+      document.getElementById('aiOutput').innerText = item.answer;
+    }
+
+    switchTab('ai-tab', document.querySelectorAll('.tab-btn')[0]);
+  }
+
+  function clearAIHistory() {
+    if (confirm("Are you sure you want to clear all saved AI chat history?")) {
+      localStorage.removeItem('spar_ai_history');
+      renderAIHistory();
     }
   }
 
@@ -642,7 +811,7 @@
       "key": razorpayKey,
       "amount": currentFinalPrice * 100,
       "currency": "INR",
-      "name": "Gemini Studio Subscription",
+      "name": "SPAR AI Subscription",
       "description": document.getElementById('planTitle').innerText,
       "handler": function (response) {
         alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
