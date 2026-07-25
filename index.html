@@ -410,20 +410,7 @@
                 userCredits--;
                 sessionStorage.setItem('spar_ai_user_credits', userCredits);
                 updateUI();
-            }function openRazorpaySubscription() {
-    var options = {
-        "key": "YOUR_RAZORPAY_KEY", // Replace with your key
-        "amount": "49900", // $4.99 or ₹499 in smallest unit
-        "currency": "USD",
-        "name": "Spar AI Pro",
-        "description": "Monthly Subscription",
-        "handler": function (response) {
-            alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
-            // Grant user access here
-        }
-    };
-    var rzp1 = new Razorpay(options);
-    rzp1.open();
+            }
 }
 
             // Image Creation
@@ -616,6 +603,19 @@
             updateUI();
             renderHistoryList();
         };
-    </script>
+    </script>function openRazorpaySubscription() {
+    var options = {
+        "key": "YOUR_RAZORPAY_KEY", // Replace with your key
+        "amount": "49900", // $4.99 or ₹499 in smallest unit
+        "currency": "USD",
+        "name": "Spar AI Pro",
+        "description": "Monthly Subscription",
+        "handler": function (response) {
+            alert("Payment Successful! Payment ID: " + response.razorpay_payment_id);
+            // Grant user access here
+        }
+    };
+    var rzp1 = new Razorpay(options);
+    rzp1.open();
 </body>
 </html>
