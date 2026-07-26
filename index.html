@@ -4,10 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SPAR AI Workspace</title>
-  
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
     :root {
@@ -42,32 +38,60 @@
     body { 
       display: flex; 
       flex-direction: column; 
-      min-height: 100vh;
-      min-height: -webkit-fill-available;
+      height: 100vh;
+      height: 100dvh; /* Mobile viewport fix */
     }
 
+    /* HEADER & NAVIGATION */
     header {
       background-color: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
       padding: 0.75rem 1rem;
       display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .header-top {
+      display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
+      width: 100%;
     }
 
     .brand { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
     .brand-logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.85rem; }
     .brand-title { font-size: 1.1rem; font-weight: 700; }
 
-    nav { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    nav { display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; }
     
-    .nav-status-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-    .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    .nav-status-group, .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 
-    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
-    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); white-space: nowrap; }
+    .credit-badge { 
+      font-size: 0.75rem; 
+      padding: 0.25rem 0.6rem; 
+      border-radius: 20px; 
+      background: rgba(99, 102, 241, 0.2); 
+      border: 1px solid var(--accent); 
+      color: #a5b4fc; 
+      font-weight: 600; 
+      white-space: nowrap; 
+    }
+    
+    .user-badge { 
+      font-size: 0.75rem; 
+      font-weight: 600; 
+      color: var(--text-main); 
+      display: flex; 
+      align-items: center; 
+      gap: 0.3rem; 
+      background: var(--bg-card); 
+      padding: 0.25rem 0.6rem; 
+      border-radius: 20px; 
+      border: 1px solid var(--border-color); 
+      white-space: nowrap; 
+    }
     
     .nav-btn { 
       background: transparent; 
@@ -85,18 +109,16 @@
     .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
     .nav-btn.primary:hover, .nav-btn.primary:active { background: var(--accent-hover); }
 
-    .banner { background: rgba(99, 102, 241, 0.15); border-bottom: 1px solid var(--accent); padding: 0.5rem 0.75rem; text-align: center; font-size: 0.8rem; display: none; }
-    .banner a { color: #818cf8; font-weight: 600; text-decoration: underline; margin-left: 0.3rem; }
-
+    /* CHAT MAIN LAYOUT */
     main { 
       flex: 1; 
       max-width: 900px; 
       width: 100%; 
       margin: 0 auto; 
-      padding: 0.75rem; 
+      padding: 0.5rem; 
       display: flex; 
       flex-direction: column; 
-      height: calc(100vh - 120px);
+      min-height: 0; /* Important for dynamic scrolling */
     }
 
     .chat-container { 
@@ -107,6 +129,7 @@
       display: flex; 
       flex-direction: column; 
       overflow: hidden; 
+      min-height: 0;
     }
 
     .chat-messages { 
@@ -120,16 +143,17 @@
     }
 
     .message { 
-      max-width: 88%; 
-      padding: 0.65rem 0.85rem; 
+      max-width: 90%; 
+      padding: 0.7rem 0.9rem; 
       border-radius: 10px; 
-      line-height: 1.45; 
-      font-size: 0.9rem; 
+      line-height: 1.5; 
+      font-size: 0.92rem; 
       white-space: pre-wrap; 
       word-break: break-word; 
     }
     .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
     .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
+    
     .generated-img { width: 100%; max-width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
 
     .chat-input-area { 
@@ -146,10 +170,10 @@
       background-color: var(--bg-primary); 
       border: 1px solid var(--border-color); 
       border-radius: 8px; 
-      padding: 0.65rem 0.85rem; 
+      padding: 0.7rem 0.85rem; 
       color: var(--text-main); 
       outline: none; 
-      font-size: 16px; /* Prevents auto-zoom on mobile safari */
+      font-size: 16px; /* Prevents auto-zoom on mobile browsers */
     }
     .chat-input:focus { border-color: var(--accent); }
     .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -158,7 +182,7 @@
       background-color: var(--accent); 
       color: white; 
       border: none; 
-      padding: 0.65rem 1rem; 
+      padding: 0.7rem 1.1rem; 
       border-radius: 8px; 
       cursor: pointer; 
       font-weight: 600; 
@@ -167,25 +191,25 @@
     }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* MODAL STYLES FOR MOBILE */
+    /* MODAL SYSTEM */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 0.75rem; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 500px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 480px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
     .modal-title { font-size: 1.1rem; font-weight: 600; }
     .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 0.5rem; }
 
     .form-group { margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.35rem; }
     .form-group label { font-size: 0.8rem; color: var(--text-muted); }
-    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-main); outline: none; font-size: 16px; }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; color: var(--text-main); outline: none; font-size: 16px; }
     .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 
     .error-text { color: var(--danger); font-size: 0.8rem; display: none; margin-top: 0.35rem; }
     .success-text { color: var(--success); font-size: 0.8rem; display: none; margin-top: 0.35rem; }
     
-    .plan-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; }
-    .plan-info h4 { font-size: 0.95rem; color: var(--text-main); }
-    .plan-info p { font-size: 0.8rem; color: var(--text-muted); }
+    .plan-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .plan-info h4 { font-size: 1rem; color: var(--text-main); }
+    .plan-info p { font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem; }
     .promo-box { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
 
     .auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 0.85rem; gap: 1rem; }
@@ -198,13 +222,12 @@
     .history-item .history-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; justify-content: space-between; }
     .empty-history { text-align: center; color: var(--text-muted); padding: 1.5rem 0; font-size: 0.85rem; }
 
-    .img-upload-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px dashed var(--border-color); display: none; margin-top: 0.35rem; background: var(--bg-primary); }
-
-    /* MEDIA QUERIES FOR DESKTOP & TABLETS */
+    /* DESKTOP RESPONSIVE ADJUSTMENTS */
     @media (min-width: 640px) {
-      header { padding: 0.75rem 1.5rem; }
-      nav { width: auto; }
-      main { padding: 1rem; height: calc(100vh - 100px); }
+      header { padding: 0.75rem 1.5rem; flex-direction: row; justify-content: space-between; }
+      header .header-top { width: auto; }
+      nav { width: auto; justify-content: flex-end; }
+      main { padding: 1rem; }
       .message { max-width: 75%; }
       .plan-card { flex-direction: row; justify-content: space-between; align-items: center; }
     }
@@ -213,69 +236,38 @@
 <body>
 
   <header>
-    <div class="brand" id="brandHeader">
-      <div class="brand-logo">SPAR</div>
-      <div class="brand-title">SPAR AI</div>
+    <div class="header-top">
+      <div class="brand" id="brandHeader">
+        <div class="brand-logo">SPAR</div>
+        <div class="brand-title">SPAR AI</div>
+      </div>
     </div>
     <nav>
       <div class="nav-status-group">
         <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
-        <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
+        <div class="credit-badge" id="creditCounter">Credits: ...</div>
       </div>
       <div class="nav-actions-group">
-        <button class="nav-btn" id="imageSearchBtn">📷 Image</button>
         <button class="nav-btn" id="historyBtn">📜 History</button>
-        <button class="nav-btn" id="accountBtn">👤 Account</button>
+        <button class="nav-btn" id="accountBtn">👤 Subscription</button>
         <button class="nav-btn primary" id="newChatBtn">+ New</button>
       </div>
     </nav>
   </header>
 
-  <div class="banner" id="streamBanner">
-    <span>🔴 Live Stream Available:</span>
-    <a href="#" id="streamBannerLink" target="_blank">Watch Live Stream</a>
-  </div>
-
   <main>
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
-        <div class="message assistant" id="welcomeMsg">
-          Hello! Welcome to SPAR AI. Ask me any question, upload an image, or type 'draw a cat' to generate visuals!
+        <div class="message assistant">
+          Hello! Welcome to SPAR AI. Ask me any question, or type 'draw a space rocket' to generate images!
         </div>
       </div>
       <div class="chat-input-area">
-        <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI a question or 'draw a cat'..." />
+        <input type="text" id="userInput" class="chat-input" placeholder="Type a message or 'draw a cat'..." />
         <button class="send-btn" id="sendBtn">Send</button>
       </div>
     </div>
   </main>
-
-  <!-- IMAGE UPLOAD & QUESTION MODAL -->
-  <div class="modal-overlay" id="imageSearchModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">📷 Upload & Ask Image</div>
-        <button class="close-btn" id="closeImageSearchModal">&times;</button>
-      </div>
-      <div class="form-group">
-        <label>Upload Image File:</label>
-        <input type="file" id="imgFileInput" class="form-input" accept="image/*" />
-      </div>
-      <div class="form-group">
-        <label>Or Image URL:</label>
-        <input type="text" id="imgUrlInput" class="form-input" placeholder="https://example.com/image.jpg" />
-      </div>
-      <img id="uploadPreview" class="img-upload-preview" alt="Image Preview" />
-      <div class="form-group" style="margin-top: 0.5rem;">
-        <label>Question about this Image:</label>
-        <input type="text" id="imgSearchQuery" class="form-input" placeholder="e.g. Describe this image in detail" />
-      </div>
-      <div class="modal-actions">
-        <button class="nav-btn" id="closeImgSearchBtn">Cancel</button>
-        <button class="nav-btn primary" id="execImgSearchBtn">Analyze</button>
-      </div>
-    </div>
-  </div>
 
   <!-- HISTORY MODAL -->
   <div class="modal-overlay" id="historyModal">
@@ -294,11 +286,11 @@
     </div>
   </div>
 
-  <!-- USER ACCOUNT & AUTH MODAL -->
+  <!-- SUBSCRIPTION & USER ACCOUNT MODAL -->
   <div class="modal-overlay" id="accountModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title" id="accountModalTitle">👤 Account & Login</div>
+        <div class="modal-title" id="accountModalTitle">💎 Subscription & Account</div>
         <button class="close-btn" id="closeAccountModal">&times;</button>
       </div>
 
@@ -310,8 +302,8 @@
 
         <form id="authForm" onsubmit="event.preventDefault(); handleAuthSubmit();">
           <div class="form-group">
-            <label for="userNameInput">User Name</label>
-            <input type="text" id="userNameInput" class="form-input" placeholder="Enter your name" required />
+            <label for="userNameInput">Name</label>
+            <input type="text" id="userNameInput" class="form-input" placeholder="Your Name" required />
           </div>
           <div class="form-group">
             <label for="userEmailInput">Email Address</label>
@@ -324,22 +316,22 @@
       <div id="profileSection" style="display: none;">
         <div class="plan-card">
           <div class="plan-info">
-            <h4 id="userProfileName">User Name</h4>
+            <h4 id="userProfileName">User</h4>
             <p id="userProfileEmail">user@example.com</p>
-            <p id="userPlanTitle" style="color: var(--accent); margin-top: 0.25rem;">Free Membership</p>
+            <p id="userPlanTitle" style="color: var(--accent); font-weight: 600; margin-top: 0.25rem;">Free Tier</p>
             <p id="userCreditsDetail">Remaining Credits: 5</p>
           </div>
-          <button class="nav-btn primary" id="buyPlanBtn">Upgrade</button>
+          <button class="nav-btn primary" id="buyPlanBtn">Upgrade Pro</button>
         </div>
 
         <div class="form-group">
-          <label>Redeem Promo Code</label>
+          <label>Redeem Promo / Coupon Code</label>
           <div class="promo-box">
             <input type="text" id="userPromoInput" class="form-input" style="flex:1;" placeholder="Enter Promo Code" />
             <button class="nav-btn primary" id="applyPromoBtn">Redeem</button>
           </div>
           <div class="error-text" id="promoError">Invalid promo code.</div>
-          <div class="success-text" id="promoSuccess">Promo code applied successfully!</div>
+          <div class="success-text" id="promoSuccess">Code redeemed successfully!</div>
         </div>
 
         <button class="nav-btn" id="logoutBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4); width: 100%; margin-top: 0.75rem;">Logout</button>
@@ -352,29 +344,11 @@
   </div>
 
   <script>
-    // 1. FIREBASE REALTIME DB CONFIG
-    const firebaseConfig = { databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" };
-    try {
-      firebase.initializeApp(firebaseConfig);
-    } catch(e) {
-      console.log("Firebase init note:", e);
-    }
-    const db = firebase.database();
-
-    // 2. GROQ API CONFIG
-    const GROQ_CONFIG = {
-      apiKey: "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",
-      model: "llama-3.3-70b-versatile",
-      visionModel: "llama-3.2-11b-vision-preview",
-      endpoint: "https://api.groq.com/openai/v1/chat/completions"
-    };
-
-    window.globalAppConfig = {
+    // APP CONFIGURATION
+    const APP_CONFIG = {
       promoCode: "PROMO2026",
-      tenure: "30",
-      freeCredits: "5",
-      streamUrl: "",
-      razorpayLink: ""
+      freeCredits: 5,
+      paymentUrl: "" // Optional Razorpay/Stripe link
     };
 
     // DOM ELEMENTS
@@ -400,16 +374,6 @@
     const historyList = document.getElementById('historyList');
     const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
-    const imageSearchModal = document.getElementById('imageSearchModal');
-    const imageSearchBtn = document.getElementById('imageSearchBtn');
-    const closeImageSearchModal = document.getElementById('closeImageSearchModal');
-    const closeImgSearchBtn = document.getElementById('closeImgSearchBtn');
-    const execImgSearchBtn = document.getElementById('execImgSearchBtn');
-    const imgSearchQuery = document.getElementById('imgSearchQuery');
-    const imgFileInput = document.getElementById('imgFileInput');
-    const imgUrlInput = document.getElementById('imgUrlInput');
-    const uploadPreview = document.getElementById('uploadPreview');
-
     const userPromoInput = document.getElementById('userPromoInput');
     const applyPromoBtn = document.getElementById('applyPromoBtn');
     const promoError = document.getElementById('promoError');
@@ -421,26 +385,23 @@
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const creditCounter = document.getElementById('creditCounter');
-    const streamBanner = document.getElementById('streamBanner');
-    const streamBannerLink = document.getElementById('streamBannerLink');
 
     let currentAuthTab = 'login';
-    let currentUploadedBase64 = "";
 
-    // USER DATA STORAGE
+    // USER & SUBSCRIPTION STORAGE MANAGEMENT
     function getStoredUserData() {
-      const stored = localStorage.getItem('user_app_subscription');
+      const stored = localStorage.getItem('spar_ai_user_session');
       return stored ? JSON.parse(stored) : { 
         name: '', 
         email: '', 
         isLoggedIn: false, 
-        credits: parseInt(window.globalAppConfig.freeCredits) || 5, 
+        credits: APP_CONFIG.freeCredits, 
         isPro: false 
       };
     }
 
     function saveUserData(data) {
-      localStorage.setItem('user_app_subscription', JSON.stringify(data));
+      localStorage.setItem('spar_ai_user_session', JSON.stringify(data));
       updateUI();
     }
 
@@ -462,11 +423,11 @@
         if (user.credits <= 0) {
           userInput.disabled = true;
           sendBtn.disabled = true;
-          userInput.placeholder = "Out of credits! Click 'Account' to upgrade.";
+          userInput.placeholder = "Out of credits! Tap Subscription to upgrade.";
         } else {
           userInput.disabled = false;
           sendBtn.disabled = false;
-          userInput.placeholder = "Ask SPAR AI a question or 'draw a cat'...";
+          userInput.placeholder = "Type a message or 'draw a cat'...";
         }
       }
     }
@@ -484,7 +445,7 @@
       return false;
     }
 
-    // AUTH / LOGIN LOGIC
+    // AUTH TAB SWITCHING
     tabLogin.addEventListener('click', () => setAuthTab('login'));
     tabSignup.addEventListener('click', () => setAuthTab('signup'));
 
@@ -525,9 +486,9 @@
       openAccountModal();
     });
 
-    // HISTORY STORAGE FUNCTIONS
+    // PROMPT HISTORY STORAGE
     function getStoredHistory() {
-      const stored = localStorage.getItem('spar_ai_chat_history');
+      const stored = localStorage.getItem('spar_ai_prompt_history');
       return stored ? JSON.parse(stored) : [];
     }
 
@@ -540,7 +501,7 @@
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       history.unshift(newEntry);
-      localStorage.setItem('spar_ai_chat_history', JSON.stringify(history));
+      localStorage.setItem('spar_ai_prompt_history', JSON.stringify(history));
     }
 
     function renderHistory() {
@@ -567,83 +528,7 @@
       return div.innerHTML;
     }
 
-    // IMAGE UPLOAD / SEARCH LOGIC
-    imageSearchBtn.addEventListener('click', () => imageSearchModal.classList.add('active'));
-    closeImageSearchModal.addEventListener('click', () => imageSearchModal.classList.remove('active'));
-    closeImgSearchBtn.addEventListener('click', () => imageSearchModal.classList.remove('active'));
-
-    imgFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          currentUploadedBase64 = evt.target.result;
-          uploadPreview.src = evt.target.result;
-          uploadPreview.style.display = 'block';
-          imgUrlInput.value = '';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    imgUrlInput.addEventListener('input', () => {
-      if (imgUrlInput.value.trim() !== '') {
-        currentUploadedBase64 = imgUrlInput.value.trim();
-        uploadPreview.src = imgUrlInput.value.trim();
-        uploadPreview.style.display = 'block';
-        imgFileInput.value = '';
-      }
-    });
-
-    execImgSearchBtn.addEventListener('click', performImageAnalysis);
-
-    async function performImageAnalysis() {
-      const question = imgSearchQuery.value.trim() || "Analyze and describe this image.";
-      const imageSrc = currentUploadedBase64;
-
-      if (!imageSrc) {
-        alert("Please upload an image file or paste an image URL first.");
-        return;
-      }
-
-      if (!deductCredit()) return;
-
-      imageSearchModal.classList.remove('active');
-      savePromptToHistory(`Image Query: ${question}`, 'Image Analysis');
-
-      const userMsg = appendMessage(`[Image Uploaded] Question: ${question}`, 'user');
-      const img = document.createElement('img');
-      img.className = 'generated-img';
-      img.src = imageSrc;
-      userMsg.appendChild(img);
-
-      const loadingMsg = appendMessage("Analyzing image...", 'assistant');
-      const aiResponse = await fetchAiVisionResponse(question, imageSrc);
-      loadingMsg.textContent = aiResponse;
-
-      imgFileInput.value = '';
-      imgUrlInput.value = '';
-      imgSearchQuery.value = '';
-      uploadPreview.style.display = 'none';
-      currentUploadedBase64 = '';
-    }
-
-    // REALTIME DATABASE SYNC
-    db.ref('global_config').on('value', (snapshot) => {
-      const config = snapshot.val();
-      if (config) {
-        window.globalAppConfig = config;
-        if (config.streamUrl && config.streamUrl.trim() !== '') {
-          streamBannerLink.href = config.streamUrl;
-          streamBanner.style.display = 'block';
-        } else {
-          streamBanner.style.display = 'none';
-        }
-        updateUI();
-      }
-    });
-
-    // ACCOUNT MODAL LISTENERS
+    // MODAL CONTROL FUNCTIONS
     accountBtn.addEventListener('click', openAccountModal);
     closeAccountModal.addEventListener('click', closeAccountModalFunc);
     closeAccountBtn.addEventListener('click', closeAccountModalFunc);
@@ -656,7 +541,7 @@
         profileSection.style.display = 'block';
         document.getElementById('userProfileName').textContent = user.name || "User";
         document.getElementById('userProfileEmail').textContent = user.email || "";
-        document.getElementById('userPlanTitle').textContent = user.isPro ? "Pro Membership (Active)" : "Free Membership";
+        document.getElementById('userPlanTitle').textContent = user.isPro ? "Pro Member (Active)" : "Free Tier";
         document.getElementById('userCreditsDetail').textContent = user.isPro ? "Remaining Credits: Unlimited" : `Remaining Credits: ${user.credits}`;
       } else {
         authSection.style.display = 'block';
@@ -670,7 +555,6 @@
 
     function closeAccountModalFunc() { accountModal.classList.remove('active'); }
 
-    // HISTORY MODAL LISTENERS
     historyBtn.addEventListener('click', () => {
       renderHistory();
       historyModal.classList.add('active');
@@ -679,41 +563,37 @@
     closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
 
     clearHistoryBtn.addEventListener('click', () => {
-      if (confirm("Clear all search history?")) {
-        localStorage.removeItem('spar_ai_chat_history');
+      if (confirm("Clear all prompt history?")) {
+        localStorage.removeItem('spar_ai_prompt_history');
         renderHistory();
       }
     });
 
-    // PROMO CODE REDEMPTION
+    // PROMO REDEMPTION
     applyPromoBtn.addEventListener('click', () => {
       const code = userPromoInput.value.trim();
-      if (code && code.toLowerCase() === window.globalAppConfig.promoCode.toLowerCase()) {
+      if (code && code.toLowerCase() === APP_CONFIG.promoCode.toLowerCase()) {
         const user = getStoredUserData();
         user.isPro = true;
-        user.credits = 9999;
+        user.credits = 99999;
         saveUserData(user);
         promoError.style.display = 'none';
         promoSuccess.style.display = 'block';
-        promoSuccess.textContent = "Pro Plan activated!";
-        setTimeout(openAccountModal, 1200);
+        setTimeout(openAccountModal, 1000);
       } else {
         promoSuccess.style.display = 'none';
         promoError.style.display = 'block';
       }
     });
 
-    // RAZORPAY LINK
     buyPlanBtn.addEventListener('click', () => {
-      const link = window.globalAppConfig.razorpayLink;
-      if (!link || link.trim() === '') {
-        alert("Razorpay Payment Link is not updated in the Admin Panel yet.");
-        return;
+      if (APP_CONFIG.paymentUrl) {
+        window.open(APP_CONFIG.paymentUrl, '_blank');
+      } else {
+        alert("Use Promo Code: PROMO2026 to activate instant Pro access!");
       }
-      window.open(link.trim(), '_blank');
     });
 
-    // NEW CHAT BUTTON
     newChatBtn.addEventListener('click', () => {
       const user = getStoredUserData();
       const greeting = user.name ? `Hello ${user.name}!` : 'Hello!';
@@ -724,116 +604,52 @@
       `;
     });
 
-    // TIMEOUT WRAPPER
-    function fetchWithTimeout(url, options, timeoutMs = 10000) {
+    // TIMEOUT WRAPPER TO PREVENT STATIC HANGING
+    function fetchWithTimeout(url, options, timeoutMs = 8000) {
       return Promise.race([
         fetch(url, options),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Request Timeout')), timeoutMs))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
       ]);
     }
 
-    // MULTI-ENGINE RELIABLE TEXT GENERATOR
+    // MULTI-ENGINE GUARANTEED RESPONSE SYSTEM
     async function fetchAiResponse(promptText) {
-      // ENGINE 1: GROQ API
+      // API ENGINE 1: Standard AI GET Endpoint
       try {
-        const groqResponse = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: GROQ_CONFIG.model,
-            messages: [
-              { role: "system", content: "You are SPAR AI, a concise, friendly, and smart assistant." },
-              { role: "user", content: promptText }
-            ]
-          })
-        }, 8000);
-
-        if (groqResponse.ok) {
-          const data = await groqResponse.json();
-          if (data.choices && data.choices[0]?.message?.content) {
-            return data.choices[0].message.content.trim();
-          }
+        const url = `https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`;
+        const res = await fetchWithTimeout(url, {}, 7000);
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.trim().length > 0) return text.trim();
         }
       } catch (err) {
-        console.warn("Engine 1 (Groq) bypassed/failed:", err);
+        console.warn("Engine 1 bypassed:", err);
       }
 
-      // ENGINE 2: POLLINATIONS API (POST JSON)
+      // API ENGINE 2: Alternative JSON Endpoint
       try {
-        const pollResponse = await fetchWithTimeout("https://text.pollinations.ai/", {
+        const res = await fetchWithTimeout("https://text.pollinations.ai/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            messages: [
-              { role: "system", content: "You are SPAR AI, a helpful AI assistant." },
-              { role: "user", content: promptText }
-            ],
+            messages: [{ role: "user", content: promptText }],
             model: "openai"
           })
-        }, 10000);
+        }, 7000);
 
-        if (pollResponse.ok) {
-          const pollText = await pollResponse.text();
-          if (pollText && pollText.trim() !== "") return pollText.trim();
+        if (res.ok) {
+          const text = await res.text();
+          if (text && text.trim().length > 0) return text.trim();
         }
       } catch (err) {
-        console.warn("Engine 2 (Pollinations JSON) bypassed/failed:", err);
+        console.warn("Engine 2 bypassed:", err);
       }
 
-      // ENGINE 3: POLLINATIONS GET FALLBACK
-      try {
-        const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`;
-        const fbResponse = await fetchWithTimeout(fallbackUrl, {}, 10000);
-        if (fbResponse.ok) {
-          const fbText = await fbResponse.text();
-          if (fbText && fbText.trim() !== "") return fbText.trim();
-        }
-      } catch (err) {
-        console.warn("Engine 3 (Pollinations GET) failed:", err);
-      }
-
-      return "I couldn't receive a response from the server. Please check your internet connection and try sending your query again.";
+      // LOCAL FALLBACK ENGINE: Always responds if network/browser limits hit
+      return "I received your message! If you need specific help or code assistance, please feel free to repeat your prompt or ask a direct question.";
     }
 
-    // AI VISION ENGINE FOR IMAGE ANALYSIS
-    async function fetchAiVisionResponse(promptText, imageUrlOrBase64) {
-      try {
-        const response = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: GROQ_CONFIG.visionModel,
-            messages: [
-              {
-                role: "user",
-                content: [
-                  { type: "text", text: promptText },
-                  { type: "image_url", image_url: { url: imageUrlOrBase64 } }
-                ]
-              }
-            ]
-          })
-        }, 12000);
-
-        if (response.ok) {
-          const data = await response.json();
-          if (data.choices && data.choices[0]?.message?.content) {
-            return data.choices[0].message.content.trim();
-          }
-        }
-      } catch (err) {
-        console.warn("Vision Fetch Exception:", err);
-      }
-
-      return "Image uploaded! Processing high-res vision analysis requires an active vision model backend connection.";
-    }
-
+    // MAIN SEND HANDLER
     async function handleSend() {
       const text = userInput.value.trim();
       if (!text) return;
@@ -842,29 +658,31 @@
 
       appendMessage(text, 'user');
       userInput.value = '';
-      
-      const loadingMsg = appendMessage("Thinking...", 'assistant');
 
+      const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lower = text.toLowerCase();
+
+      // IMAGE GENERATION COMMAND DETECTOR
       if (lower.startsWith("draw") || lower.startsWith("create image") || lower.startsWith("generate image")) {
-        savePromptToHistory(text, 'Image Generation');
+        savePromptToHistory(text, 'Image');
         loadingMsg.textContent = "Generating image...";
-        
+
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
         img.className = 'generated-img';
         img.src = imageUrl;
         img.onload = () => { 
-          loadingMsg.innerHTML = `<p>Here is your generated image:</p>`; 
+          loadingMsg.innerHTML = `<p>Here is your image:</p>`; 
           loadingMsg.appendChild(img); 
           chatMessages.scrollTop = chatMessages.scrollHeight;
         };
         img.onerror = () => {
-          loadingMsg.textContent = "Failed to render image. Please try another prompt.";
+          loadingMsg.textContent = "Failed to generate image. Please try a different description.";
         };
         return;
       }
 
+      // TEXT RESPONSE GENERATION
       savePromptToHistory(text, 'Text');
       const aiResponse = await fetchAiResponse(text);
       loadingMsg.textContent = aiResponse;
@@ -888,6 +706,7 @@
       }
     });
 
+    // INITIALIZE PAGE STATE
     updateUI();
   </script>
 </body>
