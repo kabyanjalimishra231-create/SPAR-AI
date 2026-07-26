@@ -98,10 +98,8 @@
     .history-item .history-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
     .empty-history { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; }
 
-    /* Image Search Grid Styling */
-    .image-search-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; overflow-y: auto; flex: 1; margin-top: 1rem; max-height: 350px; }
-    .search-img-card { width: 100%; height: 160px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
-    .search-img-card:hover { transform: scale(1.02); }
+    /* Image Upload & Search Preview Styling */
+    .img-upload-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px dashed var(--border-color); display: none; margin-top: 0.5rem; background: var(--bg-primary); }
   </style>
 </head>
 <body>
@@ -114,7 +112,7 @@
     <nav>
       <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
       <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
-      <button class="nav-btn" id="imageSearchBtn">🔍 Image Search</button>
+      <button class="nav-btn" id="imageSearchBtn">📷 Image Search</button>
       <button class="nav-btn" id="historyBtn">📜 History</button>
       <button class="nav-btn" id="accountBtn">👤 Account</button>
       <button class="nav-btn primary" id="newChatBtn">+ New Chat</button>
@@ -130,7 +128,7 @@
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant" id="welcomeMsg">
-          Hello! Welcome to SPAR AI. How can I assist you today? Ask questions, use Image Search, or type 'draw a cat'.
+          Hello! Welcome to SPAR AI. How can I assist you today? Ask questions, upload an image via Image Search, or type 'draw a cat'.
         </div>
       </div>
       <div class="chat-input-area">
@@ -140,25 +138,29 @@
     </div>
   </main>
 
-  <!-- IMAGE SEARCH MODAL -->
+  <!-- IMAGE UPLOAD & QUESTION MODAL -->
   <div class="modal-overlay" id="imageSearchModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">🔍 AI Image Search</div>
+        <div class="modal-title">📷 Upload Image & Ask Question</div>
         <button class="close-btn" id="closeImageSearchModal">&times;</button>
       </div>
       <div class="form-group">
-        <label>Search and generate visual ideas instantly</label>
-        <div class="promo-box">
-          <input type="text" id="imgSearchQuery" class="form-input" style="flex:1;" placeholder="e.g. Futuristic city, Cyberpunk car..." />
-          <button class="nav-btn primary" id="execImgSearchBtn">Search</button>
-        </div>
+        <label>Upload an image file or paste an image URL:</label>
+        <input type="file" id="imgFileInput" class="form-input" accept="image/*" />
       </div>
-      <div class="image-search-results" id="imageSearchResults">
-        <div class="empty-history" style="grid-column: span 2;">Enter a keyword above to search for images.</div>
+      <div class="form-group">
+        <label>Or Image URL:</label>
+        <input type="text" id="imgUrlInput" class="form-input" placeholder="https://example.com/image.jpg" />
+      </div>
+      <img id="uploadPreview" class="img-upload-preview" alt="Image Preview" />
+      <div class="form-group" style="margin-top: 0.75rem;">
+        <label>Your Question about the Image:</label>
+        <input type="text" id="imgSearchQuery" class="form-input" placeholder="e.g. What is in this image? Explain this diagram." />
       </div>
       <div class="modal-actions">
-        <button class="nav-btn" id="closeImgSearchBtn">Close</button>
+        <button class="nav-btn" id="closeImgSearchBtn">Cancel</button>
+        <button class="nav-btn primary" id="execImgSearchBtn">Ask AI</button>
       </div>
     </div>
   </div>
@@ -249,6 +251,7 @@
     const GROQ_CONFIG = {
       apiKey: "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",
       model: "llama-3.3-70b-versatile",
+      visionModel: "llama-3.2-11b-vision-preview",
       endpoint: "https://api.groq.com/openai/v1/chat/completions"
     };
 
@@ -289,7 +292,9 @@
     const closeImgSearchBtn = document.getElementById('closeImgSearchBtn');
     const execImgSearchBtn = document.getElementById('execImgSearchBtn');
     const imgSearchQuery = document.getElementById('imgSearchQuery');
-    const imageSearchResults = document.getElementById('imageSearchResults');
+    const imgFileInput = document.getElementById('imgFileInput');
+    const imgUrlInput = document.getElementById('imgUrlInput');
+    const uploadPreview = document.getElementById('uploadPreview');
 
     const userPromoInput = document.getElementById('userPromoInput');
     const applyPromoBtn = document.getElementById('applyPromoBtn');
@@ -306,6 +311,7 @@
     const streamBannerLink = document.getElementById('streamBannerLink');
 
     let currentAuthTab = 'login';
+    let currentUploadedBase64 = "";
 
     // USER DATA STORAGE
     function getStoredUserData() {
@@ -447,41 +453,68 @@
       return div.innerHTML;
     }
 
-    // IMAGE SEARCH LOGIC
+    // IMAGE UPLOAD / SEARCH LOGIC
     imageSearchBtn.addEventListener('click', () => imageSearchModal.classList.add('active'));
     closeImageSearchModal.addEventListener('click', () => imageSearchModal.classList.remove('active'));
     closeImgSearchBtn.addEventListener('click', () => imageSearchModal.classList.remove('active'));
 
-    execImgSearchBtn.addEventListener('click', performImageSearch);
-    imgSearchQuery.addEventListener('keypress', (e) => { if (e.key === 'Enter') performImageSearch(); });
+    imgFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          currentUploadedBase64 = evt.target.result;
+          uploadPreview.src = evt.target.result;
+          uploadPreview.style.display = 'block';
+          imgUrlInput.value = '';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-    function performImageSearch() {
-      const query = imgSearchQuery.value.trim();
-      if (!query) return;
+    imgUrlInput.addEventListener('input', () => {
+      if (imgUrlInput.value.trim() !== '') {
+        currentUploadedBase64 = imgUrlInput.value.trim();
+        uploadPreview.src = imgUrlInput.value.trim();
+        uploadPreview.style.display = 'block';
+        imgFileInput.value = '';
+      }
+    });
+
+    execImgSearchBtn.addEventListener('click', performImageAnalysis);
+
+    async function performImageAnalysis() {
+      const question = imgSearchQuery.value.trim() || "Analyze and describe this image.";
+      const imageSrc = currentUploadedBase64;
+
+      if (!imageSrc) {
+        alert("Please upload an image file or paste an image URL first.");
+        return;
+      }
 
       if (!deductCredit()) return;
 
-      savePromptToHistory(`Image Search: ${query}`, 'Image Search');
-      imageSearchResults.innerHTML = `<div class="empty-history" style="grid-column: span 2;">Searching images...</div>`;
-
-      const seeds = [101, 202, 303, 404];
-      const imagesHtml = seeds.map(seed => {
-        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(query)}?width=500&height=500&nologo=true&seed=${seed}`;
-        return `<img src="${url}" class="search-img-card" alt="${escapeHtml(query)}" onclick="sendImageToChat('${url}', '${escapeHtml(query)}')"/>`;
-      }).join('');
-
-      imageSearchResults.innerHTML = imagesHtml;
-    }
-
-    window.sendImageToChat = function(url, promptText) {
       imageSearchModal.classList.remove('active');
-      appendMessage(`Selected Image for: "${promptText}"`, 'user');
-      const msg = appendMessage('Here is your selected search result:', 'assistant');
+      savePromptToHistory(`Image Query: ${question}`, 'Image Analysis');
+
+      // Add user message with image
+      const userMsg = appendMessage(`[Image Uploaded] Question: ${question}`, 'user');
       const img = document.createElement('img');
       img.className = 'generated-img';
-      img.src = url;
-      msg.appendChild(img);
-    };
+      img.src = imageSrc;
+      userMsg.appendChild(img);
+
+      const loadingMsg = appendMessage("Analyzing image...", 'assistant');
+      const aiResponse = await fetchAiVisionResponse(question, imageSrc);
+      loadingMsg.textContent = aiResponse;
+
+      // Reset modal fields
+      imgFileInput.value = '';
+      imgUrlInput.value = '';
+      imgSearchQuery.value = '';
+      uploadPreview.style.display = 'none';
+      currentUploadedBase64 = '';
+    }
 
     // REALTIME DATABASE SYNC
     db.ref('global_config').on('value', (snapshot) => {
@@ -574,18 +607,14 @@
       const greeting = user.name ? `Hello ${user.name}!` : 'Hello!';
       chatMessages.innerHTML = `
         <div class="message assistant">
-          ${greeting} Welcome to SPAR AI. How can I assist you today? Ask questions, use Image Search, or type 'draw a cat'.
+          ${greeting} Welcome to SPAR AI. How can I assist you today? Ask questions, upload an image via Image Search, or type 'draw a cat'.
         </div>
       `;
     });
 
-    // ROBUST AI RESPONSE ENGINE WITH RELIABLE FALLBACK
+    // GROQ TEXT RESPONSE ENGINE
     async function fetchAiResponse(promptText) {
-      // 1. Try Groq API first
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 sec timeout
-
         const response = await fetch(GROQ_CONFIG.endpoint, {
           method: "POST",
           headers: {
@@ -595,39 +624,72 @@
           body: JSON.stringify({
             model: GROQ_CONFIG.model,
             messages: [
-              { role: "system", content: "You are SPAR AI, a helpful, precise AI assistant." },
+              { role: "system", content: "You are SPAR AI, a helpful and intelligent AI assistant." },
               { role: "user", content: promptText }
             ]
-          }),
-          signal: controller.signal
+          })
         });
-        clearTimeout(timeoutId);
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.choices && data.choices[0]?.message?.content) {
-            return data.choices[0].message.content;
-          }
+        const data = await response.json();
+        if (response.ok && data.choices && data.choices[0]?.message?.content) {
+          return data.choices[0].message.content;
+        } else if (data.error) {
+          console.error("Groq API Error:", data.error);
+          return `API Error: ${data.error.message || "Failed to generate response."}`;
         }
       } catch (err) {
-        console.warn("Groq fetch primary failed, using fallback engine...", err);
+        console.error("Fetch Exception:", err);
       }
 
-      // 2. Fallback Engine (Pollinations Free Text AI API)
+      // Fallback
       try {
         const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}`;
         const fbResponse = await fetch(fallbackUrl);
         if (fbResponse.ok) {
           const fbText = await fbResponse.text();
-          if (fbText && fbText.trim() !== "") {
-            return fbText.trim();
-          }
+          if (fbText && fbText.trim() !== "") return fbText.trim();
         }
       } catch (fbErr) {
-        console.error("Fallback API Error:", fbErr);
+        console.error("Fallback Error:", fbErr);
       }
 
-      return "I'm having trouble processing your request right now. Please check your network connection and try again.";
+      return "I'm having trouble processing your request right now. Please check your internet connection or try again.";
+    }
+
+    // GROQ VISION RESPONSE ENGINE FOR IMAGE ANALYSIS
+    async function fetchAiVisionResponse(promptText, imageUrlOrBase64) {
+      try {
+        const response = await fetch(GROQ_CONFIG.endpoint, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: GROQ_CONFIG.visionModel,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  { type: "text", text: promptText },
+                  { type: "image_url", image_url: { url: imageUrlOrBase64 } }
+                ]
+              }
+            ]
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.choices && data.choices[0]?.message?.content) {
+          return data.choices[0].message.content;
+        } else if (data.error) {
+          return `Image Analysis Error: ${data.error.message || "Unable to read image."}`;
+        }
+      } catch (err) {
+        console.error("Vision API Error:", err);
+      }
+
+      return "Unable to analyze this image at the moment. Please ensure the image is accessible and try again.";
     }
 
     async function handleSend() {
@@ -640,7 +702,7 @@
 
       const lower = text.toLowerCase();
       if (lower.startsWith("draw") || lower.startsWith("create image") || lower.startsWith("generate image")) {
-        savePromptToHistory(text, 'Image');
+        savePromptToHistory(text, 'Image Generation');
         loadingMsg.textContent = "Generating image...";
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
