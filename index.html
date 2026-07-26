@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SPAR AI Workspace</title>
   
-  <!-- Firebase Core SDKs -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
   <style>
-    /* -------------------------------------------------------------
-       DESIGN & STYLES (SPAR AI THEME)
-    ------------------------------------------------------------- */
     :root {
       --bg-primary: #0f172a;
       --bg-secondary: #1e293b;
@@ -26,22 +23,9 @@
       --success: #10b981;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
 
-    body {
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    /* Navigation Bar */
     header {
       background-color: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
@@ -51,360 +35,79 @@
       align-items: center;
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      cursor: pointer; /* Secret admin trigger: Double-click here */
-      user-select: none;
-    }
+    .brand { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; user-select: none; }
+    .brand-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+    .brand-title { font-size: 1.25rem; font-weight: 700; }
 
-    .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: var(--accent);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      font-size: 0.9rem;
-      letter-spacing: 0.5px;
-    }
+    nav { display: flex; gap: 1rem; align-items: center; }
+    .credit-badge { font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; }
+    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid transparent; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; }
+    .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    .nav-btn.primary { background: var(--accent); color: white; }
+    .nav-btn.primary:hover { background: var(--accent-hover); }
 
-    .brand-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
+    .banner { background: rgba(99, 102, 241, 0.15); border-bottom: 1px solid var(--accent); padding: 0.6rem 1rem; text-align: center; font-size: 0.85rem; display: none; }
+    .banner a { color: #818cf8; font-weight: 600; text-decoration: underline; margin-left: 0.5rem; }
 
-    nav {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-    }
+    main { flex: 1; max-width: 900px; width: 100%; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
+    .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; height: 500px; display: flex; flex-direction: column; overflow: hidden; }
+    .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+    .message { max-width: 80%; padding: 0.75rem 1rem; border-radius: 8px; line-height: 1.5; font-size: 0.95rem; }
+    .message.user { align-self: flex-end; background-color: var(--accent); color: white; }
+    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
+    .generated-img { width: 100%; max-width: 400px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
 
-    .credit-badge {
-      font-size: 0.8rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 20px;
-      background: rgba(99, 102, 241, 0.2);
-      border: 1px solid var(--accent);
-      color: #a5b4fc;
-      font-weight: 600;
-    }
+    .chat-input-area { padding: 1rem; background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; }
+    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); outline: none; }
+    .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
+    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .nav-btn {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid transparent;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
-    }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 500px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .modal-title { font-size: 1.25rem; font-weight: 600; }
+    .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.25rem; cursor: pointer; }
 
-    .nav-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
-    }
+    .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-main); outline: none; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
 
-    .nav-btn.primary {
-      background: var(--accent);
-      color: white;
-    }
-
-    .nav-btn.primary:hover {
-      background: var(--accent-hover);
-    }
-
-    /* Live Announcement Banner */
-    .banner {
-      background: rgba(99, 102, 241, 0.15);
-      border-bottom: 1px solid var(--accent);
-      padding: 0.6rem 1rem;
-      text-align: center;
-      font-size: 0.85rem;
-      display: none;
-    }
-
-    .banner a {
-      color: #818cf8;
-      font-weight: 600;
-      text-decoration: underline;
-      margin-left: 0.5rem;
-    }
-
-    /* Main Content Layout */
-    main {
-      flex: 1;
-      max-width: 900px;
-      width: 100%;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .chat-container {
-      background-color: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      height: 500px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .chat-messages {
-      flex: 1;
-      padding: 1.5rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .message {
-      max-width: 80%;
-      padding: 0.75rem 1rem;
-      border-radius: 8px;
-      line-height: 1.5;
-      font-size: 0.95rem;
-    }
-
-    .message.user {
-      align-self: flex-end;
-      background-color: var(--accent);
-      color: white;
-    }
-
-    .message.assistant {
-      align-self: flex-start;
-      background-color: var(--bg-card);
-      color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
-
-    .generated-img {
-      width: 100%;
-      max-width: 400px;
-      border-radius: 8px;
-      margin-top: 8px;
-      border: 1px solid var(--border-color);
-      display: block;
-    }
-
-    .chat-input-area {
-      padding: 1rem;
-      background-color: var(--bg-secondary);
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      gap: 0.75rem;
-    }
-
-    .chat-input {
-      flex: 1;
-      background-color: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.75rem 1rem;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    .chat-input:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .chat-input:focus {
-      border-color: var(--accent);
-    }
-
-    .send-btn {
-      background-color: var(--accent);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.25rem;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 500;
-    }
-
-    .send-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .send-btn:hover:not(:disabled) {
-      background-color: var(--accent-hover);
-    }
-
-    /* Modal / Admin Overlay */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(4px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-card {
-      background: var(--bg-secondary);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 500px;
-      padding: 1.5rem;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .close-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
-      cursor: pointer;
-    }
-
-    .form-group {
-      margin-bottom: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .form-group label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
-
-    .form-input {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 0.75rem;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--accent);
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-    }
-
-    .error-text {
-      color: var(--danger);
-      font-size: 0.85rem;
-      display: none;
-      margin-top: 0.5rem;
-    }
-
-    .success-text {
-      color: var(--success);
-      font-size: 0.85rem;
-      display: none;
-      margin-top: 0.5rem;
-    }
+    .error-text { color: var(--danger); font-size: 0.85rem; display: none; margin-top: 0.5rem; }
+    .success-text { color: var(--success); font-size: 0.85rem; display: none; margin-top: 0.5rem; }
     
-    .status-badge {
-      font-size: 0.75rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 4px;
-      background: rgba(16, 185, 129, 0.2);
-      color: var(--success);
-      margin-left: 0.5rem;
-    }
-
-    /* Subscription Pricing Cards inside Account Modal */
-    .plan-card {
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .plan-info h4 {
-      font-size: 1rem;
-      color: var(--text-main);
-    }
-
-    .plan-info p {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .promo-box {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
+    .plan-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .plan-info h4 { font-size: 1rem; color: var(--text-main); }
+    .plan-info p { font-size: 0.8rem; color: var(--text-muted); }
+    .promo-box { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
 
-  <!-- Navigation Header -->
   <header>
-    <div class="brand" id="brandHeader" title="Double click for Owner Access">
+    <div class="brand" id="brandHeader">
       <div class="brand-logo">SPAR</div>
       <div class="brand-title">SPAR AI</div>
     </div>
     <nav>
       <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
-      <button class="nav-btn" id="historyBtn">History</button>
       <button class="nav-btn" id="accountBtn">Account / Upgrade</button>
       <button class="nav-btn primary" id="newChatBtn">+ New Chat</button>
     </nav>
   </header>
 
-  <!-- Dynamic Live Broadcast Banner -->
   <div class="banner" id="streamBanner">
     <span>🔴 Live Stream Available:</span>
     <a href="#" id="streamBannerLink" target="_blank">Watch Live Stream</a>
   </div>
 
-  <!-- Main App Layout -->
   <main>
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant">
-          Hello! Welcome to SPAR AI. How can I assist you today? You can ask questions or generate images!
+          Hello! Welcome to SPAR AI. How can I assist you today? Ask questions or type 'draw a cat'.
         </div>
       </div>
       <div class="chat-input-area">
@@ -414,7 +117,7 @@
     </div>
   </main>
 
-  <!-- User Account & Subscription Modal -->
+  <!-- User Account & Upgrade Modal -->
   <div class="modal-overlay" id="accountModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -428,7 +131,7 @@
           <p id="userCreditsDetail">Remaining Credits: 5</p>
           <p id="userTenureDetail">Plan Tenure: Active</p>
         </div>
-        <button class="nav-btn primary" id="buyPlanBtn">Upgrade ($9.99)</button>
+        <button class="nav-btn primary" id="buyPlanBtn">Upgrade Now</button>
       </div>
 
       <div class="form-group">
@@ -447,102 +150,28 @@
     </div>
   </div>
 
-  <!-- Hidden Owner Password Verification Modal -->
-  <div class="modal-overlay" id="authModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">SPAR AI Owner Verification</div>
-        <button class="close-btn" id="closeAuthModal">&times;</button>
-      </div>
-      <div class="form-group">
-        <label for="adminPass">Enter Security Passcode</label>
-        <input type="password" id="adminPass" class="form-input" placeholder="••••••" />
-        <div class="error-text" id="authError">Incorrect passcode. Access denied.</div>
-      </div>
-      <div class="modal-actions">
-        <button class="nav-btn" id="cancelAuth">Cancel</button>
-        <button class="nav-btn primary" id="loginAdminBtn">Verify</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Restricted Admin Panel Modal -->
-  <div class="modal-overlay" id="adminPanelModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">SPAR AI Global Dashboard <span class="status-badge">Live Sync</span></div>
-        <button class="close-btn" id="closeAdminModal">&times;</button>
-      </div>
-      <div class="form-group">
-        <label>Live Stream Link (Broadcasting to all users)</label>
-        <input type="text" id="adminStreamUrl" class="form-input" placeholder="https://..." />
-      </div>
-      <div class="form-group">
-        <label>Active Promo Code</label>
-        <input type="text" id="adminPromo" class="form-input" placeholder="PROMO2026" />
-      </div>
-      <div class="form-group">
-        <label>Plan Tenure (Days)</label>
-        <input type="number" id="adminTenure" class="form-input" value="30" />
-      </div>
-      <div class="form-group">
-        <label>Default Free Credits per User</label>
-        <input type="number" id="adminFreeCredits" class="form-input" value="5" />
-      </div>
-      <div class="modal-actions">
-        <button class="nav-btn" id="closeAdminBtn">Close</button>
-        <button class="nav-btn primary" id="saveAdminSettings">Publish Changes</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Application Logic -->
   <script>
-    /* -------------------------------------------------------------
-       1. FIREBASE REALTIME DATABASE CONFIGURATION
-    ------------------------------------------------------------- */
-    const firebaseConfig = {
-      databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" 
-    };
-
+    // 1. FIREBASE REALTIME DB
+    const firebaseConfig = { databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    /* -------------------------------------------------------------
-       2. GROQ AI API KEY & ADMIN SECURITY
-    ------------------------------------------------------------- */
+    // 2. GROQ CONFIG
     const GROQ_CONFIG = {
       apiKey: "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",
       model: "llama-3.3-70b-versatile",
       endpoint: "https://api.groq.com/openai/v1/chat/completions"
     };
 
-    const ADMIN_PASSWORD = "221181";
-
-    // Global Config Defaults
     window.globalAppConfig = {
       promoCode: "PROMO2026",
       tenure: "30",
       freeCredits: "5",
-      streamUrl: ""
+      streamUrl: "",
+      razorpayLink: ""
     };
 
-    // UI Elements
-    const brandHeader = document.getElementById('brandHeader');
-    const authModal = document.getElementById('authModal');
-    const adminPanelModal = document.getElementById('adminPanelModal');
     const accountModal = document.getElementById('accountModal');
-    
-    const closeAuthModal = document.getElementById('closeAuthModal');
-    const cancelAuth = document.getElementById('cancelAuth');
-    const loginAdminBtn = document.getElementById('loginAdminBtn');
-    const adminPassInput = document.getElementById('adminPass');
-    const authError = document.getElementById('authError');
-    
-    const closeAdminModal = document.getElementById('closeAdminModal');
-    const closeAdminBtn = document.getElementById('closeAdminBtn');
-    const saveAdminSettings = document.getElementById('saveAdminSettings');
-
     const accountBtn = document.getElementById('accountBtn');
     const closeAccountModal = document.getElementById('closeAccountModal');
     const closeAccountBtn = document.getElementById('closeAccountBtn');
@@ -556,23 +185,12 @@
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const creditCounter = document.getElementById('creditCounter');
-    
     const streamBanner = document.getElementById('streamBanner');
     const streamBannerLink = document.getElementById('streamBannerLink');
 
-    /* -------------------------------------------------------------
-       3. USER SUBSCRIPTION & CREDIT ENGINE
-    ------------------------------------------------------------- */
     function getStoredUserData() {
       const stored = localStorage.getItem('user_app_subscription');
-      if (stored) {
-        return JSON.parse(stored);
-      }
-      return {
-        credits: parseInt(window.globalAppConfig.freeCredits) || 5,
-        isPro: false,
-        expiryDate: null
-      };
+      return stored ? JSON.parse(stored) : { credits: parseInt(window.globalAppConfig.freeCredits) || 5, isPro: false };
     }
 
     function saveUserData(data) {
@@ -586,7 +204,6 @@
         creditCounter.textContent = "Plan: PRO (Unlimited)";
         userInput.disabled = false;
         sendBtn.disabled = false;
-        userInput.placeholder = "Ask SPAR AI a question or type 'draw a cat'...";
       } else {
         creditCounter.textContent = `Credits: ${user.credits}`;
         if (user.credits <= 0) {
@@ -603,22 +220,18 @@
 
     function deductCredit() {
       const user = getStoredUserData();
-      if (user.isPro) return true; // Unlimited
-
+      if (user.isPro) return true;
       if (user.credits > 0) {
         user.credits -= 1;
         saveUserData(user);
         return true;
       }
-      
       updateCreditUI();
       openAccountModal();
       return false;
     }
 
-    /* -------------------------------------------------------------
-       4. REALTIME CLOUD SYNC
-    ------------------------------------------------------------- */
+    // REALTIME DATABASE SYNC
     db.ref('global_config').on('value', (snapshot) => {
       const config = snapshot.val();
       if (config) {
@@ -633,226 +246,87 @@
       }
     });
 
-    /* -------------------------------------------------------------
-       5. ACCOUNT / UPGRADE MODAL LOGIC
-    ------------------------------------------------------------- */
     accountBtn.addEventListener('click', openAccountModal);
     closeAccountModal.addEventListener('click', closeAccountModalFunc);
     closeAccountBtn.addEventListener('click', closeAccountModalFunc);
 
     function openAccountModal() {
       const user = getStoredUserData();
-      const title = document.getElementById('userPlanTitle');
-      const creditsDet = document.getElementById('userCreditsDetail');
-      const tenureDet = document.getElementById('userTenureDetail');
-
+      document.getElementById('userPlanTitle').textContent = user.isPro ? "Pro Membership (Active)" : "Free Membership";
+      document.getElementById('userCreditsDetail').textContent = user.isPro ? "Remaining Credits: Unlimited" : `Remaining Credits: ${user.credits}`;
+      document.getElementById('userTenureDetail').textContent = `Plan Tenure: ${window.globalAppConfig.tenure || '30'} Days`;
       promoError.style.display = 'none';
       promoSuccess.style.display = 'none';
-
-      if (user.isPro) {
-        title.textContent = "Pro Membership (Active)";
-        creditsDet.textContent = "Remaining Credits: Unlimited";
-        tenureDet.textContent = `Valid for ${window.globalAppConfig.tenure || '30'} Days`;
-      } else {
-        title.textContent = "Free Membership";
-        creditsDet.textContent = `Remaining Credits: ${user.credits}`;
-        tenureDet.textContent = `Standard Plan Tenure: ${window.globalAppConfig.tenure || '30'} Days`;
-      }
-
       accountModal.classList.add('active');
     }
 
-    function closeAccountModalFunc() {
-      accountModal.classList.remove('active');
-    }
+    function closeAccountModalFunc() { accountModal.classList.remove('active'); }
 
-    // Apply Admin Promo Code
+    // PROMO CODE REDEMPTION
     applyPromoBtn.addEventListener('click', () => {
       const code = userPromoInput.value.trim();
-      const activeAdminCode = window.globalAppConfig.promoCode;
-
-      if (code && code.toLowerCase() === activeAdminCode.toLowerCase()) {
+      if (code && code.toLowerCase() === window.globalAppConfig.promoCode.toLowerCase()) {
         const user = getStoredUserData();
         user.isPro = true;
         user.credits = 9999;
         saveUserData(user);
-
         promoError.style.display = 'none';
         promoSuccess.style.display = 'block';
-        promoSuccess.textContent = `Promo code applied! Pro Plan activated for ${window.globalAppConfig.tenure} days!`;
-        
-        setTimeout(() => {
-          openAccountModal();
-        }, 1200);
+        promoSuccess.textContent = "Pro Plan activated!";
+        setTimeout(openAccountModal, 1200);
       } else {
         promoSuccess.style.display = 'none';
         promoError.style.display = 'block';
-        promoError.textContent = "Invalid promo code. Please try again.";
       }
     });
 
-    // Buy Plan Payment Button Action
+    // DIRECT RAZORPAY PAYMENT LINK TRIGGER
     buyPlanBtn.addEventListener('click', () => {
-      alert("Redirecting to Payment Gateway... (After payment, your credits will upgrade automatically)");
+      const link = window.globalAppConfig.razorpayLink;
       
-      const user = getStoredUserData();
-      user.isPro = true;
-      user.credits = 9999;
-      saveUserData(user);
-      openAccountModal();
-    });
-
-    /* -------------------------------------------------------------
-       6. SECRET OWNER ACCESS & ADMIN PANEL
-    ------------------------------------------------------------- */
-    brandHeader.addEventListener('dblclick', openAuthModal);
-
-    window.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') {
-        e.preventDefault();
-        openAuthModal();
+      if (!link || link.trim() === '') {
+        alert("Razorpay Payment Link is not updated in the Admin Panel yet. Please contact the administrator.");
+        return;
       }
+
+      // Opens the Razorpay payment gateway in a new tab directly
+      window.open(link.trim(), '_blank');
     });
 
-    function openAuthModal() {
-      adminPassInput.value = '';
-      authError.style.display = 'none';
-      authModal.classList.add('active');
-      adminPassInput.focus();
-    }
-
-    function closeAuthModalFunc() {
-      authModal.classList.remove('active');
-    }
-
-    closeAuthModal.addEventListener('click', closeAuthModalFunc);
-    cancelAuth.addEventListener('click', closeAuthModalFunc);
-
-    loginAdminBtn.addEventListener('click', verifyAdminPassword);
-    adminPassInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') verifyAdminPassword();
-    });
-
-    function verifyAdminPassword() {
-      if (adminPassInput.value === ADMIN_PASSWORD) {
-        closeAuthModalFunc();
-        openAdminPanel();
-      } else {
-        authError.style.display = 'block';
-      }
-    }
-
-    function openAdminPanel() {
-      db.ref('global_config').once('value').then((snapshot) => {
-        const data = snapshot.val() || {};
-        document.getElementById('adminStreamUrl').value = data.streamUrl || '';
-        document.getElementById('adminPromo').value = data.promoCode || 'PROMO2026';
-        document.getElementById('adminTenure').value = data.tenure || '30';
-        document.getElementById('adminFreeCredits').value = data.freeCredits || '5';
-        adminPanelModal.classList.add('active');
-      });
-    }
-
-    function closeAdminPanelFunc() {
-      adminPanelModal.classList.remove('active');
-    }
-
-    closeAdminModal.addEventListener('click', closeAdminPanelFunc);
-    closeAdminBtn.addEventListener('click', closeAdminPanelFunc);
-
-    saveAdminSettings.addEventListener('click', () => {
-      const updatedConfig = {
-        streamUrl: document.getElementById('adminStreamUrl').value,
-        promoCode: document.getElementById('adminPromo').value,
-        tenure: document.getElementById('adminTenure').value,
-        freeCredits: document.getElementById('adminFreeCredits').value,
-        updatedAt: new Date().toISOString()
-      };
-
-      db.ref('global_config').set(updatedConfig, (error) => {
-        if (error) {
-          alert('Failed to update live settings: ' + error.message);
-        } else {
-          alert('Published! Subscription rules & stream settings updated live across all users.');
-          closeAdminPanelFunc();
-        }
-      });
-    });
-
-    /* -------------------------------------------------------------
-       7. CHAT ENGINE (TEXT via GROQ + IMAGES via POLLINATIONS)
-    ------------------------------------------------------------- */
-    function isImagePrompt(text) {
-      const lower = text.toLowerCase();
-      return lower.startsWith("generate image") || 
-             lower.startsWith("create image") || 
-             lower.startsWith("draw") || 
-             lower.startsWith("paint") || 
-             lower.includes("picture of") || 
-             lower.includes("image of") || 
-             lower.includes("generate an image");
-    }
-
+    // CHAT & IMAGE GENERATION
     async function sendPromptToGroq(promptText) {
       try {
         const response = await fetch(GROQ_CONFIG.endpoint, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            model: GROQ_CONFIG.model,
-            messages: [{ role: "user", content: promptText }]
-          })
+          headers: { "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: GROQ_CONFIG.model, messages: [{ role: "user", content: promptText }] })
         });
-
-        if (!response.ok) throw new Error(`API Error: ${response.status}`);
         const data = await response.json();
         return data.choices[0]?.message?.content || "No response received.";
       } catch (err) {
-        console.error("Groq Request Failed:", err);
-        return "Failed to fetch response. Please verify your connection.";
+        return "Error reaching AI servers.";
       }
     }
 
     async function handleSend() {
       const text = userInput.value.trim();
-      if (!text) return;
-
-      // Verify and deduct credits before proceeding
-      if (!deductCredit()) return;
+      if (!text || !deductCredit()) return;
 
       appendMessage(text, 'user');
       userInput.value = '';
-
       const loadingMsg = appendMessage("Thinking...", 'assistant');
 
-      // Check for image generation request
-      if (isImagePrompt(text)) {
-        loadingMsg.textContent = "Generating your image...";
-        
-        const cleanPrompt = encodeURIComponent(text);
-        const imageUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
-
-        const imgElement = document.createElement('img');
-        imgElement.className = 'generated-img';
-        imgElement.src = imageUrl;
-        imgElement.alt = text;
-
-        imgElement.onload = () => {
-          loadingMsg.innerHTML = `<p>Here is your generated image:</p>`;
-          loadingMsg.appendChild(imgElement);
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        };
-
-        imgElement.onerror = () => {
-          loadingMsg.textContent = "Failed to generate image. Please try again.";
-        };
+      const lower = text.toLowerCase();
+      if (lower.startsWith("draw") || lower.startsWith("create image") || lower.startsWith("generate image")) {
+        loadingMsg.textContent = "Generating image...";
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+        const img = document.createElement('img');
+        img.className = 'generated-img';
+        img.src = imageUrl;
+        img.onload = () => { loadingMsg.innerHTML = `<p>Here is your image:</p>`; loadingMsg.appendChild(img); };
         return;
       }
 
-      // Handle standard text response via Groq
       const aiResponse = await sendPromptToGroq(text);
       loadingMsg.textContent = aiResponse;
     }
@@ -867,11 +341,8 @@
     }
 
     sendBtn.addEventListener('click', handleSend);
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSend();
-    });
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
 
-    // Initialize UI on startup
     updateCreditUI();
   </script>
 </body>

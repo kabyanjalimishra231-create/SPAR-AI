@@ -1,177 +1,203 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spar AI - Admin Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPAR AI - Owner Control Center</title>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --border-color: #475569;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+
+    header { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .brand { display: flex; align-items: center; gap: 0.75rem; }
+    .brand-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+    .brand-title { font-size: 1.25rem; font-weight: 700; }
+
+    .status-badge { font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 20px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: #6ee7b7; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
+    .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; }
+
+    main { flex: 1; max-width: 800px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
+    .admin-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+    .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .card-title { font-size: 1.5rem; font-weight: 600; }
+    .card-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    .form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label { font-size: 0.9rem; font-weight: 500; color: var(--text-main); }
+    .form-group .description { font-size: 0.8rem; color: var(--text-muted); }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); font-size: 0.95rem; outline: none; }
+    .form-input:focus { border-color: var(--accent); }
+
+    .actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+    .btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
+
+    .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-primary); display: flex; justify-content: center; align-items: center; z-index: 999; }
+    .auth-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; text-align: center; }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 500; display: none; }
+  </style>
 </head>
-<body class="bg-[#0f172a] text-slate-100 font-sans min-h-screen p-4 sm:p-8">
+<body>
 
-    <div class="max-w-6xl mx-auto space-y-6">
-        
-        <!-- HEADER -->
-        <div class="flex justify-between items-center bg-[#1e293b] p-5 rounded-2xl border border-slate-700 shadow-xl">
-            <div>
-                <h1 class="text-xl font-bold text-blue-400 flex items-center gap-2">
-                    <i class="fa-solid fa-gauge-high"></i> Spar AI Admin Control Panel
-                </h1>
-                <p class="text-xs text-slate-400">Manage user ratings, system configs, Razorpay keys, and subscription promos.</p>
-            </div>
-            <a href="index.html" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
-                <i class="fa-solid fa-arrow-left"></i> Open App
-            </a>
-        </div>
-
-        <!-- ANALYTICAL STATS CARDS -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
-                <span class="text-slate-400 text-xs block">Average Rating</span>
-                <span id="stat-avg-rating" class="text-2xl font-bold text-yellow-400">0.0 ★</span>
-            </div>
-            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
-                <span class="text-slate-400 text-xs block">Total Feedback Received</span>
-                <span id="stat-total-ratings" class="text-2xl font-bold text-blue-400">0</span>
-            </div>
-            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
-                <span class="text-slate-400 text-xs block">Pro VIP Status</span>
-                <span id="stat-pro-status" class="text-2xl font-bold text-emerald-400">Inactive</span>
-            </div>
-            <div class="bg-[#1e293b] border border-slate-700 p-4 rounded-xl">
-                <span class="text-slate-400 text-xs block">Free Tier Limit</span>
-                <span id="stat-free-credits" class="text-2xl font-bold text-purple-400">5 Credits</span>
-            </div>
-        </div>
-
-        <!-- MAIN CONTENT GRID -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <!-- FEEDBACK & RATINGS FEED (2 COLS) -->
-            <div class="lg:col-span-2 bg-[#1e293b] border border-slate-700 rounded-2xl p-5 space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h2 class="font-bold text-sm text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-star text-yellow-400"></i> User Ratings & Feedback Feed
-                    </h2>
-                    <button onclick="clearRatings()" class="text-xs text-red-400 hover:underline">Clear Ratings</button>
-                </div>
-                
-                <div id="ratings-container" class="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                    <!-- Dynamic Ratings Rendered Here -->
-                </div>
-            </div>
-
-            <!-- SYSTEM SETTINGS (1 COL) -->
-            <div class="bg-[#1e293b] border border-slate-700 rounded-2xl p-5 space-y-4">
-                <h2 class="font-bold text-sm text-slate-200 border-b border-slate-700 pb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-blue-400"></i> System Configuration
-                </h2>
-
-                <div class="space-y-3 text-xs">
-                    <!-- ADDED: Razorpay Key Input Field -->
-                    <div>
-                        <label class="text-slate-400 block mb-1">Razorpay Key ID</label>
-                        <input id="admin-razorpay-key" type="text" placeholder="rzp_live_xxxxxxxxxxxxxx" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white">
-                    </div>
-
-                    <div>
-                        <label class="text-slate-400 block mb-1">Free Tier Credits Allocation</label>
-                        <input id="admin-credits-input" type="number" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white">
-                    </div>
-
-                    <div>
-                        <label class="text-slate-400 block mb-1">Subscription Price Display (INR)</label>
-                        <input id="admin-price-input" type="text" placeholder="₹499" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white">
-                    </div>
-
-                    <div>
-                        <label class="text-slate-400 block mb-1">Valid Promo Codes (Comma Separated)</label>
-                        <input id="admin-promos-input" type="text" class="w-full bg-[#0f172a] border border-slate-700 p-2.5 rounded-xl text-white">
-                    </div>
-
-                    <button onclick="saveAdminSettings()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 font-bold text-white rounded-xl transition">
-                        Save System Configuration
-                    </button>
-                </div>
-            </div>
-
-        </div>
-
+  <div class="auth-overlay" id="authGate">
+    <div class="auth-card">
+      <h2 style="margin-bottom: 0.5rem;">SPAR AI Admin</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Enter security code to open admin controls.</p>
+      
+      <div class="form-group">
+        <input type="password" id="passcodeInput" class="form-input" placeholder="Security Code" style="text-align: center;" />
+        <div class="error-msg" id="authError">Invalid Security Code.</div>
+      </div>
+      
+      <button class="btn btn-primary" id="unlockBtn" style="width: 100%;">Unlock Panel</button>
     </div>
+  </div>
 
-    <script>
-        function loadAdminData() {
-            // Ratings (No changes)
-            const ratings = JSON.parse(localStorage.getItem('spar_ai_user_ratings') || '[]');
-            const container = document.getElementById('ratings-container');
-            container.innerHTML = '';
+  <header>
+    <div class="brand">
+      <div class="brand-logo">SPAR</div>
+      <div class="brand-title">SPAR AI Owner Controls</div>
+    </div>
+    <div class="status-badge"><div class="status-dot"></div> Live Database Sync</div>
+  </header>
 
-            if (ratings.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 italic">No user feedback submitted yet.</p>`;
-                document.getElementById('stat-avg-rating').innerText = '0.0 ★';
-                document.getElementById('stat-total-ratings').innerText = '0';
-            } else {
-                let sum = 0;
-                ratings.reverse().forEach(r => {
-                    sum += r.rating;
-                    const card = document.createElement('div');
-                    card.className = "bg-[#0f172a] p-3.5 rounded-xl border border-slate-700/80 space-y-1.5 text-xs";
-                    card.innerHTML = `
-                        <div class="flex justify-between items-center">
-                            <span class="font-bold text-blue-400">${r.userName || 'Anonymous'}</span>
-                            <span class="text-yellow-400 font-bold">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-                        </div>
-                        <p class="text-slate-300">"${r.responseSnippet}"</p>
-                        <span class="text-[10px] text-slate-500 block">${r.timestamp} | Session: ${r.sessionId}</span>
-                    `;
-                    container.appendChild(card);
-                });
+  <main>
+    <div class="admin-card">
+      <div class="card-header">
+        <h1 class="card-title">Global Configuration</h1>
+        <p class="card-subtitle">Pushes live configuration directly to <code>index.html</code>.</p>
+      </div>
 
-                const avg = (sum / ratings.length).toFixed(1);
-                document.getElementById('stat-avg-rating').innerText = `${avg} ★`;
-                document.getElementById('stat-total-ratings').innerText = ratings.length;
-            }
+      <div class="form-group">
+        <label for="razorpayLink">Razorpay Payment Link / Page URL</label>
+        <div class="description">Paste your Razorpay Payment Link (e.g. <code>https://rzp.io/l/yourlink</code>). Users clicking "Upgrade" will be sent straight to your payment page.</div>
+        <input type="text" id="razorpayLink" class="form-input" placeholder="https://rzp.io/l/..." />
+      </div>
 
-            // System Config Defaults (ADDED Razorpay Key logic)
-            const razorpayKey = localStorage.getItem('spar_ai_razorpay_key') || "";
-            const freeCredits = localStorage.getItem('spar_ai_free_credits') || "5";
-            const subPrice = localStorage.getItem('spar_ai_sub_price') || "₹499";
-            const promoCodes = JSON.parse(localStorage.getItem('spar_ai_promo_codes') || '["PRO-UNLIMITED-2026", "VIP-SPAR-AI"]');
-            const isPro = localStorage.getItem('spar_ai_pro_active') === 'true';
+      <div class="form-group">
+        <label for="streamUrl">Live Stream Link</label>
+        <div class="description">Broadcasting URL for top banner across all users.</div>
+        <input type="text" id="streamUrl" class="form-input" placeholder="https://..." />
+      </div>
 
-            document.getElementById('admin-razorpay-key').value = razorpayKey;
-            document.getElementById('admin-credits-input').value = freeCredits;
-            document.getElementById('admin-price-input').value = subPrice;
-            document.getElementById('admin-promos-input').value = promoCodes.join(', ');
-            
-            document.getElementById('stat-free-credits').innerText = `${freeCredits} Credits`;
-            document.getElementById('stat-pro-status').innerText = isPro ? 'Active VIP' : 'Inactive';
+      <div class="form-group">
+        <label for="promoCode">Active Promo Code</label>
+        <input type="text" id="promoCode" class="form-input" placeholder="PROMO2026" />
+      </div>
+
+      <div class="form-group">
+        <label for="tenure">Plan Tenure (Days)</label>
+        <input type="number" id="tenure" class="form-input" value="30" />
+      </div>
+
+      <div class="form-group">
+        <label for="freeCredits">Default Free Credits</label>
+        <input type="number" id="freeCredits" class="form-input" value="5" />
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+        <button class="btn btn-primary" id="publishBtn">Publish Changes Live</button>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Settings published live to index.html!</div>
+
+  <script>
+    const firebaseConfig = { databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const ADMIN_PASSWORD = "221181";
+
+    const authGate = document.getElementById('authGate');
+    const passcodeInput = document.getElementById('passcodeInput');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const authError = document.getElementById('authError');
+
+    const razorpayLinkInput = document.getElementById('razorpayLink');
+    const streamUrlInput = document.getElementById('streamUrl');
+    const promoCodeInput = document.getElementById('promoCode');
+    const tenureInput = document.getElementById('tenure');
+    const freeCreditsInput = document.getElementById('freeCredits');
+
+    const publishBtn = document.getElementById('publishBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const toast = document.getElementById('toast');
+
+    function verifyPasscode() {
+      if (passcodeInput.value === ADMIN_PASSWORD) {
+        authGate.style.display = 'none';
+        initAdminSync();
+      } else {
+        authError.style.display = 'block';
+      }
+    }
+
+    unlockBtn.addEventListener('click', verifyPasscode);
+    passcodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPasscode(); });
+
+    function initAdminSync() {
+      db.ref('global_config').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          razorpayLinkInput.value = data.razorpayLink || '';
+          streamUrlInput.value = data.streamUrl || '';
+          promoCodeInput.value = data.promoCode || 'PROMO2026';
+          tenureInput.value = data.tenure || '30';
+          freeCreditsInput.value = data.freeCredits || '5';
         }
+      });
+    }
 
-        function saveAdminSettings() {
-            // ADDED: Razorpay Key ID
-            const razorpayKey = document.getElementById('admin-razorpay-key').value.trim();
-            const credits = document.getElementById('admin-credits-input').value;
-            const price = document.getElementById('admin-price-input').value;
-            const promos = document.getElementById('admin-promos-input').value.split(',').map(s => s.trim().toUpperCase());
+    publishBtn.addEventListener('click', () => {
+      const payload = {
+        razorpayLink: razorpayLinkInput.value.trim(),
+        streamUrl: streamUrlInput.value.trim(),
+        promoCode: promoCodeInput.value.trim(),
+        tenure: tenureInput.value,
+        freeCredits: freeCreditsInput.value,
+        lastUpdated: new Date().toISOString()
+      };
 
-            localStorage.setItem('spar_ai_razorpay_key', razorpayKey);
-            localStorage.setItem('spar_ai_free_credits', credits);
-            localStorage.setItem('spar_ai_sub_price', price);
-            localStorage.setItem('spar_ai_promo_codes', JSON.stringify(promos));
-
-            alert("Admin configuration saved successfully!");
-            loadAdminData();
+      db.ref('global_config').set(payload, (error) => {
+        if (error) {
+          alert('Update failed: ' + error.message);
+        } else {
+          toast.style.display = 'block';
+          setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }
+      });
+    });
 
-        function clearRatings() {
-            if (confirm("Are you sure you want to delete all user ratings?")) {
-                localStorage.removeItem('spar_ai_user_ratings');
-                loadAdminData();
-            }
-        }
-
-        window.onload = loadAdminData;
-    </script>
+    resetBtn.addEventListener('click', () => {
+      razorpayLinkInput.value = '';
+      streamUrlInput.value = '';
+      promoCodeInput.value = 'PROMO2026';
+      tenureInput.value = '30';
+      freeCreditsInput.value = '5';
+    });
+  </script>
 </body>
 </html>
