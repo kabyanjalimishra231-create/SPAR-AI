@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SPAR AI Workspace</title>
   
   <!-- Firebase SDKs -->
@@ -23,80 +23,191 @@
       --success: #10b981;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-primary); color: var(--text-main); display: flex; flex-direction: column; min-height: 100vh; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+    }
+
+    body { 
+      display: flex; 
+      flex-direction: column; 
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+    }
 
     header {
       background-color: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
-      padding: 1rem 2rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 0.5rem;
       flex-wrap: wrap;
-      gap: 1rem;
     }
 
-    .brand { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; user-select: none; }
-    .brand-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
-    .brand-title { font-size: 1.25rem; font-weight: 700; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
+    .brand-logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.85rem; }
+    .brand-title { font-size: 1.1rem; font-weight: 700; }
 
-    nav { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
-    .credit-badge { font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; }
-    .user-badge { font-size: 0.85rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.4rem; background: var(--bg-card); padding: 0.35rem 0.75rem; border-radius: 20px; border: 1px solid var(--border-color); }
-    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-size: 0.85rem; font-weight: 500; }
-    .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.05); }
+    nav { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    
+    .nav-status-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+
+    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
+    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); white-space: nowrap; }
+    
+    .nav-btn { 
+      background: transparent; 
+      color: var(--text-muted); 
+      border: 1px solid var(--border-color); 
+      padding: 0.4rem 0.6rem; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      transition: all 0.2s ease; 
+      font-size: 0.8rem; 
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .nav-btn:hover, .nav-btn:active { color: var(--text-main); background: rgba(255, 255, 255, 0.08); }
     .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
-    .nav-btn.primary:hover { background: var(--accent-hover); }
+    .nav-btn.primary:hover, .nav-btn.primary:active { background: var(--accent-hover); }
 
-    .banner { background: rgba(99, 102, 241, 0.15); border-bottom: 1px solid var(--accent); padding: 0.6rem 1rem; text-align: center; font-size: 0.85rem; display: none; }
-    .banner a { color: #818cf8; font-weight: 600; text-decoration: underline; margin-left: 0.5rem; }
+    .banner { background: rgba(99, 102, 241, 0.15); border-bottom: 1px solid var(--accent); padding: 0.5rem 0.75rem; text-align: center; font-size: 0.8rem; display: none; }
+    .banner a { color: #818cf8; font-weight: 600; text-decoration: underline; margin-left: 0.3rem; }
 
-    main { flex: 1; max-width: 900px; width: 100%; margin: 2rem auto; padding: 0 1rem; display: flex; flex-direction: column; gap: 1.5rem; }
-    .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; height: 500px; display: flex; flex-direction: column; overflow: hidden; }
-    .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-    .message { max-width: 80%; padding: 0.75rem 1rem; border-radius: 8px; line-height: 1.5; font-size: 0.95rem; white-space: pre-wrap; word-break: break-word; }
-    .message.user { align-self: flex-end; background-color: var(--accent); color: white; }
-    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); }
-    .generated-img { width: 100%; max-width: 400px; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
+    main { 
+      flex: 1; 
+      max-width: 900px; 
+      width: 100%; 
+      margin: 0 auto; 
+      padding: 0.75rem; 
+      display: flex; 
+      flex-direction: column; 
+      height: calc(100vh - 120px);
+    }
 
-    .chat-input-area { padding: 1rem; background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.75rem; }
-    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); outline: none; }
+    .chat-container { 
+      background-color: var(--bg-secondary); 
+      border: 1px solid var(--border-color); 
+      border-radius: 12px; 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+    }
+
+    .chat-messages { 
+      flex: 1; 
+      padding: 1rem; 
+      overflow-y: auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.85rem; 
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .message { 
+      max-width: 88%; 
+      padding: 0.65rem 0.85rem; 
+      border-radius: 10px; 
+      line-height: 1.45; 
+      font-size: 0.9rem; 
+      white-space: pre-wrap; 
+      word-break: break-word; 
+    }
+    .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
+    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
+    .generated-img { width: 100%; max-width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
+
+    .chat-input-area { 
+      padding: 0.65rem; 
+      background-color: var(--bg-secondary); 
+      border-top: 1px solid var(--border-color); 
+      display: flex; 
+      gap: 0.5rem; 
+      align-items: center;
+    }
+
+    .chat-input { 
+      flex: 1; 
+      background-color: var(--bg-primary); 
+      border: 1px solid var(--border-color); 
+      border-radius: 8px; 
+      padding: 0.65rem 0.85rem; 
+      color: var(--text-main); 
+      outline: none; 
+      font-size: 16px; /* Prevents auto-zoom on mobile safari */
+    }
+    .chat-input:focus { border-color: var(--accent); }
     .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
-    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 6px; cursor: pointer; font-weight: 500; }
+
+    .send-btn { 
+      background-color: var(--accent); 
+      color: white; 
+      border: none; 
+      padding: 0.65rem 1rem; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; }
+    /* MODAL STYLES FOR MOBILE */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 0.75rem; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 550px; padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 85vh; display: flex; flex-direction: column; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    .modal-title { font-size: 1.25rem; font-weight: 600; }
-    .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.25rem; cursor: pointer; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 500px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .modal-title { font-size: 1.1rem; font-weight: 600; }
+    .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; padding: 0 0.5rem; }
 
-    .form-group { margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
-    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem; color: var(--text-main); outline: none; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+    .form-group { margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.6rem; color: var(--text-main); outline: none; font-size: 16px; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
 
-    .error-text { color: var(--danger); font-size: 0.85rem; display: none; margin-top: 0.5rem; }
-    .success-text { color: var(--success); font-size: 0.85rem; display: none; margin-top: 0.5rem; }
+    .error-text { color: var(--danger); font-size: 0.8rem; display: none; margin-top: 0.35rem; }
+    .success-text { color: var(--success); font-size: 0.8rem; display: none; margin-top: 0.35rem; }
     
-    .plan-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
-    .plan-info h4 { font-size: 1rem; color: var(--text-main); }
+    .plan-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; margin-bottom: 0.85rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .plan-info h4 { font-size: 0.95rem; color: var(--text-main); }
     .plan-info p { font-size: 0.8rem; color: var(--text-muted); }
-    .promo-box { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .promo-box { display: flex; gap: 0.5rem; margin-top: 0.35rem; }
 
-    .auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; gap: 1rem; }
-    .auth-tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 0.5rem 0.25rem; cursor: pointer; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid transparent; }
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 0.85rem; gap: 1rem; }
+    .auth-tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 0.4rem 0.2rem; cursor: pointer; font-weight: 600; font-size: 0.85rem; border-bottom: 2px solid transparent; }
     .auth-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .history-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; padding-right: 0.25rem; }
-    .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; }
-    .history-item .history-prompt { font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem; }
-    .history-item .history-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
-    .empty-history { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; }
+    .history-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 0.85rem; padding-right: 0.2rem; max-height: 250px; }
+    .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; font-size: 0.8rem; }
+    .history-item .history-prompt { font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem; }
+    .history-item .history-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+    .empty-history { text-align: center; color: var(--text-muted); padding: 1.5rem 0; font-size: 0.85rem; }
 
-    .img-upload-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px dashed var(--border-color); display: none; margin-top: 0.5rem; background: var(--bg-primary); }
+    .img-upload-preview { width: 100%; max-height: 140px; object-fit: contain; border-radius: 6px; border: 1px dashed var(--border-color); display: none; margin-top: 0.35rem; background: var(--bg-primary); }
+
+    /* MEDIA QUERIES FOR DESKTOP & TABLETS */
+    @media (min-width: 640px) {
+      header { padding: 0.75rem 1.5rem; }
+      nav { width: auto; }
+      main { padding: 1rem; height: calc(100vh - 100px); }
+      .message { max-width: 75%; }
+      .plan-card { flex-direction: row; justify-content: space-between; align-items: center; }
+    }
   </style>
 </head>
 <body>
@@ -107,12 +218,16 @@
       <div class="brand-title">SPAR AI</div>
     </div>
     <nav>
-      <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
-      <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
-      <button class="nav-btn" id="imageSearchBtn">📷 Image Search</button>
-      <button class="nav-btn" id="historyBtn">📜 History</button>
-      <button class="nav-btn" id="accountBtn">👤 Account</button>
-      <button class="nav-btn primary" id="newChatBtn">+ New Chat</button>
+      <div class="nav-status-group">
+        <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
+        <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
+      </div>
+      <div class="nav-actions-group">
+        <button class="nav-btn" id="imageSearchBtn">📷 Image</button>
+        <button class="nav-btn" id="historyBtn">📜 History</button>
+        <button class="nav-btn" id="accountBtn">👤 Account</button>
+        <button class="nav-btn primary" id="newChatBtn">+ New</button>
+      </div>
     </nav>
   </header>
 
@@ -125,11 +240,11 @@
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant" id="welcomeMsg">
-          Hello! Welcome to SPAR AI. How can I assist you today? Ask questions, upload an image via Image Search, or type 'draw a cat'.
+          Hello! Welcome to SPAR AI. Ask me any question, upload an image, or type 'draw a cat' to generate visuals!
         </div>
       </div>
       <div class="chat-input-area">
-        <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI a question or type 'draw a cat'..." />
+        <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI a question or 'draw a cat'..." />
         <button class="send-btn" id="sendBtn">Send</button>
       </div>
     </div>
@@ -139,11 +254,11 @@
   <div class="modal-overlay" id="imageSearchModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">📷 Upload Image & Ask Question</div>
+        <div class="modal-title">📷 Upload & Ask Image</div>
         <button class="close-btn" id="closeImageSearchModal">&times;</button>
       </div>
       <div class="form-group">
-        <label>Upload an image file or paste an image URL:</label>
+        <label>Upload Image File:</label>
         <input type="file" id="imgFileInput" class="form-input" accept="image/*" />
       </div>
       <div class="form-group">
@@ -151,13 +266,13 @@
         <input type="text" id="imgUrlInput" class="form-input" placeholder="https://example.com/image.jpg" />
       </div>
       <img id="uploadPreview" class="img-upload-preview" alt="Image Preview" />
-      <div class="form-group" style="margin-top: 0.75rem;">
-        <label>Your Question about the Image:</label>
-        <input type="text" id="imgSearchQuery" class="form-input" placeholder="e.g. What is in this image? Explain this diagram." />
+      <div class="form-group" style="margin-top: 0.5rem;">
+        <label>Question about this Image:</label>
+        <input type="text" id="imgSearchQuery" class="form-input" placeholder="e.g. Describe this image in detail" />
       </div>
       <div class="modal-actions">
         <button class="nav-btn" id="closeImgSearchBtn">Cancel</button>
-        <button class="nav-btn primary" id="execImgSearchBtn">Ask AI</button>
+        <button class="nav-btn primary" id="execImgSearchBtn">Analyze</button>
       </div>
     </div>
   </div>
@@ -173,7 +288,7 @@
         <div class="empty-history">No history saved yet.</div>
       </div>
       <div class="modal-actions" style="justify-content: space-between;">
-        <button class="nav-btn" id="clearHistoryBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);">Clear History</button>
+        <button class="nav-btn" id="clearHistoryBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);">Clear</button>
         <button class="nav-btn" id="closeHistoryBtn">Close</button>
       </div>
     </div>
@@ -196,7 +311,7 @@
         <form id="authForm" onsubmit="event.preventDefault(); handleAuthSubmit();">
           <div class="form-group">
             <label for="userNameInput">User Name</label>
-            <input type="text" id="userNameInput" class="form-input" placeholder="Enter your full name" required />
+            <input type="text" id="userNameInput" class="form-input" placeholder="Enter your name" required />
           </div>
           <div class="form-group">
             <label for="userEmailInput">Email Address</label>
@@ -214,11 +329,11 @@
             <p id="userPlanTitle" style="color: var(--accent); margin-top: 0.25rem;">Free Membership</p>
             <p id="userCreditsDetail">Remaining Credits: 5</p>
           </div>
-          <button class="nav-btn primary" id="buyPlanBtn">Upgrade Now</button>
+          <button class="nav-btn primary" id="buyPlanBtn">Upgrade</button>
         </div>
 
         <div class="form-group">
-          <label>Redeem Admin Promo Code</label>
+          <label>Redeem Promo Code</label>
           <div class="promo-box">
             <input type="text" id="userPromoInput" class="form-input" style="flex:1;" placeholder="Enter Promo Code" />
             <button class="nav-btn primary" id="applyPromoBtn">Redeem</button>
@@ -227,7 +342,7 @@
           <div class="success-text" id="promoSuccess">Promo code applied successfully!</div>
         </div>
 
-        <button class="nav-btn" id="logoutBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4); width: 100%; margin-top: 1rem;">Logout Account</button>
+        <button class="nav-btn" id="logoutBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4); width: 100%; margin-top: 0.75rem;">Logout</button>
       </div>
 
       <div class="modal-actions">
@@ -239,10 +354,14 @@
   <script>
     // 1. FIREBASE REALTIME DB CONFIG
     const firebaseConfig = { databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
+    try {
+      firebase.initializeApp(firebaseConfig);
+    } catch(e) {
+      console.log("Firebase init note:", e);
+    }
     const db = firebase.database();
 
-    // 2. GROQ API CONFIG (UPDATED KEY)
+    // 2. GROQ API CONFIG
     const GROQ_CONFIG = {
       apiKey: "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",
       model: "llama-3.3-70b-versatile",
@@ -258,7 +377,7 @@
       razorpayLink: ""
     };
 
-    // DOM Elements
+    // DOM ELEMENTS
     const accountModal = document.getElementById('accountModal');
     const accountBtn = document.getElementById('accountBtn');
     const closeAccountModal = document.getElementById('closeAccountModal');
@@ -335,7 +454,7 @@
       }
 
       if (user.isPro) {
-        creditCounter.textContent = "Plan: PRO (Unlimited)";
+        creditCounter.textContent = "Pro (Unlimited)";
         userInput.disabled = false;
         sendBtn.disabled = false;
       } else {
@@ -343,11 +462,11 @@
         if (user.credits <= 0) {
           userInput.disabled = true;
           sendBtn.disabled = true;
-          userInput.placeholder = "Out of credits! Click 'Account' to upgrade or login.";
+          userInput.placeholder = "Out of credits! Click 'Account' to upgrade.";
         } else {
           userInput.disabled = false;
           sendBtn.disabled = false;
-          userInput.placeholder = "Ask SPAR AI a question or type 'draw a cat'...";
+          userInput.placeholder = "Ask SPAR AI a question or 'draw a cat'...";
         }
       }
     }
@@ -600,24 +719,24 @@
       const greeting = user.name ? `Hello ${user.name}!` : 'Hello!';
       chatMessages.innerHTML = `
         <div class="message assistant">
-          ${greeting} Welcome to SPAR AI. How can I assist you today? Ask questions, upload an image via Image Search, or type 'draw a cat'.
+          ${greeting} Welcome to SPAR AI. How can I assist you today?
         </div>
       `;
     });
 
-    // HELPER: TIMEOUT WRAPPER FOR FETCH
-    function fetchWithTimeout(url, options, timeoutMs = 12000) {
+    // TIMEOUT WRAPPER
+    function fetchWithTimeout(url, options, timeoutMs = 10000) {
       return Promise.race([
         fetch(url, options),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Request Timeout')), timeoutMs))
       ]);
     }
 
-    // AI TEXT RESPONSE ENGINE WITH GROQ AND INSTANT CORS FALLBACK
+    // MULTI-ENGINE RELIABLE TEXT GENERATOR
     async function fetchAiResponse(promptText) {
-      // 1. Try Groq API
+      // ENGINE 1: GROQ API
       try {
-        const response = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
+        const groqResponse = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
@@ -626,21 +745,45 @@
           body: JSON.stringify({
             model: GROQ_CONFIG.model,
             messages: [
-              { role: "system", content: "You are SPAR AI, a helpful and intelligent AI assistant." },
+              { role: "system", content: "You are SPAR AI, a concise, friendly, and smart assistant." },
               { role: "user", content: promptText }
             ]
           })
         }, 8000);
 
-        const data = await response.json();
-        if (response.ok && data.choices && data.choices[0]?.message?.content) {
-          return data.choices[0].message.content;
+        if (groqResponse.ok) {
+          const data = await groqResponse.json();
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content.trim();
+          }
         }
       } catch (err) {
-        console.warn("Groq Direct API hindered by browser CORS or timeout, switching to web fallback...", err);
+        console.warn("Engine 1 (Groq) bypassed/failed:", err);
       }
 
-      // 2. Fallback Engine (Direct Browser Friendly Endpoint)
+      // ENGINE 2: POLLINATIONS API (POST JSON)
+      try {
+        const pollResponse = await fetchWithTimeout("https://text.pollinations.ai/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              { role: "system", content: "You are SPAR AI, a helpful AI assistant." },
+              { role: "user", content: promptText }
+            ],
+            model: "openai"
+          })
+        }, 10000);
+
+        if (pollResponse.ok) {
+          const pollText = await pollResponse.text();
+          if (pollText && pollText.trim() !== "") return pollText.trim();
+        }
+      } catch (err) {
+        console.warn("Engine 2 (Pollinations JSON) bypassed/failed:", err);
+      }
+
+      // ENGINE 3: POLLINATIONS GET FALLBACK
       try {
         const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`;
         const fbResponse = await fetchWithTimeout(fallbackUrl, {}, 10000);
@@ -648,14 +791,14 @@
           const fbText = await fbResponse.text();
           if (fbText && fbText.trim() !== "") return fbText.trim();
         }
-      } catch (fbErr) {
-        console.error("Fallback Error:", fbErr);
+      } catch (err) {
+        console.warn("Engine 3 (Pollinations GET) failed:", err);
       }
 
-      return "I was unable to complete the request right now. Please check your network connection and try again!";
+      return "I couldn't receive a response from the server. Please check your internet connection and try sending your query again.";
     }
 
-    // AI VISION RESPONSE ENGINE FOR IMAGE ANALYSIS
+    // AI VISION ENGINE FOR IMAGE ANALYSIS
     async function fetchAiVisionResponse(promptText, imageUrlOrBase64) {
       try {
         const response = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
@@ -678,31 +821,35 @@
           })
         }, 12000);
 
-        const data = await response.json();
-        if (response.ok && data.choices && data.choices[0]?.message?.content) {
-          return data.choices[0].message.content;
-        } else if (data.error) {
-          return `Image Analysis Notice: ${data.error.message || "Could not read image payload directly."}`;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content.trim();
+          }
         }
       } catch (err) {
         console.warn("Vision Fetch Exception:", err);
       }
 
-      return "Image uploaded successfully. To process multimodal vision queries without browser CORS restrictions, deploy the Groq API call via a backend server proxy or serverless function (e.g., Cloudflare Workers / Node.js).";
+      return "Image uploaded! Processing high-res vision analysis requires an active vision model backend connection.";
     }
 
     async function handleSend() {
       const text = userInput.value.trim();
-      if (!text || !deductCredit()) return;
+      if (!text) return;
+
+      if (!deductCredit()) return;
 
       appendMessage(text, 'user');
       userInput.value = '';
+      
       const loadingMsg = appendMessage("Thinking...", 'assistant');
 
       const lower = text.toLowerCase();
       if (lower.startsWith("draw") || lower.startsWith("create image") || lower.startsWith("generate image")) {
         savePromptToHistory(text, 'Image Generation');
         loadingMsg.textContent = "Generating image...";
+        
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
         img.className = 'generated-img';
@@ -710,9 +857,10 @@
         img.onload = () => { 
           loadingMsg.innerHTML = `<p>Here is your generated image:</p>`; 
           loadingMsg.appendChild(img); 
+          chatMessages.scrollTop = chatMessages.scrollHeight;
         };
         img.onerror = () => {
-          loadingMsg.textContent = "Failed to load image. Please try again.";
+          loadingMsg.textContent = "Failed to render image. Please try another prompt.";
         };
         return;
       }
@@ -720,6 +868,7 @@
       savePromptToHistory(text, 'Text');
       const aiResponse = await fetchAiResponse(text);
       loadingMsg.textContent = aiResponse;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     function appendMessage(text, sender) {
@@ -732,7 +881,12 @@
     }
 
     sendBtn.addEventListener('click', handleSend);
-    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+    userInput.addEventListener('keypress', (e) => { 
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleSend(); 
+      }
+    });
 
     updateUI();
   </script>
