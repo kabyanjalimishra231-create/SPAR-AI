@@ -86,19 +86,16 @@
     .plan-info p { font-size: 0.8rem; color: var(--text-muted); }
     .promo-box { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
 
-    /* Account Tabs & Login Form */
     .auth-tabs { display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 1rem; gap: 1rem; }
     .auth-tab-btn { background: transparent; border: none; color: var(--text-muted); padding: 0.5rem 0.25rem; cursor: pointer; font-weight: 600; font-size: 0.9rem; border-bottom: 2px solid transparent; }
     .auth-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* History & Search Styling */
     .history-list { overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; padding-right: 0.25rem; }
     .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem; font-size: 0.85rem; }
     .history-item .history-prompt { font-weight: 600; color: var(--text-main); margin-bottom: 0.35rem; }
     .history-item .history-meta { font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; }
     .empty-history { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; }
 
-    /* Image Upload & Search Preview Styling */
     .img-upload-preview { width: 100%; max-height: 180px; object-fit: contain; border-radius: 8px; border: 1px dashed var(--border-color); display: none; margin-top: 0.5rem; background: var(--bg-primary); }
   </style>
 </head>
@@ -190,7 +187,6 @@
         <button class="close-btn" id="closeAccountModal">&times;</button>
       </div>
 
-      <!-- Auth Form Section (When logged out) -->
       <div id="authSection">
         <div class="auth-tabs">
           <button class="auth-tab-btn active" id="tabLogin">Login</button>
@@ -210,7 +206,6 @@
         </form>
       </div>
 
-      <!-- Account Info Section (When logged in) -->
       <div id="profileSection" style="display: none;">
         <div class="plan-card">
           <div class="plan-info">
@@ -497,7 +492,6 @@
       imageSearchModal.classList.remove('active');
       savePromptToHistory(`Image Query: ${question}`, 'Image Analysis');
 
-      // Add user message with image
       const userMsg = appendMessage(`[Image Uploaded] Question: ${question}`, 'user');
       const img = document.createElement('img');
       img.className = 'generated-img';
@@ -508,7 +502,6 @@
       const aiResponse = await fetchAiVisionResponse(question, imageSrc);
       loadingMsg.textContent = aiResponse;
 
-      // Reset modal fields
       imgFileInput.value = '';
       imgUrlInput.value = '';
       imgSearchQuery.value = '';
@@ -612,10 +605,19 @@
       `;
     });
 
-    // GROQ TEXT RESPONSE ENGINE
+    // HELPER: TIMEOUT WRAPPER FOR FETCH
+    function fetchWithTimeout(url, options, timeoutMs = 12000) {
+      return Promise.race([
+        fetch(url, options),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), timeoutMs))
+      ]);
+    }
+
+    // AI TEXT RESPONSE ENGINE WITH GROQ AND INSTANT CORS FALLBACK
     async function fetchAiResponse(promptText) {
+      // 1. Try Groq API
       try {
-        const response = await fetch(GROQ_CONFIG.endpoint, {
+        const response = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
@@ -628,23 +630,20 @@
               { role: "user", content: promptText }
             ]
           })
-        });
+        }, 8000);
 
         const data = await response.json();
         if (response.ok && data.choices && data.choices[0]?.message?.content) {
           return data.choices[0].message.content;
-        } else if (data.error) {
-          console.error("Groq API Error:", data.error);
-          return `API Error: ${data.error.message || "Failed to generate response."}`;
         }
       } catch (err) {
-        console.error("Fetch Exception:", err);
+        console.warn("Groq Direct API hindered by browser CORS or timeout, switching to web fallback...", err);
       }
 
-      // Fallback
+      // 2. Fallback Engine (Direct Browser Friendly Endpoint)
       try {
-        const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}`;
-        const fbResponse = await fetch(fallbackUrl);
+        const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai`;
+        const fbResponse = await fetchWithTimeout(fallbackUrl, {}, 10000);
         if (fbResponse.ok) {
           const fbText = await fbResponse.text();
           if (fbText && fbText.trim() !== "") return fbText.trim();
@@ -653,13 +652,13 @@
         console.error("Fallback Error:", fbErr);
       }
 
-      return "I'm having trouble processing your request right now. Please check your internet connection or try again.";
+      return "I was unable to complete the request right now. Please check your network connection and try again!";
     }
 
-    // GROQ VISION RESPONSE ENGINE FOR IMAGE ANALYSIS
+    // AI VISION RESPONSE ENGINE FOR IMAGE ANALYSIS
     async function fetchAiVisionResponse(promptText, imageUrlOrBase64) {
       try {
-        const response = await fetch(GROQ_CONFIG.endpoint, {
+        const response = await fetchWithTimeout(GROQ_CONFIG.endpoint, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${GROQ_CONFIG.apiKey}`,
@@ -677,19 +676,19 @@
               }
             ]
           })
-        });
+        }, 12000);
 
         const data = await response.json();
         if (response.ok && data.choices && data.choices[0]?.message?.content) {
           return data.choices[0].message.content;
         } else if (data.error) {
-          return `Image Analysis Error: ${data.error.message || "Unable to read image."}`;
+          return `Image Analysis Notice: ${data.error.message || "Could not read image payload directly."}`;
         }
       } catch (err) {
-        console.error("Vision API Error:", err);
+        console.warn("Vision Fetch Exception:", err);
       }
 
-      return "Unable to analyze this image at the moment. Please ensure the image is accessible and try again.";
+      return "Image uploaded successfully. To process multimodal vision queries without browser CORS restrictions, deploy the Groq API call via a backend server proxy or serverless function (e.g., Cloudflare Workers / Node.js).";
     }
 
     async function handleSend() {
