@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI Workspace App</title>
+  <title>SPAR AI Workspace</title>
   
   <!-- Firebase Core SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -11,7 +11,7 @@
 
   <style>
     /* -------------------------------------------------------------
-       DESIGN & STYLES (100% UNCHANGED + SUBSCRIPTION ADDITIONS)
+       DESIGN & STYLES (SPAR AI THEME)
     ------------------------------------------------------------- */
     :root {
       --bg-primary: #0f172a;
@@ -60,8 +60,8 @@
     }
 
     .brand-logo {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       background: var(--accent);
       border-radius: 8px;
       display: flex;
@@ -69,11 +69,14 @@
       justify-content: center;
       font-weight: bold;
       color: white;
+      font-size: 0.9rem;
+      letter-spacing: 0.5px;
     }
 
     .brand-title {
       font-size: 1.25rem;
-      font-weight: 600;
+      font-weight: 700;
+      letter-spacing: 0.5px;
     }
 
     nav {
@@ -379,8 +382,8 @@
   <!-- Navigation Header -->
   <header>
     <div class="brand" id="brandHeader" title="Double click for Owner Access">
-      <div class="brand-logo">AI</div>
-      <div class="brand-title">Workspace</div>
+      <div class="brand-logo">SPAR</div>
+      <div class="brand-title">SPAR AI</div>
     </div>
     <nav>
       <div class="credit-badge" id="creditCounter">Credits: Loading...</div>
@@ -401,11 +404,11 @@
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant">
-          Hello! How can I assist you today? You can ask questions or generate images!
+          Hello! Welcome to SPAR AI. How can I assist you today? You can ask questions or generate images!
         </div>
       </div>
       <div class="chat-input-area">
-        <input type="text" id="userInput" class="chat-input" placeholder="Ask a question or type 'draw a cat'..." />
+        <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI a question or type 'draw a cat'..." />
         <button class="send-btn" id="sendBtn">Send</button>
       </div>
     </div>
@@ -415,7 +418,7 @@
   <div class="modal-overlay" id="accountModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">Subscription & Account</div>
+        <div class="modal-title">SPAR AI Subscription</div>
         <button class="close-btn" id="closeAccountModal">&times;</button>
       </div>
 
@@ -448,7 +451,7 @@
   <div class="modal-overlay" id="authModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">Owner Verification</div>
+        <div class="modal-title">SPAR AI Owner Verification</div>
         <button class="close-btn" id="closeAuthModal">&times;</button>
       </div>
       <div class="form-group">
@@ -467,7 +470,7 @@
   <div class="modal-overlay" id="adminPanelModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">Global Admin Dashboard <span class="status-badge">Live Sync</span></div>
+        <div class="modal-title">SPAR AI Global Dashboard <span class="status-badge">Live Sync</span></div>
         <button class="close-btn" id="closeAdminModal">&times;</button>
       </div>
       <div class="form-group">
@@ -583,7 +586,7 @@
         creditCounter.textContent = "Plan: PRO (Unlimited)";
         userInput.disabled = false;
         sendBtn.disabled = false;
-        userInput.placeholder = "Ask a question or type 'draw a cat'...";
+        userInput.placeholder = "Ask SPAR AI a question or type 'draw a cat'...";
       } else {
         creditCounter.textContent = `Credits: ${user.credits}`;
         if (user.credits <= 0) {
@@ -593,7 +596,7 @@
         } else {
           userInput.disabled = false;
           sendBtn.disabled = false;
-          userInput.placeholder = "Ask a question or type 'draw a cat'...";
+          userInput.placeholder = "Ask SPAR AI a question or type 'draw a cat'...";
         }
       }
     }
@@ -690,10 +693,8 @@
 
     // Buy Plan Payment Button Action
     buyPlanBtn.addEventListener('click', () => {
-      // Connect live checkout here (e.g., Stripe, Razorpay, or custom link)
       alert("Redirecting to Payment Gateway... (After payment, your credits will upgrade automatically)");
       
-      // Simulated Payment Success:
       const user = getStoredUserData();
       user.isPro = true;
       user.credits = 9999;
@@ -779,7 +780,7 @@
     });
 
     /* -------------------------------------------------------------
-       7. CHAT ENGINE (TEXT via GROQ + IMAGES)
+       7. CHAT ENGINE (TEXT via GROQ + IMAGES via POLLINATIONS)
     ------------------------------------------------------------- */
     function isImagePrompt(text) {
       const lower = text.toLowerCase();
