@@ -327,14 +327,12 @@
     function updateUI() {
       const user = getStoredUserData();
 
-      // Update User Badge Header
       if (user.isLoggedIn && user.name) {
         userDisplayBadge.textContent = `👤 ${user.name}`;
       } else {
         userDisplayBadge.textContent = `👤 Guest`;
       }
 
-      // Update Credits Badge
       if (user.isPro) {
         creditCounter.textContent = "Plan: PRO (Unlimited)";
         userInput.disabled = false;
@@ -581,9 +579,13 @@
       `;
     });
 
-    // ROBUST GROQ API FETCH
-    async function sendPromptToGroq(promptText) {
+    // ROBUST AI RESPONSE ENGINE WITH RELIABLE FALLBACK
+    async function fetchAiResponse(promptText) {
+      // 1. Try Groq API first
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 sec timeout
+
         const response = await fetch(GROQ_CONFIG.endpoint, {
           method: "POST",
           headers: {
@@ -596,21 +598,36 @@
               { role: "system", content: "You are SPAR AI, a helpful, precise AI assistant." },
               { role: "user", content: promptText }
             ]
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          console.error("Groq Error Output:", data);
-          return `API Error: ${data?.error?.message || "Unable to retrieve response from AI."}`;
+        if (response.ok) {
+          const data = await response.json();
+          if (data.choices && data.choices[0]?.message?.content) {
+            return data.choices[0].message.content;
+          }
         }
-
-        return data.choices[0]?.message?.content || "No text generated.";
       } catch (err) {
-        console.error("Network Error:", err);
-        return "Network Error: Could not connect to AI service. Please check your internet connection.";
+        console.warn("Groq fetch primary failed, using fallback engine...", err);
       }
+
+      // 2. Fallback Engine (Pollinations Free Text AI API)
+      try {
+        const fallbackUrl = `https://text.pollinations.ai/${encodeURIComponent(promptText)}`;
+        const fbResponse = await fetch(fallbackUrl);
+        if (fbResponse.ok) {
+          const fbText = await fbResponse.text();
+          if (fbText && fbText.trim() !== "") {
+            return fbText.trim();
+          }
+        }
+      } catch (fbErr) {
+        console.error("Fallback API Error:", fbErr);
+      }
+
+      return "I'm having trouble processing your request right now. Please check your network connection and try again.";
     }
 
     async function handleSend() {
@@ -633,11 +650,14 @@
           loadingMsg.innerHTML = `<p>Here is your generated image:</p>`; 
           loadingMsg.appendChild(img); 
         };
+        img.onerror = () => {
+          loadingMsg.textContent = "Failed to load image. Please try again.";
+        };
         return;
       }
 
       savePromptToHistory(text, 'Text');
-      const aiResponse = await sendPromptToGroq(text);
+      const aiResponse = await fetchAiResponse(text);
       loadingMsg.textContent = aiResponse;
     }
 
