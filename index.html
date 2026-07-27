@@ -1,191 +1,773 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AI Assistant App</title>
+  <title>SPAR AI</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-    body { background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-    header { background-color: #1f1f1f; padding: 16px; text-align: center; font-weight: bold; font-size: 1.1rem; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
-    .status-badge { font-size: 0.75rem; padding: 4px 8px; border-radius: 12px; background: #333; color: #aaa; }
-    .status-badge.online { background: #1b4332; color: #40c057; }
-    #chat-container { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .message { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
-    .user { align-self: flex-end; background-color: #2e66e5; color: white; border-bottom-right-radius: 4px; }
-    .assistant { align-self: flex-start; background-color: #2a2a2a; color: #e0e0e0; border-bottom-left-radius: 4px; }
-    .system-error { align-self: center; background-color: #3d1414; color: #ff6b6b; font-size: 0.85rem; border: 1px solid #842020; }
-    #input-container { padding: 12px; background-color: #1f1f1f; border-top: 1px solid #333; display: flex; gap: 8px; }
-    input[type="text"] { flex: 1; padding: 12px 16px; border-radius: 24px; border: 1px solid #444; background-color: #2a2a2a; color: white; outline: none; font-size: 0.95rem; }
-    input[type="text"]:focus { border-color: #2e66e5; }
-    button { background-color: #2e66e5; color: white; border: none; padding: 0 18px; border-radius: 24px; font-weight: bold; cursor: pointer; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    #key-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-    .modal-card { background: #222; padding: 24px; border-radius: 16px; width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; border: 1px solid #444; }
-    .modal-card h3 { color: white; font-size: 1.2rem; }
-    .modal-card p { font-size: 0.85rem; color: #aaa; }
-    .modal-card input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #444; background: #111; color: white; }
+    :root {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-card: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --border-color: #475569;
+      --danger: #ef4444;
+      --success: #10b981;
+      --admin-color: #f59e0b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+    html, body { width: 100%; height: 100%; background-color: var(--bg-primary); color: var(--text-main); overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+
+    /* HEADER */
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+    .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .brand { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; }
+    .brand-logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.85rem; }
+    .brand-title { font-size: 1.1rem; font-weight: 700; }
+
+    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #334155; color: #94a3b8; font-weight: 600; }
+    .status-badge.online { background: #064e3b; color: #34d399; }
+
+    nav { display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; }
+    .nav-status-group, .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
+    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); white-space: nowrap; }
+    
+    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+    .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.08); }
+    .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
+    .nav-btn.admin { border-color: var(--admin-color); color: var(--admin-color); }
+
+    /* MAIN CHAT AREA */
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; }
+    .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem; }
+
+    .message { max-width: 85%; padding: 0.7rem 0.9rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; }
+    .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
+    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
+    .message.system-error { align-self: center; background-color: #451a1a; color: #fca5a5; border: 1px solid var(--danger); font-size: 0.85rem; }
+
+    .preview-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 6px; display: block; border: 1px solid var(--border-color); }
+    .generated-img { width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
+
+    /* INPUT AREA */
+    .image-preview-bar { display: none; padding: 0.5rem; background: var(--bg-primary); border-top: 1px solid var(--border-color); align-items: center; gap: 0.5rem; }
+    .image-preview-bar.active { display: flex; }
+    .preview-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
+    .remove-img-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+
+    .chat-input-area { padding: 0.65rem; background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.4rem; align-items: center; }
+    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; }
+    .chat-input:focus { border-color: var(--accent); }
+
+    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* MODAL SYSTEM */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 0.75rem; }
+    .modal-overlay.active { display: flex; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 480px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; gap: 1rem; }
+    .modal-card.admin-card { border-color: var(--admin-color); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.1rem; font-weight: 600; }
+    .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
+
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; color: var(--text-main); outline: none; font-size: 16px; }
+
+    .history-list { overflow-y: auto; max-height: 250px; display: flex; flex-direction: column; gap: 0.6rem; }
+    .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; font-size: 0.8rem; }
+    .history-prompt { font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem; }
+    .history-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; justify-content: space-between; }
+
+    @media (min-width: 640px) {
+      header { padding: 0.75rem 1.5rem; flex-direction: row; justify-content: space-between; }
+      header .header-top { width: auto; }
+      nav { width: auto; justify-content: flex-end; }
+      main { padding: 1rem; }
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <span>AI Assistant</span>
-    <span id="env-badge" class="status-badge">Detecting...</span>
+    <div class="header-top">
+      <div class="brand" id="brandLogoTrigger" title="Triple click for Secret Admin">
+        <div class="brand-logo">SPAR</div>
+        <div class="brand-title">SPAR AI</div>
+        <span id="env-badge" class="status-badge">Detecting...</span>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-status-group">
+        <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
+        <div class="credit-badge" id="creditCounter">Credits: ...</div>
+      </div>
+      <div class="nav-actions-group">
+        <button class="nav-btn" id="historyBtn">📜 History</button>
+        <button class="nav-btn" id="accountBtn">💎 Subscription</button>
+        <button class="nav-btn admin" id="adminTriggerBtn">⚙️ Admin</button>
+        <button class="nav-btn primary" id="newChatBtn">+ New</button>
+      </div>
+    </nav>
   </header>
 
-  <div id="chat-container">
-    <div class="message assistant">Hello! How can I assist you today?</div>
-  </div>
+  <main>
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="message assistant">
+          Hello! Welcome to SPAR AI. Ask me any question, upload or capture an image, or type 'draw a space rocket' to generate images!
+        </div>
+      </div>
 
-  <div id="input-container">
-    <input type="text" id="user-input" placeholder="Type a message..." />
-    <button id="send-btn">Send</button>
-  </div>
+      <div class="image-preview-bar" id="imagePreviewBar">
+        <img id="previewImage" class="preview-thumb" src="" alt="Selected Image" />
+        <span style="font-size: 0.8rem; color: var(--text-muted); flex:1;">Image attached</span>
+        <button class="remove-img-btn" id="removeImgBtn">&times;</button>
+      </div>
 
-  <!-- API KEY SETTINGS MODAL -->
-  <div id="key-modal" style="display: none;">
+      <div class="chat-input-area">
+        <input type="file" id="fileUploadInput" accept="image/*" style="display:none;" />
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
+
+        <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
+        <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
+
+        <input type="text" id="userInput" class="chat-input" placeholder="Type a message or 'draw a cat'..." />
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-overlay" id="historyModal">
     <div class="modal-card">
-      <h3>Groq API Key Required</h3>
-      <p>Enter your Groq API key below (starts with <code>gsk_</code>). It will be stored safely in your local device storage.</p>
-      <input type="text" id="api-key-input" placeholder="gsk_..." />
-      <button id="save-key-btn">Save Key & Continue</button>
+      <div class="modal-header">
+        <div class="modal-title">📜 Prompt History</div>
+        <button class="close-btn" id="closeHistoryModal">&times;</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div style="text-align:center; color: var(--text-muted); padding: 1rem;">No history saved yet.</div>
+      </div>
+      <div style="display:flex; justify-content: space-between;">
+        <button class="nav-btn" id="clearHistoryBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);">Clear</button>
+        <button class="nav-btn" id="closeHistoryBtn">Close</button>
+      </div>
     </div>
   </div>
 
+  <!-- USER SUBSCRIPTION & ACCOUNT MODAL -->
+  <div class="modal-overlay" id="accountModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">💎 Subscription & Account</div>
+        <button class="close-btn" id="closeAccountModal">&times;</button>
+      </div>
+
+      <div id="authSection">
+        <div class="form-group">
+          <label>Name</label>
+          <input type="text" id="userNameInput" class="form-input" placeholder="Your Name" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="userEmailInput" class="form-input" placeholder="name@example.com" />
+        </div>
+        <button class="nav-btn primary" id="saveAccountBtn" style="width: 100%;">Save & Login</button>
+      </div>
+
+      <div id="profileSection" style="display: none; display: flex; flex-direction: column; gap: 0.85rem;">
+        <div style="background: var(--bg-primary); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+          <h4 id="userProfileName">User</h4>
+          <p id="userProfileEmail" style="font-size: 0.8rem; color: var(--text-muted);"></p>
+          <p id="userPlanTitle" style="color: var(--accent); font-weight: 600; margin-top: 0.25rem; font-size: 0.85rem;">Free Tier</p>
+          <p id="userCreditsDetail" style="font-size: 0.85rem; color: var(--text-muted);">Remaining Credits: 5</p>
+        </div>
+
+        <div class="form-group">
+          <label>Redeem Promo Code</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="userPromoInput" class="form-input" style="flex:1;" placeholder="Enter Promo Code" />
+            <button class="nav-btn primary" id="applyPromoBtn">Redeem</button>
+          </div>
+        </div>
+
+        <button class="nav-btn primary" id="payRazorpayBtn" style="width: 100%; display: none;">Upgrade via Razorpay</button>
+
+        <button class="nav-btn" id="logoutBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4); width: 100%;">Logout</button>
+      </div>
+
+      <button class="nav-btn" id="closeAccountBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- SECRET ADMINISTRATOR MODAL -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-card admin-card">
+      <div class="modal-header">
+        <div class="modal-title" style="color: var(--admin-color);">🔐 Secret Administrator Panel</div>
+        <button class="close-btn" id="closeAdminModal">&times;</button>
+      </div>
+
+      <!-- Password Login Screen -->
+      <div id="adminAuthSection" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Enter the administrator password to access core settings.</p>
+        <div class="form-group">
+          <label>Admin Password</label>
+          <input type="password" id="adminPasswordInput" class="form-input" placeholder="Enter password" />
+        </div>
+        <button class="nav-btn admin" id="adminLoginBtn" style="background: var(--admin-color); color: #000; font-weight: bold;">Login to Admin</button>
+      </div>
+
+      <!-- Admin Settings Screen -->
+      <div id="adminPanelSection" style="display: none; flex-direction: column; gap: 0.85rem;">
+        <div style="background: rgba(245, 158, 11, 0.1); padding: 0.75rem; border-radius: 6px; border: 1px solid var(--admin-color); font-size: 0.8rem; color: var(--admin-color);">
+          Logged in as Administrator
+        </div>
+
+        <div class="form-group">
+          <label>Groq API Key (Global)</label>
+          <input type="password" id="adminGroqKeyInput" class="form-input" placeholder="gsk_..." />
+        </div>
+
+        <div class="form-group">
+          <label>Razorpay Key ID</label>
+          <input type="text" id="adminRazorpayKeyIdInput" class="form-input" placeholder="rzp_live_..." />
+        </div>
+
+        <div class="form-group">
+          <label>Razorpay Key Secret</label>
+          <input type="password" id="adminRazorpaySecretInput" class="form-input" placeholder="Secret key..." />
+        </div>
+
+        <div class="form-group">
+          <label>Free Plan Default Credits</label>
+          <input type="number" id="adminFreeCreditsInput" class="form-input" placeholder="5" />
+        </div>
+
+        <div class="form-group">
+          <label>Pro Plan Promo Code</label>
+          <input type="text" id="adminPromoCodeInput" class="form-input" placeholder="PROMO2026" />
+        </div>
+
+        <button class="nav-btn primary" id="saveAdminSettingsBtn" style="width: 100%;">Save Admin Changes</button>
+      </div>
+
+      <button class="nav-btn" id="closeAdminBtn">Close</button>
+    </div>
+  </div>
+
+  <!-- Razorpay SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
   <script>
     // ==========================================
-    // CONFIGURATION & AUTO-DETECTION
+    // INITIAL SYSTEM CONFIG & LOCAL STORAGE
     // ==========================================
-    const CONFIG = {
-      // ENTER YOUR API KEY HERE OR LEAVE IT BLANK TO USE THE ON-SCREEN PROMPT
-      DEFAULT_API_KEY: "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", 
-      GROQ_URL: "https://api.groq.com/openai/v1/chat/completions",
-      MODEL: "llama-3.3-70b-versatile"
+    const DEFAULT_CONFIG = {
+      groqApiKey: "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",
+      razorpayKeyId: "",
+      razorpayKeySecret: "",
+      promoCode: "PROMO2026",
+      freeCredits: 5,
+      adminPass: "221181",
+      groqUrl: "https://api.groq.com/openai/v1/chat/completions",
+      textModel: "llama-3.3-70b-versatile",
+      visionModel: "llama-3.2-11b-vision-preview"
     };
 
-    // Detect Environment (Android WebView, Mobile, or Web)
-    function detectEnvironment() {
-      const ua = navigator.userAgent || navigator.vendor || window.opera;
+    function getAdminConfig() {
+      const stored = localStorage.getItem('spar_ai_admin_config');
+      return stored ? { ...DEFAULT_CONFIG, ...JSON.parse(stored) } : DEFAULT_CONFIG;
+    }
+
+    function saveAdminConfig(config) {
+      localStorage.setItem('spar_ai_admin_config', JSON.stringify(config));
+    }
+
+    // DOM ELEMENTS
+    const chatMessages = document.getElementById('chatMessages');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const creditCounter = document.getElementById('creditCounter');
+    const userDisplayBadge = document.getElementById('userDisplayBadge');
+    const envBadge = document.getElementById('env-badge');
+
+    const fileUploadInput = document.getElementById('fileUploadInput');
+    const cameraInput = document.getElementById('cameraInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const imagePreviewBar = document.getElementById('imagePreviewBar');
+    const previewImage = document.getElementById('previewImage');
+    const removeImgBtn = document.getElementById('removeImgBtn');
+
+    // User Modal Elements
+    const accountModal = document.getElementById('accountModal');
+    const accountBtn = document.getElementById('accountBtn');
+    const closeAccountModal = document.getElementById('closeAccountModal');
+    const closeAccountBtn = document.getElementById('closeAccountBtn');
+    const authSection = document.getElementById('authSection');
+    const profileSection = document.getElementById('profileSection');
+    const userNameInput = document.getElementById('userNameInput');
+    const userEmailInput = document.getElementById('userEmailInput');
+    const saveAccountBtn = document.getElementById('saveAccountBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userPromoInput = document.getElementById('userPromoInput');
+    const applyPromoBtn = document.getElementById('applyPromoBtn');
+    const payRazorpayBtn = document.getElementById('payRazorpayBtn');
+
+    // Admin Modal Elements
+    const adminModal = document.getElementById('adminModal');
+    const adminTriggerBtn = document.getElementById('adminTriggerBtn');
+    const brandLogoTrigger = document.getElementById('brandLogoTrigger');
+    const closeAdminModal = document.getElementById('closeAdminModal');
+    const closeAdminBtn = document.getElementById('closeAdminBtn');
+    const adminAuthSection = document.getElementById('adminAuthSection');
+    const adminPanelSection = document.getElementById('adminPanelSection');
+    const adminPasswordInput = document.getElementById('adminPasswordInput');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    
+    const adminGroqKeyInput = document.getElementById('adminGroqKeyInput');
+    const adminRazorpayKeyIdInput = document.getElementById('adminRazorpayKeyIdInput');
+    const adminRazorpaySecretInput = document.getElementById('adminRazorpaySecretInput');
+    const adminFreeCreditsInput = document.getElementById('adminFreeCreditsInput');
+    const adminPromoCodeInput = document.getElementById('adminPromoCodeInput');
+    const saveAdminSettingsBtn = document.getElementById('saveAdminSettingsBtn');
+
+    // History Modal Elements
+    const historyModal = document.getElementById('historyModal');
+    const historyBtn = document.getElementById('historyBtn');
+    const closeHistoryModal = document.getElementById('closeHistoryModal');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
+
+    let currentBase64Image = null;
+    let chatHistory = [];
+    let brandClickCount = 0;
+
+    // ENVIRONMENT DETECTOR
+    function detectEnv() {
+      const ua = navigator.userAgent || "";
       const isAndroidApp = typeof window.AndroidInterface !== "undefined" || /wv|Android.*Version\/[0-9]\.[0-9]/i.test(ua);
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-      
-      const badge = document.getElementById("env-badge");
       if (isAndroidApp) {
-        badge.textContent = "Android App";
-        badge.classList.add("online");
-      } else if (isMobile) {
-        badge.textContent = "Mobile Web";
+        envBadge.textContent = "Android App";
+        envBadge.classList.add("online");
+      } else if (/Android|iPhone|iPad/i.test(ua)) {
+        envBadge.textContent = "Mobile Web";
       } else {
-        badge.textContent = "Desktop Web";
+        envBadge.textContent = "Desktop Web";
       }
     }
 
-    // Get active API Key (from LocalStorage or Hardcoded Config)
-    function getApiKey() {
-      const storedKey = localStorage.getItem("GROQ_API_KEY");
-      if (storedKey && storedKey.trim().startsWith("gsk_")) {
-        return storedKey.trim();
-      }
-      if (CONFIG.DEFAULT_API_KEY && CONFIG.DEFAULT_API_KEY.startsWith("gsk_")) {
-        return CONFIG.DEFAULT_API_KEY.trim();
-      }
-      return null;
+    // USER DATA HANDLERS
+    function getStoredUserData() {
+      const cfg = getAdminConfig();
+      const stored = localStorage.getItem('spar_ai_user_session');
+      return stored ? JSON.parse(stored) : { 
+        name: '', email: '', isLoggedIn: false, credits: parseInt(cfg.freeCredits), isPro: false 
+      };
     }
 
-    // UI Elements
-    const chatContainer = document.getElementById("chat-container");
-    const userInput = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
-    const keyModal = document.getElementById("key-modal");
-    const apiKeyInput = document.getElementById("api-key-input");
-    const saveKeyBtn = document.getElementById("save-key-btn");
-
-    let messagesHistory = [];
-
-    function appendMessage(role, text) {
-      const msgDiv = document.createElement("div");
-      msgDiv.classList.add("message", role);
-      msgDiv.textContent = text;
-      chatContainer.appendChild(msgDiv);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    function saveUserData(data) {
+      localStorage.setItem('spar_ai_user_session', JSON.stringify(data));
+      updateUI();
     }
 
-    async function sendMessage() {
-      const text = userInput.value.trim();
-      if (!text) return;
+    function updateUI() {
+      const user = getStoredUserData();
+      const cfg = getAdminConfig();
 
-      const apiKey = getApiKey();
-      if (!apiKey) {
-        keyModal.style.display = "flex";
+      userDisplayBadge.textContent = user.isLoggedIn && user.name ? `👤 ${user.name}` : `👤 Guest`;
+
+      if (cfg.razorpayKeyId) {
+        payRazorpayBtn.style.display = 'block';
+      } else {
+        payRazorpayBtn.style.display = 'none';
+      }
+
+      if (user.isPro) {
+        creditCounter.textContent = "Pro (Unlimited)";
+        userInput.disabled = false;
+        sendBtn.disabled = false;
+      } else {
+        creditCounter.textContent = `Credits: ${user.credits}`;
+        if (user.credits <= 0) {
+          userInput.disabled = true;
+          sendBtn.disabled = true;
+          userInput.placeholder = "Out of credits! Redeem promo code in Subscription.";
+        } else {
+          userInput.disabled = false;
+          sendBtn.disabled = false;
+          userInput.placeholder = "Type a message or 'draw a cat'...";
+        }
+      }
+    }
+
+    function deductCredit() {
+      const user = getStoredUserData();
+      if (user.isPro) return true;
+      if (user.credits > 0) {
+        user.credits -= 1;
+        saveUserData(user);
+        return true;
+      }
+      openAccountModal();
+      return false;
+    }
+
+    // IMAGE UPLOAD & CAMERA HANDLERS
+    uploadBtn.addEventListener('click', () => fileUploadInput.click());
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+
+    fileUploadInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
+    cameraInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
+
+    function handleImageSelect(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        currentBase64Image = event.target.result;
+        previewImage.src = currentBase64Image;
+        imagePreviewBar.classList.add('active');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    removeImgBtn.addEventListener('click', () => {
+      currentBase64Image = null;
+      imagePreviewBar.classList.remove('active');
+      fileUploadInput.value = "";
+      cameraInput.value = "";
+    });
+
+    // ACCOUNT & SUBSCRIPTION MODAL
+    accountBtn.addEventListener('click', openAccountModal);
+    closeAccountModal.addEventListener('click', () => accountModal.classList.remove('active'));
+    closeAccountBtn.addEventListener('click', () => accountModal.classList.remove('active'));
+
+    function openAccountModal() {
+      const user = getStoredUserData();
+      if (user.isLoggedIn) {
+        authSection.style.display = 'none';
+        profileSection.style.display = 'flex';
+        document.getElementById('userProfileName').textContent = user.name || "User";
+        document.getElementById('userProfileEmail').textContent = user.email || "";
+        document.getElementById('userPlanTitle').textContent = user.isPro ? "Pro Member (Active)" : "Free Tier";
+        document.getElementById('userCreditsDetail').textContent = user.isPro ? "Remaining Credits: Unlimited" : `Remaining Credits: ${user.credits}`;
+      } else {
+        authSection.style.display = 'flex';
+        profileSection.style.display = 'none';
+      }
+      accountModal.classList.add('active');
+    }
+
+    saveAccountBtn.addEventListener('click', () => {
+      const name = userNameInput.value.trim();
+      const email = userEmailInput.value.trim();
+      if (!name || !email) return;
+      const user = getStoredUserData();
+      user.name = name;
+      user.email = email;
+      user.isLoggedIn = true;
+      saveUserData(user);
+      openAccountModal();
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      const user = getStoredUserData();
+      user.isLoggedIn = false;
+      saveUserData(user);
+      openAccountModal();
+    });
+
+    applyPromoBtn.addEventListener('click', () => {
+      const cfg = getAdminConfig();
+      if (userPromoInput.value.trim().toLowerCase() === cfg.promoCode.toLowerCase()) {
+        const user = getStoredUserData();
+        user.isPro = true;
+        saveUserData(user);
+        alert("Pro plan activated successfully!");
+        openAccountModal();
+      } else {
+        alert("Invalid promo code.");
+      }
+    });
+
+    // RAZORPAY INTEGRATION
+    payRazorpayBtn.addEventListener('click', () => {
+      const cfg = getAdminConfig();
+      const user = getStoredUserData();
+
+      if (!cfg.razorpayKeyId) {
+        alert("Razorpay is not configured by the administrator yet.");
         return;
       }
 
-      appendMessage("user", text);
-      userInput.value = "";
-      sendBtn.disabled = true;
+      const options = {
+        key: cfg.razorpayKeyId,
+        amount: 49900, // Amount in paise (499 INR)
+        currency: "INR",
+        name: "SPAR AI",
+        description: "Pro Unlimited Plan",
+        handler: function (response) {
+          user.isPro = true;
+          saveUserData(user);
+          alert("Payment Successful! Pro Plan Activated.");
+          openAccountModal();
+        },
+        prefill: {
+          name: user.name || "",
+          email: user.email || ""
+        },
+        theme: { color: "#6366f1" }
+      };
 
-      messagesHistory.push({ role: "user", content: text });
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
 
-      try {
-        const response = await fetch(CONFIG.GROQ_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: CONFIG.MODEL,
-            messages: messagesHistory
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          if (data.error && data.error.code === "invalid_api_key") {
-            localStorage.removeItem("GROQ_API_KEY");
-            throw new Error("Invalid API Key. Please check your key and try again.");
-          }
-          throw new Error(data.error?.message || "Failed to reach Groq API.");
-        }
-
-        const reply = data.choices[0].message.content;
-        messagesHistory.push({ role: "assistant", content: reply });
-        appendMessage("assistant", reply);
-
-      } catch (err) {
-        appendMessage("system-error", `Error: ${err.message}`);
-        if (err.message.includes("Invalid API Key")) {
-          keyModal.style.display = "flex";
-        }
-      } finally {
-        sendBtn.disabled = false;
+    // SECRET ADMIN PANEL LOGIC
+    adminTriggerBtn.addEventListener('click', openAdminModal);
+    brandLogoTrigger.addEventListener('click', () => {
+      brandClickCount++;
+      if (brandClickCount >= 3) {
+        brandClickCount = 0;
+        openAdminModal();
       }
+      setTimeout(() => brandClickCount = 0, 1500);
+    });
+
+    closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
+    closeAdminBtn.addEventListener('click', () => adminModal.classList.remove('active'));
+
+    function openAdminModal() {
+      adminAuthSection.style.display = 'flex';
+      adminPanelSection.style.display = 'none';
+      adminPasswordInput.value = '';
+      adminModal.classList.add('active');
     }
 
-    // Modal Event Handlers
-    saveKeyBtn.addEventListener("click", () => {
-      const key = apiKeyInput.value.trim();
-      if (key.startsWith("gsk_")) {
-        localStorage.setItem("GROQ_API_KEY", key);
-        keyModal.style.display = "none";
-        appendMessage("assistant", "API Key saved successfully! You can now send messages.");
+    adminLoginBtn.addEventListener('click', () => {
+      const cfg = getAdminConfig();
+      if (adminPasswordInput.value.trim() === cfg.adminPass) {
+        adminAuthSection.style.display = 'none';
+        adminPanelSection.style.display = 'flex';
+        
+        // Load current config values into inputs
+        adminGroqKeyInput.value = cfg.groqApiKey || '';
+        adminRazorpayKeyIdInput.value = cfg.razorpayKeyId || '';
+        adminRazorpaySecretInput.value = cfg.razorpayKeySecret || '';
+        adminFreeCreditsInput.value = cfg.freeCredits;
+        adminPromoCodeInput.value = cfg.promoCode;
       } else {
-        alert("Invalid key format. Groq API keys must start with 'gsk_'.");
+        alert("Incorrect Administrator Password!");
       }
     });
 
-    sendBtn.addEventListener("click", sendMessage);
-    userInput.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
+    saveAdminSettingsBtn.addEventListener('click', () => {
+      const cfg = getAdminConfig();
+      cfg.groqApiKey = adminGroqKeyInput.value.trim();
+      cfg.razorpayKeyId = adminRazorpayKeyIdInput.value.trim();
+      cfg.razorpayKeySecret = adminRazorpaySecretInput.value.trim();
+      cfg.freeCredits = parseInt(adminFreeCreditsInput.value.trim()) || 5;
+      cfg.promoCode = adminPromoCodeInput.value.trim();
+
+      saveAdminConfig(cfg);
+      alert("Admin settings updated successfully!");
+      adminModal.classList.remove('active');
+      updateUI();
     });
 
-    // Initialize App
-    detectEnvironment();
-    if (!getApiKey()) {
-      keyModal.style.display = "flex";
+    // PROMPT HISTORY
+    function saveHistory(prompt, type) {
+      const history = JSON.parse(localStorage.getItem('spar_ai_history') || '[]');
+      history.unshift({ prompt, type, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
+      localStorage.setItem('spar_ai_history', JSON.stringify(history));
     }
+
+    historyBtn.addEventListener('click', () => {
+      const history = JSON.parse(localStorage.getItem('spar_ai_history') || '[]');
+      if (history.length === 0) {
+        historyList.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 1rem;">No history saved yet.</div>`;
+      } else {
+        historyList.innerHTML = history.map(item => `
+          <div class="history-item">
+            <div class="history-prompt">${escapeHtml(item.prompt)}</div>
+            <div class="history-meta"><span>Type: ${item.type}</span><span>${item.time}</span></div>
+          </div>
+        `).join('');
+      }
+      historyModal.classList.add('active');
+    });
+
+    closeHistoryModal.addEventListener('click', () => historyModal.classList.remove('active'));
+    closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
+    clearHistoryBtn.addEventListener('click', () => {
+      localStorage.removeItem('spar_ai_history');
+      historyList.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 1rem;">No history saved yet.</div>`;
+    });
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    newChatBtn.addEventListener('click', () => {
+      chatHistory = [];
+      chatMessages.innerHTML = `<div class="message assistant">New chat started! How can I help you?</div>`;
+    });
+
+    // API REQUEST HANDLER
+    async function fetchAiResponse(prompt, base64Img) {
+      const cfg = getAdminConfig();
+      if (!cfg.groqApiKey || !cfg.groqApiKey.startsWith("gsk_")) {
+        throw new Error("Invalid or missing Groq API Key. Please update it in the Secret Admin Panel.");
+      }
+
+      let payloadMessages = [];
+      let modelToUse = cfg.textModel;
+
+      if (base64Img) {
+        modelToUse = cfg.visionModel;
+        payloadMessages = [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt || "Describe or analyze this image." },
+              { type: "image_url", image_url: { url: base64Img } }
+            ]
+          }
+        ];
+      } else {
+        chatHistory.push({ role: "user", content: prompt });
+        payloadMessages = [
+          { role: "system", content: "You are SPAR AI, a helpful, precise AI assistant." },
+          ...chatHistory
+        ];
+      }
+
+      const response = await fetch(cfg.groqUrl, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${cfg.groqApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: modelToUse,
+          messages: payloadMessages,
+          temperature: 0.7
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || "Failed request to Groq API.");
+      }
+
+      const reply = data.choices[0].message.content;
+      if (!base64Img) chatHistory.push({ role: "assistant", content: reply });
+      return reply;
+    }
+
+    // MAIN SEND MESSAGE HANDLER
+    async function handleSend() {
+      const text = userInput.value.trim();
+      const attachedImage = currentBase64Image;
+
+      if (!text && !attachedImage) return;
+      if (!deductCredit()) return;
+
+      const userMsgDiv = document.createElement('div');
+      userMsgDiv.className = 'message user';
+      if (attachedImage) {
+        const imgEl = document.createElement('img');
+        imgEl.className = 'preview-img';
+        imgEl.src = attachedImage;
+        userMsgDiv.appendChild(imgEl);
+      }
+      if (text) {
+        const textSpan = document.createElement('span');
+        textSpan.textContent = text;
+        userMsgDiv.appendChild(textSpan);
+      }
+      chatMessages.appendChild(userMsgDiv);
+
+      userInput.value = '';
+      const imgToProcess = currentBase64Image;
+      removeImgBtn.click();
+
+      const loadingMsg = appendMessage("Thinking...", 'assistant');
+      const lowerText = text.toLowerCase();
+
+      // IMAGE GENERATION CHECK
+      if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
+        saveHistory(text, 'Image Generation');
+        loadingMsg.textContent = "Generating image...";
+
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+        const img = document.createElement('img');
+        img.className = 'generated-img';
+        img.src = imageUrl;
+        img.onload = () => {
+          loadingMsg.innerHTML = `<p>Here is your generated image:</p>`;
+          loadingMsg.appendChild(img);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        };
+        img.onerror = () => {
+          loadingMsg.textContent = "Failed to generate image. Please try another prompt.";
+        };
+        return;
+      }
+
+      // TEXT & VISION API CALL
+      try {
+        saveHistory(text || "Image Analysis", imgToProcess ? "Vision AI" : "Text AI");
+        const reply = await fetchAiResponse(text, imgToProcess);
+        loadingMsg.textContent = reply;
+      } catch (err) {
+        loadingMsg.className = "message system-error";
+        loadingMsg.textContent = `Error: ${err.message}`;
+      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function appendMessage(text, sender) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${sender}`;
+      msgDiv.textContent = text;
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return msgDiv;
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    // INIT
+    detectEnv();
+    updateUI();
   </script>
 </body>
 </html>
