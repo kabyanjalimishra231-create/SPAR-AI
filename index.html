@@ -670,24 +670,34 @@
       chatMessages.innerHTML = `<div class="message assistant">New chat started! How can I help you?</div>`;
     });
 
-    // API REQUEST HANDLER
+    // API REQUEST HANDLER WITH CONTEXT PRESERVATION FOR VISION
     async function fetchAiResponse(prompt, base64Img) {
       let payloadMessages = [];
       let modelToUse = APP_CONFIG.textModel;
 
+      const userPrompt = prompt || "Analyze this image in detail and describe what you see, answer any questions shown, or provide key takeaways.";
+
       if (base64Img) {
         modelToUse = APP_CONFIG.visionModel;
+        
+        // Include prior text conversation history so vision model retains context
+        const priorContext = chatHistory.filter(m => typeof m.content === 'string');
+        
         payloadMessages = [
+          { role: "system", content: "You are SPAR AI, an expert vision & text assistant. Analyze uploaded images accurately, answer any questions inside or about the image, and maintain friendly conversation context." },
+          ...priorContext,
           {
             role: "user",
             content: [
-              { type: "text", text: prompt || "Describe or analyze this image." },
+              { type: "text", text: userPrompt },
               { type: "image_url", image_url: { url: base64Img } }
             ]
           }
         ];
+        
+        chatHistory.push({ role: "user", content: userPrompt });
       } else {
-        chatHistory.push({ role: "user", content: prompt });
+        chatHistory.push({ role: "user", content: userPrompt });
         payloadMessages = [
           { role: "system", content: "You are SPAR AI, an advanced AI assistant similar to Google Gemini, capable of vision analysis and text creation." },
           ...chatHistory
@@ -714,7 +724,7 @@
       }
 
       const reply = data.choices[0].message.content;
-      if (!base64Img) chatHistory.push({ role: "assistant", content: reply });
+      chatHistory.push({ role: "assistant", content: reply });
       return reply;
     }
 
@@ -738,7 +748,12 @@
         const textSpan = document.createElement('span');
         textSpan.textContent = text;
         userMsgDiv.appendChild(textSpan);
+      } else if (attachedImage) {
+        const defaultTextSpan = document.createElement('span');
+        defaultTextSpan.textContent = "Analyze this image";
+        userMsgDiv.appendChild(defaultTextSpan);
       }
+
       chatMessages.appendChild(userMsgDiv);
 
       userInput.value = '';
