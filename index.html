@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>SPAR AI</title>
   <style>
     :root {
@@ -20,7 +20,18 @@
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-    html, body { width: 100%; height: 100%; background-color: var(--bg-primary); color: var(--text-main); overflow: hidden; }
+    
+    html, body { 
+      width: 100%; 
+      height: 100%; 
+      height: 100dvh; 
+      background-color: var(--bg-primary); 
+      color: var(--text-main); 
+      overflow: hidden; 
+      position: fixed; 
+      inset: 0; 
+    }
+    
     body { display: flex; flex-direction: column; }
 
     /* HEADER */
@@ -28,6 +39,7 @@
       background-color: var(--bg-secondary);
       border-bottom: 1px solid var(--border-color);
       padding: 0.75rem 1rem;
+      padding-top: calc(0.75rem + env(safe-area-inset-top));
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
@@ -52,9 +64,9 @@
     .nav-btn.upgrade { border-color: var(--accent); color: #a5b4fc; font-weight: 600; }
 
     /* MAIN CHAT AREA */
-    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; }
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
     .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.85rem; }
+    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 0.85rem; }
 
     .message { max-width: 85%; padding: 0.7rem 0.9rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; }
     .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
@@ -70,21 +82,21 @@
     .preview-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
     .remove-img-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
 
-    .chat-input-area { padding: 0.65rem; background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.4rem; align-items: center; }
-    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; }
+    .chat-input-area { padding: 0.65rem; padding-bottom: calc(0.65rem + env(safe-area-inset-bottom)); background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.4rem; align-items: center; }
+    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; }
     .chat-input:focus { border-color: var(--accent); }
 
-    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
     .action-icon-btn.recording { background: var(--danger); animation: pulse 1.2s infinite; }
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
     .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* MODAL SYSTEM */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 0.75rem; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 520px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; gap: 1rem; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 520px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 85dvh; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; gap: 1rem; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
     .modal-title { font-size: 1.1rem; font-weight: 600; }
     .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
@@ -203,7 +215,7 @@
           <div class="plan-price">$0 <span>/ mo</span></div>
           <ul class="plan-features">
             <li>✓ Standard speed</li>
-            <li>✓ 5 Credits total</li>
+            <li id="freePlanCreditLimit">✓ 5 Credits total</li>
             <li>✕ Vision features</li>
           </ul>
           <button class="nav-btn" id="currentPlanBtn" disabled style="opacity: 0.6; cursor: not-allowed; width: 100%;">Current Plan</button>
@@ -246,6 +258,11 @@
       </div>
 
       <p style="font-size: 0.85rem; color: var(--text-muted);">Configure settings in real-time. Changes apply immediately to the app.</p>
+
+      <div class="form-group">
+        <label for="adminDefaultCredits">Default Free Credits Limit</label>
+        <input type="number" id="adminDefaultCredits" class="form-input" placeholder="5" />
+      </div>
 
       <div class="form-group">
         <label for="adminRazorpayKey">Razorpay Key ID</label>
@@ -324,6 +341,7 @@
     const closeUpgradeBtn = document.getElementById('closeUpgradeBtn');
     const selectProBtn = document.getElementById('selectProBtn');
     const displayPlanPrice = document.getElementById('displayPlanPrice');
+    const freePlanCreditLimit = document.getElementById('freePlanCreditLimit');
     const promoInput = document.getElementById('promoInput');
     const applyPromoBtn = document.getElementById('applyPromoBtn');
 
@@ -339,6 +357,7 @@
     // Admin Modal Elements
     const adminModal = document.getElementById('adminModal');
     const closeAdminModal = document.getElementById('closeAdminModal');
+    const adminDefaultCredits = document.getElementById('adminDefaultCredits');
     const adminRazorpayKey = document.getElementById('adminRazorpayKey');
     const adminProPrice = document.getElementById('adminProPrice');
     const adminPromoCode = document.getElementById('adminPromoCode');
@@ -368,7 +387,9 @@
     function updateLiveAdminUI() {
       APP_CONFIG = loadAdminSettings();
       displayPlanPrice.innerHTML = `₹${APP_CONFIG.proPriceINR} <span>/ mo</span>`;
+      freePlanCreditLimit.textContent = `✓ ${APP_CONFIG.defaultCredits} Credits total`;
       promoInput.placeholder = `Code (e.g. ${APP_CONFIG.promoCode})`;
+      updateUI();
     }
 
     // USER SESSION MANAGEMENT
@@ -514,6 +535,7 @@
       }
       const enteredPass = prompt("🔐 Admin Access\nEnter Password:");
       if (enteredPass === AUTH_CONFIG.password) {
+        adminDefaultCredits.value = APP_CONFIG.defaultCredits;
         adminRazorpayKey.value = APP_CONFIG.razorpayKey;
         adminProPrice.value = APP_CONFIG.proPriceINR;
         adminPromoCode.value = APP_CONFIG.promoCode;
@@ -526,12 +548,22 @@
     closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
 
     saveAdminSettingsBtn.addEventListener('click', () => {
+      const newCreditLimit = parseInt(adminDefaultCredits.value) || DEFAULT_CONFIG.defaultCredits;
       const updatedConfig = {
         ...APP_CONFIG,
+        defaultCredits: newCreditLimit,
         razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey,
         proPriceINR: parseFloat(adminProPrice.value) || DEFAULT_CONFIG.proPriceINR,
         promoCode: adminPromoCode.value.trim().toUpperCase() || DEFAULT_CONFIG.promoCode
       };
+      
+      // Update existing user credit balance if non-pro
+      const currentUser = getUserData();
+      if (!currentUser.isPro && currentUser.credits > newCreditLimit) {
+        currentUser.credits = newCreditLimit;
+        localStorage.setItem('spar_ai_user', JSON.stringify(currentUser));
+      }
+
       saveAdminSettings(updatedConfig);
       alert("Settings saved successfully! Changes are now live.");
       adminModal.classList.remove('active');
@@ -540,6 +572,7 @@
     resetAdminDefaultsBtn.addEventListener('click', () => {
       if (confirm("Are you sure you want to reset settings to default?")) {
         saveAdminSettings(DEFAULT_CONFIG);
+        adminDefaultCredits.value = DEFAULT_CONFIG.defaultCredits;
         adminRazorpayKey.value = DEFAULT_CONFIG.razorpayKey;
         adminProPrice.value = DEFAULT_CONFIG.proPriceINR;
         adminPromoCode.value = DEFAULT_CONFIG.promoCode;
@@ -764,7 +797,6 @@
     // INITIALIZATION
     detectEnv();
     updateLiveAdminUI();
-    updateUI();
   </script>
 </body>
 </html>
