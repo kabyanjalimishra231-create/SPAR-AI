@@ -35,14 +35,14 @@
     
     body { display: flex; flex-direction: column; }
 
-    /* GESTURE CANVAS OVERLAY */
+    /* FIXED: GESTURE CANVAS OVERLAY (pointer-events set to none) */
     #gestureCanvas {
       position: fixed;
       inset: 0;
       width: 100vw;
       height: 100vh;
       z-index: 9999;
-      pointer-events: auto;
+      pointer-events: none;
       touch-action: none;
     }
 
@@ -61,7 +61,7 @@
     .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .brand { display: flex; align-items: center; gap: 0.5rem; user-select: none; cursor: pointer; }
     .brand-logo { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--grok-neon)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 0.9rem; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
-    .brand-title { font-size: 1.15rem; font-weight: 700; tracking: -0.02em; }
+    .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
 
     .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #1e293b; color: #94a3b8; font-weight: 600; border: 1px solid var(--border-color); }
 
@@ -112,8 +112,6 @@
     .chat-input:focus { border-color: var(--accent); }
 
     .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
-    .action-icon-btn.recording { background: var(--danger); animation: pulse 1.2s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
     .send-btn.grok-btn { background: linear-gradient(135deg, #00f0ff, #3b82f6); color: black; font-weight: 800; }
@@ -137,9 +135,6 @@
     .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-color); }
 
     .history-list { overflow-y: auto; max-height: 250px; display: flex; flex-direction: column; gap: 0.6rem; }
-    .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; font-size: 0.8rem; }
-    .history-prompt { font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem; }
-    .history-meta { font-size: 0.7rem; color: var(--text-muted); display: flex; justify-content: space-between; }
 
     @media (min-width: 640px) {
       header { padding: 0.75rem 1.5rem; flex-direction: row; justify-content: space-between; }
@@ -198,7 +193,6 @@
 
           <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
           <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
-          <button class="action-icon-btn" id="voiceBtn" title="Voice Search">🎙️</button>
 
           <input type="text" id="userInput" class="chat-input" placeholder="Ask anything about history, events, or type 'draw...'..." />
           <button class="send-btn" id="sendBtn">Send</button>
@@ -375,7 +369,6 @@
     const cameraInput = document.getElementById('cameraInput');
     const uploadBtn = document.getElementById('uploadBtn');
     const cameraBtn = document.getElementById('cameraBtn');
-    const voiceBtn = document.getElementById('voiceBtn');
     const imagePreviewBar = document.getElementById('imagePreviewBar');
     const previewImage = document.getElementById('previewImage');
     const removeImgBtn = document.getElementById('removeImgBtn');
@@ -394,7 +387,6 @@
     const grokStyleSelect = document.getElementById('grokStyleSelect');
     const grokRatioSelect = document.getElementById('grokRatioSelect');
     const grokPreviewBox = document.getElementById('grokPreviewBox');
-    const grokStatusText = document.getElementById('grokStatusText');
     const enhancePromptBtn = document.getElementById('enhancePromptBtn');
 
     // Admin Modal
@@ -418,8 +410,6 @@
 
     let currentBase64Image = null;
     let chatHistory = [];
-    let isRecording = false;
-    let recognition = null;
 
     // RESIZE CANVAS FOR GESTURE RECOGNITION
     function resizeCanvas() {
@@ -429,7 +419,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // "V" GESTURE DETECTOR
+    // "V" GESTURE DETECTOR ATTACHED GLOBALLY
     let gesturePoints = [];
     let isDrawing = false;
 
@@ -441,7 +431,6 @@
     function handlePointerMove(x, y) {
       if (!isDrawing) return;
       gesturePoints.push({ x, y });
-      // Draw temporary glow line
       ctx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height);
       ctx.beginPath();
       ctx.strokeStyle = '#00f0ff';
@@ -467,22 +456,22 @@
       gesturePoints = [];
     }
 
-    // Touch & Mouse Listeners for Gesture Canvas
-    gestureCanvas.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
-    gestureCanvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
-    gestureCanvas.addEventListener('mouseup', handlePointerUp);
+    // Attach listeners to window so taps go through inputs while drawing still tracks
+    window.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
+    window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+    window.addEventListener('mouseup', handlePointerUp);
 
-    gestureCanvas.addEventListener('touchstart', (e) => {
+    window.addEventListener('touchstart', (e) => {
       const touch = e.touches[0];
       handlePointerDown(touch.clientX, touch.clientY);
     }, { passive: true });
 
-    gestureCanvas.addEventListener('touchmove', (e) => {
+    window.addEventListener('touchmove', (e) => {
       const touch = e.touches[0];
       handlePointerMove(touch.clientX, touch.clientY);
     }, { passive: true });
 
-    gestureCanvas.addEventListener('touchend', handlePointerUp);
+    window.addEventListener('touchend', handlePointerUp);
 
     // V-Shape Geometric Detection Logic
     function checkIsGestureV(points) {
@@ -491,7 +480,6 @@
       let minYIndex = 0;
       let maxYVal = -Infinity;
 
-      // Find lowest vertex point (maximum Y on screen)
       for (let i = 0; i < points.length; i++) {
         if (points[i].y > maxYVal) {
           maxYVal = points[i].y;
@@ -499,7 +487,6 @@
         }
       }
 
-      // Vertex must be in middle region of stroke (between 25% and 75%)
       const ratio = minYIndex / points.length;
       if (ratio < 0.25 || ratio > 0.75) return false;
 
@@ -507,16 +494,12 @@
       const vertexPoint = points[minYIndex];
       const endPoint = points[points.length - 1];
 
-      // Downward leg check
       const dy1 = vertexPoint.y - startPoint.y;
       const dx1 = vertexPoint.x - startPoint.x;
-
-      // Upward leg check
       const dy2 = vertexPoint.y - endPoint.y;
       const dx2 = endPoint.x - vertexPoint.x;
 
-      const isValidV = dy1 > 60 && dy2 > 60 && dx1 > -20 && dx2 > -20;
-      return isValidV;
+      return (dy1 > 60 && dy2 > 60 && dx1 > -20 && dx2 > -20);
     }
 
     function triggerAdminAuthModal() {
@@ -562,17 +545,8 @@
     function updateUI() {
       APP_CONFIG = loadAdminSettings();
       const user = getUserData();
-      if (user.email) {
-        userBadgeText.textContent = user.email.split('@')[0];
-      } else {
-        userBadgeText.textContent = "Sign In";
-      }
-
-      if (user.isPro) {
-        creditCounter.textContent = "Pro (Unlimited)";
-      } else {
-        creditCounter.textContent = `Credits: ${user.credits}`;
-      }
+      userBadgeText.textContent = user.email ? user.email.split('@')[0] : "Sign In";
+      creditCounter.textContent = user.isPro ? "Pro (Unlimited)" : `Credits: ${user.credits}`;
     }
 
     openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
@@ -581,10 +555,7 @@
 
     loginSubmitBtn.addEventListener('click', () => {
       const email = authEmailInput.value.trim();
-      if (!email) {
-        alert("Please enter a valid email.");
-        return;
-      }
+      if (!email) return alert("Please enter a valid email.");
       const user = getUserData();
       user.email = email;
       saveUserData(user);
@@ -607,13 +578,9 @@
 
       const style = grokStyleSelect.value;
       const ratio = grokRatioSelect.value.split('x');
-      const w = ratio[0];
-      const h = ratio[1];
-
-      const fullPrompt = `${promptText}, ${style}`;
       grokPreviewBox.innerHTML = `<span style="color: var(--grok-neon);">⚡ Grok is rendering your vision...</span>`;
 
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText + ', ' + style)}?width=${ratio[0]}&height=${ratio[1]}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
 
       const img = document.createElement('img');
       img.src = imageUrl;
@@ -628,8 +595,9 @@
 
     enhancePromptBtn.addEventListener('click', () => {
       const current = grokPromptInput.value.trim();
-      if (!current) return;
-      grokPromptInput.value = `hyper-detailed futuristic cinematic masterwork of ${current}, highly detailed 8k rendering, dramatic lighting`;
+      if (current) {
+        grokPromptInput.value = `hyper-detailed futuristic cinematic masterwork of ${current}, highly detailed 8k rendering, dramatic lighting`;
+      }
     });
 
     // API REQUEST HANDLER FOR COMPREHENSIVE Q&A
@@ -637,14 +605,13 @@
       let payloadMessages = [];
       let modelToUse = APP_CONFIG.textModel;
 
-      const userPrompt = prompt || "Analyze this image in detail and describe what you see, answer any questions shown, or provide key takeaways.";
+      const userPrompt = prompt || "Analyze this image in detail and describe what you see.";
 
       if (base64Img) {
         modelToUse = APP_CONFIG.visionModel;
-        const priorContext = chatHistory.filter(m => typeof m.content === 'string');
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, a world-class assistant capable of answering questions on recent events, upcoming global events, world history, science, and analyzing images with high fidelity." },
-          ...priorContext,
+          { role: "system", content: "You are SPAR AI, a world-class assistant capable of answering questions on recent events, history, science, and analyzing images." },
+          ...chatHistory.filter(m => typeof m.content === 'string'),
           {
             role: "user",
             content: [
@@ -653,15 +620,11 @@
             ]
           }
         ];
-        chatHistory.push({ role: "user", content: userPrompt });
       } else {
-        chatHistory.push({ role: "user", content: userPrompt });
         payloadMessages = [
-          { 
-            role: "system", 
-            content: "You are SPAR AI, a knowledgeable, helpful assistant like Gemini and ChatGPT. You excel at answering questions on recent events, future outlooks, history, mathematics, and complex reasoning." 
-          },
-          ...chatHistory
+          { role: "system", content: "You are SPAR AI, an intelligent assistant like Gemini and ChatGPT. You excel at answering questions on world history, current/recent events, future trends, and general knowledge." },
+          ...chatHistory,
+          { role: "user", content: userPrompt }
         ];
       }
 
@@ -682,12 +645,18 @@
       if (!response.ok) throw new Error(data.error?.message || "Failed API request.");
 
       const reply = data.choices[0].message.content;
-      chatHistory.push({ role: "assistant", content: reply });
+      chatHistory.push({ role: "user", content: userPrompt }, { role: "assistant", content: reply });
       return reply;
     }
 
     // MAIN SEND HANDLER
     async function handleSend() {
+      const user = getUserData();
+      if (!user.isPro && user.credits <= 0) {
+        alert("Out of credits! Tap Sign In or contact admin to recharge.");
+        return;
+      }
+
       const text = userInput.value.trim();
       const attachedImage = currentBase64Image;
 
@@ -712,10 +681,16 @@
       const imgToProcess = currentBase64Image;
       removeImgBtn.click();
 
+      // Deduct 1 credit
+      if (!user.isPro) {
+        user.credits -= 1;
+        saveUserData(user);
+      }
+
       const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lowerText = text.toLowerCase();
 
-      // INLINE IMAGE DRAW TRIGGER
+      // INLINE IMAGE GENERATION TRIGGER
       if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
         loadingMsg.textContent = "Generating image...";
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
