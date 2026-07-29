@@ -35,7 +35,7 @@
     
     body { display: flex; flex-direction: column; }
 
-    /* FIXED: GESTURE CANVAS OVERLAY (pointer-events set to none) */
+    /* GESTURE CANVAS OVERLAY (pointer-events set to none so clicks pass through) */
     #gestureCanvas {
       position: fixed;
       inset: 0;
@@ -128,7 +128,7 @@
     .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
     .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; color: var(--text-main); outline: none; font-size: 16px; }
 
-    /* GEMINI / CHATGPT STYLE AUTH MODAL */
+    /* AUTH MODAL */
     .sso-btn { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: white; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: background 0.2s; }
     .sso-btn:hover { background: #475569; }
     .auth-divider { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.75rem; margin: 0.2rem 0; }
@@ -177,7 +177,7 @@
       <div class="chat-container">
         <div class="chat-messages" id="chatMessages">
           <div class="message assistant">
-            Hello! I am SPAR AI. I am equipped to answer questions on world history, recent events, upcoming global events, science, code, or generate artwork. How can I help you today?
+            Hello! I am SPAR AI. Ask me questions on science, history, coding, recent events, or generate artwork. How can I help you today?
           </div>
         </div>
 
@@ -194,7 +194,7 @@
           <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
           <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
 
-          <input type="text" id="userInput" class="chat-input" placeholder="Ask anything about history, events, or type 'draw...'..." />
+          <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI or type 'draw...'..." />
           <button class="send-btn" id="sendBtn">Send</button>
         </div>
       </div>
@@ -238,7 +238,7 @@
     </div>
   </main>
 
-  <!-- GEMINI / CHATGPT STYLE AUTHENTICATION MODAL -->
+  <!-- AUTHENTICATION MODAL -->
   <div class="modal-overlay" id="authModal">
     <div class="modal-card">
       <div class="modal-header">
@@ -293,6 +293,11 @@
       <p style="font-size: 0.85rem; color: var(--text-muted);">Gesture V recognized. Live configuration dashboard.</p>
 
       <div class="form-group">
+        <label>Groq API Key (starts with gsk_)</label>
+        <input type="text" id="adminGroqKey" class="form-input" placeholder="gsk_..." />
+      </div>
+
+      <div class="form-group">
         <label>Default Free Credits Limit</label>
         <input type="number" id="adminDefaultCredits" class="form-input" placeholder="5" />
       </div>
@@ -300,16 +305,6 @@
       <div class="form-group">
         <label>Razorpay Key ID</label>
         <input type="text" id="adminRazorpayKey" class="form-input" placeholder="e.g. rzp_live_xxxxxxxx" />
-      </div>
-
-      <div class="form-group">
-        <label>Pro Subscription Amount (in ₹)</label>
-        <input type="number" id="adminProPrice" class="form-input" placeholder="799" />
-      </div>
-
-      <div class="form-group">
-        <label>Active Promo Code</label>
-        <input type="text" id="adminPromoCode" class="form-input" placeholder="PROMO2026" />
       </div>
 
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
@@ -320,21 +315,19 @@
   </div>
 
   <script>
-    // CREDENTIALS & DEFAULTS
+    // AUTH & DEFAULTS
     const AUTH_CONFIG = {
       userId: "mishraarush664",
       password: "221181"
     };
 
     const DEFAULT_CONFIG = {
-      groqApiKey: "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",
+      groqApiKey: "", // PASTE YOUR GROQ API KEY HERE IF DESIRED (starts with gsk_)
       groqUrl: "https://api.groq.com/openai/v1/chat/completions",
       textModel: "llama-3.3-70b-versatile",
       visionModel: "llama-3.2-11b-vision-preview",
       defaultCredits: 5,
-      razorpayKey: "rzp_test_sampleKey12345",
-      proPriceINR: 799,
-      promoCode: "PROMO2026"
+      razorpayKey: "rzp_test_sampleKey12345"
     };
 
     function loadAdminSettings() {
@@ -392,10 +385,9 @@
     // Admin Modal
     const adminModal = document.getElementById('adminModal');
     const closeAdminModal = document.getElementById('closeAdminModal');
+    const adminGroqKey = document.getElementById('adminGroqKey');
     const adminDefaultCredits = document.getElementById('adminDefaultCredits');
     const adminRazorpayKey = document.getElementById('adminRazorpayKey');
-    const adminProPrice = document.getElementById('adminProPrice');
-    const adminPromoCode = document.getElementById('adminPromoCode');
     const saveAdminSettingsBtn = document.getElementById('saveAdminSettingsBtn');
     const resetAdminDefaultsBtn = document.getElementById('resetAdminDefaultsBtn');
 
@@ -419,7 +411,7 @@
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // "V" GESTURE DETECTOR ATTACHED GLOBALLY
+    // "V" GESTURE DETECTOR
     let gesturePoints = [];
     let isDrawing = false;
 
@@ -456,7 +448,6 @@
       gesturePoints = [];
     }
 
-    // Attach listeners to window so taps go through inputs while drawing still tracks
     window.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
     window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
     window.addEventListener('mouseup', handlePointerUp);
@@ -473,7 +464,6 @@
 
     window.addEventListener('touchend', handlePointerUp);
 
-    // V-Shape Geometric Detection Logic
     function checkIsGestureV(points) {
       if (points.length < 10) return false;
 
@@ -510,10 +500,9 @@
       }
       const enteredPass = prompt("🔐 Secret Admin Access\nEnter Password:");
       if (enteredPass === AUTH_CONFIG.password) {
+        adminGroqKey.value = APP_CONFIG.groqApiKey || "";
         adminDefaultCredits.value = APP_CONFIG.defaultCredits;
         adminRazorpayKey.value = APP_CONFIG.razorpayKey;
-        adminProPrice.value = APP_CONFIG.proPriceINR;
-        adminPromoCode.value = APP_CONFIG.promoCode;
         adminModal.classList.add('active');
       } else {
         alert("❌ Incorrect Password!");
@@ -531,7 +520,7 @@
       chatTab.classList.add('active');
     });
 
-    // AUTH SYSTEM
+    // USER DATA HANDLERS
     function getUserData() {
       const stored = localStorage.getItem('spar_ai_user');
       return stored ? JSON.parse(stored) : { credits: APP_CONFIG.defaultCredits, isPro: false, email: null };
@@ -571,7 +560,7 @@
       authModal.classList.remove('active');
     });
 
-    // GROK AI IMAGE GENERATOR
+    // GROK IMAGE STUDIO
     grokGenerateBtn.addEventListener('click', async () => {
       const promptText = grokPromptInput.value.trim();
       if (!promptText) return;
@@ -600,17 +589,22 @@
       }
     });
 
-    // API REQUEST HANDLER FOR COMPREHENSIVE Q&A
+    // UPDATED GROQ API REQUEST HANDLER
     async function fetchAiResponse(prompt, base64Img) {
+      const apiKey = (APP_CONFIG.groqApiKey || "").trim();
+
+      if (!apiKey || !apiKey.startsWith("gsk_")) {
+        throw new Error("Missing or invalid Groq API key! Draw 'V' gesture to open Admin settings and enter your key starting with 'gsk_'.");
+      }
+
       let payloadMessages = [];
       let modelToUse = APP_CONFIG.textModel;
-
       const userPrompt = prompt || "Analyze this image in detail and describe what you see.";
 
       if (base64Img) {
         modelToUse = APP_CONFIG.visionModel;
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, a world-class assistant capable of answering questions on recent events, history, science, and analyzing images." },
+          { role: "system", content: "You are SPAR AI, a helpful assistant capable of answering questions and analyzing images." },
           ...chatHistory.filter(m => typeof m.content === 'string'),
           {
             role: "user",
@@ -622,16 +616,16 @@
         ];
       } else {
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, an intelligent assistant like Gemini and ChatGPT. You excel at answering questions on world history, current/recent events, future trends, and general knowledge." },
+          { role: "system", content: "You are SPAR AI, an intelligent assistant built to help with questions, analysis, writing, and code." },
           ...chatHistory,
           { role: "user", content: userPrompt }
         ];
       }
 
-      const response = await fetch(APP_CONFIG.groqUrl, {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${APP_CONFIG.groqApiKey}`,
+          "Authorization": `Bearer ${apiKey}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -642,7 +636,11 @@
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || "Failed API request.");
+
+      if (!response.ok) {
+        console.error("Groq Error Payload:", data);
+        throw new Error(data.error?.message || `API error ${response.status}`);
+      }
 
       const reply = data.choices[0].message.content;
       chatHistory.push({ role: "user", content: userPrompt }, { role: "assistant", content: reply });
@@ -681,7 +679,6 @@
       const imgToProcess = currentBase64Image;
       removeImgBtn.click();
 
-      // Deduct 1 credit
       if (!user.isPro) {
         user.credits -= 1;
         saveUserData(user);
@@ -690,7 +687,7 @@
       const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lowerText = text.toLowerCase();
 
-      // INLINE IMAGE GENERATION TRIGGER
+      // INLINE IMAGE GENERATION
       if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
         loadingMsg.textContent = "Generating image...";
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
@@ -754,10 +751,9 @@
     saveAdminSettingsBtn.addEventListener('click', () => {
       const updatedConfig = {
         ...APP_CONFIG,
+        groqApiKey: adminGroqKey.value.trim(),
         defaultCredits: parseInt(adminDefaultCredits.value) || DEFAULT_CONFIG.defaultCredits,
-        razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey,
-        proPriceINR: parseFloat(adminProPrice.value) || DEFAULT_CONFIG.proPriceINR,
-        promoCode: adminPromoCode.value.trim().toUpperCase() || DEFAULT_CONFIG.promoCode
+        razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey
       };
       saveAdminSettings(updatedConfig);
       alert("Admin settings updated!");
