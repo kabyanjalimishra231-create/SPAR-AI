@@ -322,7 +322,7 @@
     };
 
     const DEFAULT_CONFIG = {
-      groqApiKey:"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"
+      groqApiKey: "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",
       groqUrl: "https://api.groq.com/openai/v1/chat/completions",
       textModel: "llama-3.3-70b-versatile",
       visionModel: "llama-3.2-11b-vision-preview",
@@ -774,7 +774,7 @@
       chatMessages.innerHTML = `<div class="message assistant">New session started! Ask me anything.</div>`;
     });
 
-    // ENVIRONMENT DETECTION
+    // OPTIMIZED ENVIRONMENT DETECTION
     function detectEnv() {
       const ua = navigator.userAgent || "";
       if (/wv|Android.*Version\/[0-9]\.[0-9]/i.test(ua)) {
