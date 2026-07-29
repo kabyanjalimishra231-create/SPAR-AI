@@ -290,7 +290,7 @@
         <button class="close-btn" id="closeAdminModal">&times;</button>
       </div>
 
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Gesture V recognized. Live configuration dashboard.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Gesture V recognized. Enter your valid Groq API key below.</p>
 
       <div class="form-group">
         <label>Groq API Key (starts with gsk_)</label>
@@ -322,7 +322,7 @@
     };
 
     const DEFAULT_CONFIG = {
-      groqApiKey: "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",
+      groqApiKey: "", // User must enter key via admin panel or prompt
       groqUrl: "https://api.groq.com/openai/v1/chat/completions",
       textModel: "llama-3.3-70b-versatile",
       visionModel: "llama-3.2-11b-vision-preview",
@@ -589,12 +589,19 @@
       }
     });
 
-    // UPDATED GROQ API REQUEST HANDLER
+    // API REQUEST HANDLER
     async function fetchAiResponse(prompt, base64Img) {
-      const apiKey = (APP_CONFIG.groqApiKey || "").trim();
+      let apiKey = (APP_CONFIG.groqApiKey || "").trim();
 
       if (!apiKey || !apiKey.startsWith("gsk_")) {
-        throw new Error("Missing or invalid Groq API key! Draw 'V' gesture to open Admin settings and enter your key starting with 'gsk_'.");
+        const inputKey = prompt("Please enter a valid Groq API Key (starts with gsk_):");
+        if (inputKey && inputKey.trim().startsWith("gsk_")) {
+          apiKey = inputKey.trim();
+          APP_CONFIG.groqApiKey = apiKey;
+          saveAdminSettings(APP_CONFIG);
+        } else {
+          throw new Error("Invalid or missing Groq API key! Draw 'V' gesture on screen to open Admin Panel and set your key.");
+        }
       }
 
       let payloadMessages = [];
@@ -756,7 +763,7 @@
         razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey
       };
       saveAdminSettings(updatedConfig);
-      alert("Admin settings updated!");
+      alert("Admin settings updated successfully!");
       adminModal.classList.remove('active');
     });
 
