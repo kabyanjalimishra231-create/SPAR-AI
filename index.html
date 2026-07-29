@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SPAR AI</title>
+  <title>SPAR AI - NextGen Studio</title>
   <style>
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --bg-card: #334155;
+      --bg-primary: #090d16;
+      --bg-secondary: #131b2e;
+      --bg-card: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #6366f1;
       --accent-hover: #4f46e5;
-      --border-color: #475569;
+      --grok-neon: #00f0ff;
+      --border-color: #334155;
       --danger: #ef4444;
       --success: #10b981;
-      --warning: #f59e0b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -30,9 +30,21 @@
       overflow: hidden; 
       position: fixed; 
       inset: 0; 
+      user-select: none;
     }
     
     body { display: flex; flex-direction: column; }
+
+    /* GESTURE CANVAS OVERLAY */
+    #gestureCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      pointer-events: auto;
+      touch-action: none;
+    }
 
     /* HEADER */
     header {
@@ -44,31 +56,35 @@
       flex-direction: column;
       gap: 0.5rem;
       flex-shrink: 0;
+      z-index: 100;
     }
     .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .brand { display: flex; align-items: center; gap: 0.5rem; user-select: none; cursor: pointer; }
-    .brand-logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; font-size: 0.85rem; }
-    .brand-title { font-size: 1.1rem; font-weight: 700; }
+    .brand-logo { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--grok-neon)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 0.9rem; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
+    .brand-title { font-size: 1.15rem; font-weight: 700; tracking: -0.02em; }
 
-    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #334155; color: #94a3b8; font-weight: 600; }
-    .status-badge.online { background: #064e3b; color: #34d399; }
+    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #1e293b; color: #94a3b8; font-weight: 600; border: 1px solid var(--border-color); }
 
     nav { display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; }
     .nav-status-group, .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
-    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); white-space: nowrap; }
+    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
+    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); cursor: pointer; }
     
-    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.4rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; }
+    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.4rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
     .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.08); }
     .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
-    .nav-btn.upgrade { border-color: var(--accent); color: #a5b4fc; font-weight: 600; }
+    .nav-btn.grok-mode { background: linear-gradient(90deg, #111827, #0f172a); border-color: var(--grok-neon); color: var(--grok-neon); font-weight: 700; box-shadow: 0 0 10px rgba(0,240,255,0.2); }
 
-    /* MAIN CHAT AREA */
-    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+    /* MAIN CONTAINER & TABS */
+    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; z-index: 100; }
+    .tab-content { display: none; flex: 1; flex-direction: column; min-height: 0; height: 100%; }
+    .tab-content.active { display: flex; }
+
+    /* CHAT CONTAINER */
     .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 0.85rem; }
+    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 0.85rem; user-select: text; }
 
-    .message { max-width: 85%; padding: 0.7rem 0.9rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; }
+    .message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; }
     .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
     .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
     .message.system-error { align-self: center; background-color: #451a1a; color: #fca5a5; border: 1px solid var(--danger); font-size: 0.85rem; }
@@ -76,14 +92,23 @@
     .preview-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 6px; display: block; border: 1px solid var(--border-color); }
     .generated-img { width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
 
-    /* INPUT AREA */
+    /* GROK IMAGE STUDIO DESIGN */
+    .grok-studio { background: #050811; border: 1px solid var(--grok-neon); border-radius: 12px; padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; }
+    .grok-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,240,255,0.2); padding-bottom: 0.5rem; }
+    .grok-title { color: var(--grok-neon); font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; display: flex; align-items: center; gap: 0.5rem; }
+    .grok-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
+    .grok-select { background: #0f172a; border: 1px solid var(--border-color); color: white; padding: 0.5rem; border-radius: 8px; font-size: 0.8rem; outline: none; }
+    .grok-preview-box { flex: 1; background: #02040a; border: 1px dashed rgba(0,240,255,0.3); border-radius: 10px; min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    .grok-preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+    /* INPUT BAR */
     .image-preview-bar { display: none; padding: 0.5rem; background: var(--bg-primary); border-top: 1px solid var(--border-color); align-items: center; gap: 0.5rem; }
     .image-preview-bar.active { display: flex; }
     .preview-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
     .remove-img-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
 
     .chat-input-area { padding: 0.65rem; padding-bottom: calc(0.65rem + env(safe-area-inset-bottom)); background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.4rem; align-items: center; }
-    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; }
+    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; user-select: text; }
     .chat-input:focus { border-color: var(--accent); }
 
     .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
@@ -91,29 +116,25 @@
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
-    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .send-btn.grok-btn { background: linear-gradient(135deg, #00f0ff, #3b82f6); color: black; font-weight: 800; }
 
     /* MODAL SYSTEM */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; padding: 0.75rem; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); z-index: 10000; justify-content: center; align-items: center; padding: 0.75rem; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; width: 100%; max-width: 520px; padding: 1.25rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); max-height: 85dvh; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; gap: 1rem; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 440px; padding: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); max-height: 90dvh; display: flex; flex-direction: column; overflow-y: auto; gap: 1.2rem; user-select: text; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
-    .modal-title { font-size: 1.1rem; font-weight: 600; }
+    .modal-title { font-size: 1.2rem; font-weight: 700; }
     .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
 
-    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
-    .form-group label { font-size: 0.8rem; color: var(--text-muted); }
-    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; color: var(--text-main); outline: none; font-size: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; color: var(--text-main); outline: none; font-size: 16px; }
 
-    /* PRICING GRID */
-    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
-    .plan-card { border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; background: var(--bg-primary); position: relative; display: flex; flex-direction: column; gap: 0.5rem; }
-    .plan-card.featured { border-color: var(--accent); background: rgba(99, 102, 241, 0.05); }
-    .plan-card .badge { position: absolute; top: -10px; right: 10px; background: var(--accent); color: white; font-size: 0.65rem; font-weight: bold; padding: 2px 8px; border-radius: 10px; }
-    .plan-price { font-size: 1.5rem; font-weight: bold; }
-    .plan-price span { font-size: 0.8rem; color: var(--text-muted); font-weight: normal; }
-    .plan-features { list-style: none; padding: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin: 0.5rem 0; }
-    .plan-features li { display: flex; align-items: center; gap: 0.3rem; }
+    /* GEMINI / CHATGPT STYLE AUTH MODAL */
+    .sso-btn { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: white; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: background 0.2s; }
+    .sso-btn:hover { background: #475569; }
+    .auth-divider { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.75rem; margin: 0.2rem 0; }
+    .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-color); }
 
     .history-list { overflow-y: auto; max-height: 250px; display: flex; flex-direction: column; gap: 0.6rem; }
     .history-item { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.65rem; font-size: 0.8rem; }
@@ -127,10 +148,12 @@
       main { padding: 1rem; }
     }
   </style>
-  <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
+
+  <!-- DRAWING CANVAS OVERLAY FOR "V" GESTURE -->
+  <canvas id="gestureCanvas"></canvas>
 
   <header>
     <div class="header-top">
@@ -142,44 +165,111 @@
     </div>
     <nav>
       <div class="nav-status-group">
-        <div class="user-badge" id="userDisplayBadge">👤 Guest</div>
+        <div class="user-badge" id="openAuthModalBtn">👤 <span id="userBadgeText">Sign In</span></div>
         <div class="credit-badge" id="creditCounter">Credits: ...</div>
       </div>
       <div class="nav-actions-group">
+        <button class="nav-btn grok-mode" id="toggleGrokModeBtn">⚡ Grok Studio</button>
         <button class="nav-btn" id="historyBtn">📜 History</button>
-        <button class="nav-btn upgrade" id="upgradeNavBtn">⚡ Upgrade</button>
         <button class="nav-btn primary" id="newChatBtn">+ New</button>
       </div>
     </nav>
   </header>
 
   <main>
-    <div class="chat-container">
-      <div class="chat-messages" id="chatMessages">
-        <div class="message assistant">
-          Hello! Welcome to SPAR AI. Ask me questions, click 🎙️ for voice input, attach images for visual analysis, or type 'draw a space rocket' to generate images!
+    <!-- TAB 1: CHAT & VISION ENGINE -->
+    <div class="tab-content active" id="chatTab">
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message assistant">
+            Hello! I am SPAR AI. I am equipped to answer questions on world history, recent events, upcoming global events, science, code, or generate artwork. How can I help you today?
+          </div>
+        </div>
+
+        <div class="image-preview-bar" id="imagePreviewBar">
+          <img id="previewImage" class="preview-thumb" src="" alt="Selected Image" />
+          <span style="font-size: 0.8rem; color: var(--text-muted); flex:1;">Image attached</span>
+          <button class="remove-img-btn" id="removeImgBtn">&times;</button>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="file" id="fileUploadInput" accept="image/*" style="display:none;" />
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
+
+          <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
+          <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
+          <button class="action-icon-btn" id="voiceBtn" title="Voice Search">🎙️</button>
+
+          <input type="text" id="userInput" class="chat-input" placeholder="Ask anything about history, events, or type 'draw...'..." />
+          <button class="send-btn" id="sendBtn">Send</button>
         </div>
       </div>
+    </div>
 
-      <div class="image-preview-bar" id="imagePreviewBar">
-        <img id="previewImage" class="preview-thumb" src="" alt="Selected Image" />
-        <span style="font-size: 0.8rem; color: var(--text-muted); flex:1;">Image attached</span>
-        <button class="remove-img-btn" id="removeImgBtn">&times;</button>
-      </div>
+    <!-- TAB 2: GROK AI IMAGE CREATION STUDIO -->
+    <div class="tab-content" id="grokTab">
+      <div class="grok-studio">
+        <div class="grok-header">
+          <div class="grok-title">⚡ GROK IMAGE LAB</div>
+          <button class="nav-btn" id="exitGrokBtn">← Back to Chat</button>
+        </div>
 
-      <div class="chat-input-area">
-        <input type="file" id="fileUploadInput" accept="image/*" style="display:none;" />
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
+        <div class="grok-controls">
+          <select id="grokStyleSelect" class="grok-select">
+            <option value="cinematic dark moody lighting">Style: Cinematic</option>
+            <option value="photorealistic 8k highly detailed">Style: Photorealistic</option>
+            <option value="cyberpunk neon futuristic aesthetics">Style: Cyberpunk</option>
+            <option value="anime vibrant render">Style: Anime</option>
+            <option value="surreal dark fantasy art">Style: Dark Fantasy</option>
+          </select>
+          <select id="grokRatioSelect" class="grok-select">
+            <option value="1024x1024">Aspect: Square (1:1)</option>
+            <option value="1280x720">Aspect: Landscape (16:9)</option>
+            <option value="720x1280">Aspect: Portrait (9:16)</option>
+          </select>
+        </div>
 
-        <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
-        <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
-        <button class="action-icon-btn" id="voiceBtn" title="Voice Search">🎙️</button>
+        <div class="grok-preview-box" id="grokPreviewBox">
+          <span style="color: var(--text-muted); font-size: 0.85rem;" id="grokStatusText">Enter a prompt below to ignite Grok Image Studio</span>
+        </div>
 
-        <input type="text" id="userInput" class="chat-input" placeholder="Ask, speak, or 'draw a cat'..." />
-        <button class="send-btn" id="sendBtn">Send</button>
+        <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+          <div style="display: flex; gap: 0.4rem;">
+            <input type="text" id="grokPromptInput" class="chat-input" style="border-color: rgba(0,240,255,0.4);" placeholder="Describe the image you want Grok to generate..." />
+            <button class="send-btn grok-btn" id="grokGenerateBtn">Generate</button>
+          </div>
+          <button class="nav-btn" id="enhancePromptBtn" style="color: var(--grok-neon); border-color: rgba(0,240,255,0.3); font-size: 0.75rem;">✨ Enhance Prompt with AI</button>
+        </div>
       </div>
     </div>
   </main>
+
+  <!-- GEMINI / CHATGPT STYLE AUTHENTICATION MODAL -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title">Welcome to SPAR AI</div>
+        <button class="close-btn" id="closeAuthModal">&times;</button>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Log in or create an account to save history, unlock high credit limits, and access Grok Studio.</p>
+
+      <button class="sso-btn" id="ssoGoogleBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        Continue with Google
+      </button>
+
+      <div class="auth-divider">OR</div>
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="authEmailInput" class="form-input" placeholder="name@domain.com" />
+      </div>
+
+      <button class="nav-btn primary" id="loginSubmitBtn" style="padding: 0.75rem; font-weight: 600;">Sign In / Register</button>
+      <button class="nav-btn" id="closeAuthBtn">Cancel</button>
+    </div>
+  </div>
 
   <!-- HISTORY MODAL -->
   <div class="modal-overlay" id="historyModal">
@@ -198,96 +288,45 @@
     </div>
   </div>
 
-  <!-- SUBSCRIPTION & UPGRADE MODAL -->
-  <div class="modal-overlay" id="upgradeModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title">💎 Choose Subscription Plan</div>
-        <button class="close-btn" id="closeUpgradeModal">&times;</button>
-      </div>
-
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Upgrade your account to unlock unlimited access and higher limits.</p>
-
-      <div class="pricing-grid">
-        <!-- Free Tier Card -->
-        <div class="plan-card">
-          <h4 style="font-size: 1rem;">Free</h4>
-          <div class="plan-price">$0 <span>/ mo</span></div>
-          <ul class="plan-features">
-            <li>✓ Standard speed</li>
-            <li id="freePlanCreditLimit">✓ 5 Credits total</li>
-            <li>✕ Vision features</li>
-          </ul>
-          <button class="nav-btn" id="currentPlanBtn" disabled style="opacity: 0.6; cursor: not-allowed; width: 100%;">Current Plan</button>
-        </div>
-
-        <!-- Pro Tier Card -->
-        <div class="plan-card featured">
-          <div class="badge">POPULAR</div>
-          <h4 style="font-size: 1rem;">Pro Unlimited</h4>
-          <div class="plan-price" id="displayPlanPrice">₹799 <span>/ mo</span></div>
-          <ul class="plan-features">
-            <li>✓ Unlimited AI queries</li>
-            <li>✓ Vision & Image Analysis</li>
-            <li>✓ Image Generation</li>
-            <li>✓ Priority Processing</li>
-          </ul>
-          <button class="nav-btn primary" id="selectProBtn" style="width: 100%;">Pay & Upgrade</button>
-        </div>
-      </div>
-
-      <!-- Promo Code Section -->
-      <div style="border-top: 1px solid var(--border-color); padding-top: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem;">
-        <label style="font-size: 0.8rem; color: var(--text-muted);">Have a Promo Code?</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <input type="text" id="promoInput" class="form-input" style="flex: 1;" placeholder="Enter promo code..." />
-          <button class="nav-btn primary" id="applyPromoBtn">Redeem</button>
-        </div>
-      </div>
-
-      <button class="nav-btn" id="closeUpgradeBtn">Close</button>
-    </div>
-  </div>
-
-  <!-- HIDDEN ADMIN CONTROL PANEL MODAL -->
+  <!-- SECRET GESTURE ADMIN MODAL -->
   <div class="modal-overlay" id="adminModal">
     <div class="modal-card">
       <div class="modal-header">
-        <div class="modal-title">⚙️ Admin Configuration Dashboard</div>
+        <div class="modal-title" style="color: var(--grok-neon);">🔐 Secret Admin Dashboard</div>
         <button class="close-btn" id="closeAdminModal">&times;</button>
       </div>
 
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Configure settings in real-time. Changes apply immediately to the app.</p>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Gesture V recognized. Live configuration dashboard.</p>
 
       <div class="form-group">
-        <label for="adminDefaultCredits">Default Free Credits Limit</label>
+        <label>Default Free Credits Limit</label>
         <input type="number" id="adminDefaultCredits" class="form-input" placeholder="5" />
       </div>
 
       <div class="form-group">
-        <label for="adminRazorpayKey">Razorpay Key ID</label>
-        <input type="text" id="adminRazorpayKey" class="form-input" placeholder="e.g. rzp_live_xxxxxxxxxxxxxx" />
+        <label>Razorpay Key ID</label>
+        <input type="text" id="adminRazorpayKey" class="form-input" placeholder="e.g. rzp_live_xxxxxxxx" />
       </div>
 
       <div class="form-group">
-        <label for="adminProPrice">Pro Subscription Amount (in ₹)</label>
+        <label>Pro Subscription Amount (in ₹)</label>
         <input type="number" id="adminProPrice" class="form-input" placeholder="799" />
       </div>
 
       <div class="form-group">
-        <label for="adminPromoCode">Active Promo Code</label>
+        <label>Active Promo Code</label>
         <input type="text" id="adminPromoCode" class="form-input" placeholder="PROMO2026" />
       </div>
 
       <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
         <button class="nav-btn" id="resetAdminDefaultsBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);">Reset Defaults</button>
-        <button class="nav-btn primary" id="saveAdminSettingsBtn">Save Live Changes</button>
+        <button class="nav-btn primary" id="saveAdminSettingsBtn">Save Changes</button>
       </div>
     </div>
   </div>
 
   <script>
-    // SECURE ADMIN CREDENTIALS & APP DEFAULTS
+    // CREDENTIALS & DEFAULTS
     const AUTH_CONFIG = {
       userId: "mishraarush664",
       password: "221181"
@@ -311,19 +350,26 @@
 
     function saveAdminSettings(settings) {
       localStorage.setItem('spar_ai_admin_config', JSON.stringify(settings));
-      updateLiveAdminUI();
+      updateUI();
     }
 
     let APP_CONFIG = loadAdminSettings();
 
     // DOM ELEMENTS
+    const gestureCanvas = document.getElementById('gestureCanvas');
+    const ctx = gestureCanvas.getContext('2d');
+    const chatTab = document.getElementById('chatTab');
+    const grokTab = document.getElementById('grokTab');
+    const toggleGrokModeBtn = document.getElementById('toggleGrokModeBtn');
+    const exitGrokBtn = document.getElementById('exitGrokBtn');
+    
     const chatMessages = document.getElementById('chatMessages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const creditCounter = document.getElementById('creditCounter');
-    const userDisplayBadge = document.getElementById('userDisplayBadge');
+    const userBadgeText = document.getElementById('userBadgeText');
+    const openAuthModalBtn = document.getElementById('openAuthModalBtn');
     const envBadge = document.getElementById('env-badge');
-    const brandLogo = document.getElementById('brandLogo');
 
     const fileUploadInput = document.getElementById('fileUploadInput');
     const cameraInput = document.getElementById('cameraInput');
@@ -334,27 +380,24 @@
     const previewImage = document.getElementById('previewImage');
     const removeImgBtn = document.getElementById('removeImgBtn');
 
-    // Upgrade Modal Elements
-    const upgradeModal = document.getElementById('upgradeModal');
-    const upgradeNavBtn = document.getElementById('upgradeNavBtn');
-    const closeUpgradeModal = document.getElementById('closeUpgradeModal');
-    const closeUpgradeBtn = document.getElementById('closeUpgradeBtn');
-    const selectProBtn = document.getElementById('selectProBtn');
-    const displayPlanPrice = document.getElementById('displayPlanPrice');
-    const freePlanCreditLimit = document.getElementById('freePlanCreditLimit');
-    const promoInput = document.getElementById('promoInput');
-    const applyPromoBtn = document.getElementById('applyPromoBtn');
+    // Auth Modal
+    const authModal = document.getElementById('authModal');
+    const closeAuthModal = document.getElementById('closeAuthModal');
+    const closeAuthBtn = document.getElementById('closeAuthBtn');
+    const ssoGoogleBtn = document.getElementById('ssoGoogleBtn');
+    const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+    const authEmailInput = document.getElementById('authEmailInput');
 
-    // History Modal Elements
-    const historyModal = document.getElementById('historyModal');
-    const historyBtn = document.getElementById('historyBtn');
-    const closeHistoryModal = document.getElementById('closeHistoryModal');
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const historyList = document.getElementById('historyList');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    const newChatBtn = document.getElementById('newChatBtn');
+    // Grok Studio Elements
+    const grokPromptInput = document.getElementById('grokPromptInput');
+    const grokGenerateBtn = document.getElementById('grokGenerateBtn');
+    const grokStyleSelect = document.getElementById('grokStyleSelect');
+    const grokRatioSelect = document.getElementById('grokRatioSelect');
+    const grokPreviewBox = document.getElementById('grokPreviewBox');
+    const grokStatusText = document.getElementById('grokStatusText');
+    const enhancePromptBtn = document.getElementById('enhancePromptBtn');
 
-    // Admin Modal Elements
+    // Admin Modal
     const adminModal = document.getElementById('adminModal');
     const closeAdminModal = document.getElementById('closeAdminModal');
     const adminDefaultCredits = document.getElementById('adminDefaultCredits');
@@ -364,38 +407,151 @@
     const saveAdminSettingsBtn = document.getElementById('saveAdminSettingsBtn');
     const resetAdminDefaultsBtn = document.getElementById('resetAdminDefaultsBtn');
 
+    // History Modal
+    const historyModal = document.getElementById('historyModal');
+    const historyBtn = document.getElementById('historyBtn');
+    const closeHistoryModal = document.getElementById('closeHistoryModal');
+    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+    const historyList = document.getElementById('historyList');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+    const newChatBtn = document.getElementById('newChatBtn');
+
     let currentBase64Image = null;
     let chatHistory = [];
     let isRecording = false;
     let recognition = null;
 
-    // ENVIRONMENT DETECTION
-    function detectEnv() {
-      const ua = navigator.userAgent || "";
-      const isAndroidApp = typeof window.AndroidInterface !== "undefined" || /wv|Android.*Version\/[0-9]\.[0-9]/i.test(ua);
-      if (isAndroidApp) {
-        envBadge.textContent = "Android App";
-        envBadge.classList.add("online");
-      } else if (/Android|iPhone|iPad/i.test(ua)) {
-        envBadge.textContent = "Mobile Web";
+    // RESIZE CANVAS FOR GESTURE RECOGNITION
+    function resizeCanvas() {
+      gestureCanvas.width = window.innerWidth;
+      gestureCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // "V" GESTURE DETECTOR
+    let gesturePoints = [];
+    let isDrawing = false;
+
+    function handlePointerDown(x, y) {
+      isDrawing = true;
+      gesturePoints = [{ x, y }];
+    }
+
+    function handlePointerMove(x, y) {
+      if (!isDrawing) return;
+      gesturePoints.push({ x, y });
+      // Draw temporary glow line
+      ctx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height);
+      ctx.beginPath();
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#00f0ff';
+      for (let i = 0; i < gesturePoints.length - 1; i++) {
+        ctx.moveTo(gesturePoints[i].x, gesturePoints[i].y);
+        ctx.lineTo(gesturePoints[i+1].x, gesturePoints[i+1].y);
+      }
+      ctx.stroke();
+    }
+
+    function handlePointerUp() {
+      if (!isDrawing) return;
+      isDrawing = false;
+      setTimeout(() => ctx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height), 200);
+
+      if (checkIsGestureV(gesturePoints)) {
+        triggerAdminAuthModal();
+      }
+      gesturePoints = [];
+    }
+
+    // Touch & Mouse Listeners for Gesture Canvas
+    gestureCanvas.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
+    gestureCanvas.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
+    gestureCanvas.addEventListener('mouseup', handlePointerUp);
+
+    gestureCanvas.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      handlePointerDown(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    gestureCanvas.addEventListener('touchmove', (e) => {
+      const touch = e.touches[0];
+      handlePointerMove(touch.clientX, touch.clientY);
+    }, { passive: true });
+
+    gestureCanvas.addEventListener('touchend', handlePointerUp);
+
+    // V-Shape Geometric Detection Logic
+    function checkIsGestureV(points) {
+      if (points.length < 10) return false;
+
+      let minYIndex = 0;
+      let maxYVal = -Infinity;
+
+      // Find lowest vertex point (maximum Y on screen)
+      for (let i = 0; i < points.length; i++) {
+        if (points[i].y > maxYVal) {
+          maxYVal = points[i].y;
+          minYIndex = i;
+        }
+      }
+
+      // Vertex must be in middle region of stroke (between 25% and 75%)
+      const ratio = minYIndex / points.length;
+      if (ratio < 0.25 || ratio > 0.75) return false;
+
+      const startPoint = points[0];
+      const vertexPoint = points[minYIndex];
+      const endPoint = points[points.length - 1];
+
+      // Downward leg check
+      const dy1 = vertexPoint.y - startPoint.y;
+      const dx1 = vertexPoint.x - startPoint.x;
+
+      // Upward leg check
+      const dy2 = vertexPoint.y - endPoint.y;
+      const dx2 = endPoint.x - vertexPoint.x;
+
+      const isValidV = dy1 > 60 && dy2 > 60 && dx1 > -20 && dx2 > -20;
+      return isValidV;
+    }
+
+    function triggerAdminAuthModal() {
+      const enteredUser = prompt("🔐 Secret Admin Gesture V Recognized\nEnter User ID:");
+      if (enteredUser !== AUTH_CONFIG.userId) {
+        alert("❌ Invalid User ID.");
+        return;
+      }
+      const enteredPass = prompt("🔐 Secret Admin Access\nEnter Password:");
+      if (enteredPass === AUTH_CONFIG.password) {
+        adminDefaultCredits.value = APP_CONFIG.defaultCredits;
+        adminRazorpayKey.value = APP_CONFIG.razorpayKey;
+        adminProPrice.value = APP_CONFIG.proPriceINR;
+        adminPromoCode.value = APP_CONFIG.promoCode;
+        adminModal.classList.add('active');
       } else {
-        envBadge.textContent = "Desktop Web";
+        alert("❌ Incorrect Password!");
       }
     }
 
-    // UPDATE LIVE ADMIN UI
-    function updateLiveAdminUI() {
-      APP_CONFIG = loadAdminSettings();
-      displayPlanPrice.innerHTML = `₹${APP_CONFIG.proPriceINR} <span>/ mo</span>`;
-      freePlanCreditLimit.textContent = `✓ ${APP_CONFIG.defaultCredits} Credits total`;
-      promoInput.placeholder = `Code (e.g. ${APP_CONFIG.promoCode})`;
-      updateUI();
-    }
+    // TAB SWITCHING
+    toggleGrokModeBtn.addEventListener('click', () => {
+      chatTab.classList.remove('active');
+      grokTab.classList.add('active');
+    });
 
-    // USER SESSION MANAGEMENT
+    exitGrokBtn.addEventListener('click', () => {
+      grokTab.classList.remove('active');
+      chatTab.classList.add('active');
+    });
+
+    // AUTH SYSTEM
     function getUserData() {
       const stored = localStorage.getItem('spar_ai_user');
-      return stored ? JSON.parse(stored) : { credits: APP_CONFIG.defaultCredits, isPro: false };
+      return stored ? JSON.parse(stored) : { credits: APP_CONFIG.defaultCredits, isPro: false, email: null };
     }
 
     function saveUserData(data) {
@@ -404,273 +560,79 @@
     }
 
     function updateUI() {
+      APP_CONFIG = loadAdminSettings();
       const user = getUserData();
+      if (user.email) {
+        userBadgeText.textContent = user.email.split('@')[0];
+      } else {
+        userBadgeText.textContent = "Sign In";
+      }
+
       if (user.isPro) {
         creditCounter.textContent = "Pro (Unlimited)";
-        userDisplayBadge.textContent = "👤 Pro User";
-        userInput.disabled = false;
-        sendBtn.disabled = false;
-        userInput.placeholder = "Ask, speak, or 'draw a cat'...";
       } else {
         creditCounter.textContent = `Credits: ${user.credits}`;
-        userDisplayBadge.textContent = "👤 Free Tier";
-        if (user.credits <= 0) {
-          userInput.disabled = true;
-          sendBtn.disabled = true;
-          userInput.placeholder = "Out of credits! Click Upgrade to get more.";
-        } else {
-          userInput.disabled = false;
-          sendBtn.disabled = false;
-          userInput.placeholder = "Ask, speak, or 'draw a cat'...";
-        }
       }
     }
 
-    function deductCredit() {
+    openAuthModalBtn.addEventListener('click', () => authModal.classList.add('active'));
+    closeAuthModal.addEventListener('click', () => authModal.classList.remove('active'));
+    closeAuthBtn.addEventListener('click', () => authModal.classList.remove('active'));
+
+    loginSubmitBtn.addEventListener('click', () => {
+      const email = authEmailInput.value.trim();
+      if (!email) {
+        alert("Please enter a valid email.");
+        return;
+      }
       const user = getUserData();
-      if (user.isPro) return true;
-      if (user.credits > 0) {
-        user.credits -= 1;
-        saveUserData(user);
-        return true;
-      }
-      upgradeModal.classList.add('active');
-      return false;
-    }
+      user.email = email;
+      saveUserData(user);
+      alert(`Welcome ${email}! Logged in successfully.`);
+      authModal.classList.remove('active');
+    });
 
-    // VOICE SEARCH (SPEECH-TO-TEXT)
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition = new SpeechRecognition();
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
+    ssoGoogleBtn.addEventListener('click', () => {
+      const user = getUserData();
+      user.email = "google_user@gmail.com";
+      saveUserData(user);
+      alert("Signed in with Google!");
+      authModal.classList.remove('active');
+    });
 
-      recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        userInput.value = transcript;
-        voiceBtn.classList.remove('recording');
-        isRecording = false;
+    // GROK AI IMAGE GENERATOR
+    grokGenerateBtn.addEventListener('click', async () => {
+      const promptText = grokPromptInput.value.trim();
+      if (!promptText) return;
+
+      const style = grokStyleSelect.value;
+      const ratio = grokRatioSelect.value.split('x');
+      const w = ratio[0];
+      const h = ratio[1];
+
+      const fullPrompt = `${promptText}, ${style}`;
+      grokPreviewBox.innerHTML = `<span style="color: var(--grok-neon);">⚡ Grok is rendering your vision...</span>`;
+
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${w}&height=${h}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+
+      const img = document.createElement('img');
+      img.src = imageUrl;
+      img.onload = () => {
+        grokPreviewBox.innerHTML = '';
+        grokPreviewBox.appendChild(img);
       };
-
-      recognition.onerror = () => {
-        voiceBtn.classList.remove('recording');
-        isRecording = false;
+      img.onerror = () => {
+        grokPreviewBox.innerHTML = `<span style="color: var(--danger);">Failed to render image. Please try again.</span>`;
       };
-
-      recognition.onend = () => {
-        voiceBtn.classList.remove('recording');
-        isRecording = false;
-      };
-    }
-
-    voiceBtn.addEventListener('click', () => {
-      if (!recognition) {
-        alert("Voice recognition is not supported in this browser.");
-        return;
-      }
-      if (isRecording) {
-        recognition.stop();
-        voiceBtn.classList.remove('recording');
-        isRecording = false;
-      } else {
-        recognition.start();
-        voiceBtn.classList.add('recording');
-        isRecording = true;
-      }
     });
 
-    // ATTACHMENT HANDLERS
-    uploadBtn.addEventListener('click', () => fileUploadInput.click());
-    cameraBtn.addEventListener('click', () => cameraInput.click());
-
-    fileUploadInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
-    cameraInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
-
-    function handleImageSelect(file) {
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(event) {
-        currentBase64Image = event.target.result;
-        previewImage.src = currentBase64Image;
-        imagePreviewBar.classList.add('active');
-      };
-      reader.readAsDataURL(file);
-    }
-
-    removeImgBtn.addEventListener('click', () => {
-      currentBase64Image = null;
-      imagePreviewBar.classList.remove('active');
-      fileUploadInput.value = "";
-      cameraInput.value = "";
+    enhancePromptBtn.addEventListener('click', () => {
+      const current = grokPromptInput.value.trim();
+      if (!current) return;
+      grokPromptInput.value = `hyper-detailed futuristic cinematic masterwork of ${current}, highly detailed 8k rendering, dramatic lighting`;
     });
 
-    // HIDDEN ADMIN ACCESS (5 TAP OR SHORTCUT)
-    let tapCount = 0;
-    let tapTimer;
-
-    brandLogo.addEventListener('click', () => {
-      tapCount++;
-      clearTimeout(tapTimer);
-      if (tapCount === 5) {
-        tapCount = 0;
-        triggerAdminAuth();
-      } else {
-        tapTimer = setTimeout(() => { tapCount = 0; }, 1200);
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        triggerAdminAuth();
-      }
-    });
-
-    function triggerAdminAuth() {
-      const enteredUser = prompt("🔐 Admin Access\nEnter User ID:");
-      if (enteredUser !== AUTH_CONFIG.userId) {
-        alert("❌ Invalid User ID.");
-        return;
-      }
-      const enteredPass = prompt("🔐 Admin Access\nEnter Password:");
-      if (enteredPass === AUTH_CONFIG.password) {
-        adminDefaultCredits.value = APP_CONFIG.defaultCredits;
-        adminRazorpayKey.value = APP_CONFIG.razorpayKey;
-        adminProPrice.value = APP_CONFIG.proPriceINR;
-        adminPromoCode.value = APP_CONFIG.promoCode;
-        adminModal.classList.add('active');
-      } else {
-        alert("❌ Incorrect password! Access denied.");
-      }
-    }
-
-    closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
-
-    saveAdminSettingsBtn.addEventListener('click', () => {
-      const newCreditLimit = parseInt(adminDefaultCredits.value) || DEFAULT_CONFIG.defaultCredits;
-      const updatedConfig = {
-        ...APP_CONFIG,
-        defaultCredits: newCreditLimit,
-        razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey,
-        proPriceINR: parseFloat(adminProPrice.value) || DEFAULT_CONFIG.proPriceINR,
-        promoCode: adminPromoCode.value.trim().toUpperCase() || DEFAULT_CONFIG.promoCode
-      };
-      
-      // Update existing user credit balance if non-pro
-      const currentUser = getUserData();
-      if (!currentUser.isPro && currentUser.credits > newCreditLimit) {
-        currentUser.credits = newCreditLimit;
-        localStorage.setItem('spar_ai_user', JSON.stringify(currentUser));
-      }
-
-      saveAdminSettings(updatedConfig);
-      alert("Settings saved successfully! Changes are now live.");
-      adminModal.classList.remove('active');
-    });
-
-    resetAdminDefaultsBtn.addEventListener('click', () => {
-      if (confirm("Are you sure you want to reset settings to default?")) {
-        saveAdminSettings(DEFAULT_CONFIG);
-        adminDefaultCredits.value = DEFAULT_CONFIG.defaultCredits;
-        adminRazorpayKey.value = DEFAULT_CONFIG.razorpayKey;
-        adminProPrice.value = DEFAULT_CONFIG.proPriceINR;
-        adminPromoCode.value = DEFAULT_CONFIG.promoCode;
-        alert("Reset to default settings.");
-      }
-    });
-
-    // UPGRADE & SUBSCRIPTION MODAL EVENTS WITH RAZORPAY
-    upgradeNavBtn.addEventListener('click', () => upgradeModal.classList.add('active'));
-    closeUpgradeModal.addEventListener('click', () => upgradeModal.classList.remove('active'));
-    closeUpgradeBtn.addEventListener('click', () => upgradeModal.classList.remove('active'));
-
-    selectProBtn.addEventListener('click', () => {
-      if (typeof Razorpay === "undefined") {
-        alert("Razorpay SDK failed to load. Check network connection.");
-        return;
-      }
-
-      const options = {
-        key: APP_CONFIG.razorpayKey,
-        amount: APP_CONFIG.proPriceINR * 100,
-        currency: "INR",
-        name: "SPAR AI",
-        description: "Pro Unlimited Subscription",
-        handler: function (response) {
-          if (response.razorpay_payment_id) {
-            const user = getUserData();
-            user.isPro = true;
-            saveUserData(user);
-            alert(`Payment Successful! Payment ID: ${response.razorpay_payment_id}. You are now on Pro Plan.`);
-            upgradeModal.classList.remove('active');
-          }
-        },
-        prefill: { name: "SPAR AI User", email: "user@example.com" },
-        theme: { color: "#6366f1" }
-      };
-
-      const rzp = new Razorpay(options);
-      rzp.on('payment.failed', function (response){
-        alert(`Payment Failed: ${response.error.description}`);
-      });
-      rzp.open();
-    });
-
-    applyPromoBtn.addEventListener('click', () => {
-      const code = promoInput.value.trim().toUpperCase();
-      if (code === APP_CONFIG.promoCode) {
-        const user = getUserData();
-        user.isPro = true;
-        saveUserData(user);
-        alert("Promo code applied successfully! You are now on the Pro Plan.");
-        upgradeModal.classList.remove('active');
-      } else {
-        alert("Invalid promo code.");
-      }
-    });
-
-    // PROMPT HISTORY LOGIC
-    function saveHistory(prompt, type) {
-      const history = JSON.parse(localStorage.getItem('spar_ai_history') || '[]');
-      history.unshift({ prompt, type, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
-      localStorage.setItem('spar_ai_history', JSON.stringify(history));
-    }
-
-    historyBtn.addEventListener('click', () => {
-      const history = JSON.parse(localStorage.getItem('spar_ai_history') || '[]');
-      if (history.length === 0) {
-        historyList.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 1rem;">No history saved yet.</div>`;
-      } else {
-        historyList.innerHTML = history.map(item => `
-          <div class="history-item">
-            <div class="history-prompt">${escapeHtml(item.prompt)}</div>
-            <div class="history-meta"><span>Type: ${item.type}</span><span>${item.time}</span></div>
-          </div>
-        `).join('');
-      }
-      historyModal.classList.add('active');
-    });
-
-    closeHistoryModal.addEventListener('click', () => historyModal.classList.remove('active'));
-    closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
-    clearHistoryBtn.addEventListener('click', () => {
-      localStorage.removeItem('spar_ai_history');
-      historyList.innerHTML = `<div style="text-align:center; color: var(--text-muted); padding: 1rem;">No history saved yet.</div>`;
-    });
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    newChatBtn.addEventListener('click', () => {
-      chatHistory = [];
-      chatMessages.innerHTML = `<div class="message assistant">New chat started! How can I help you?</div>`;
-    });
-
-    // API REQUEST HANDLER WITH CONTEXT PRESERVATION FOR VISION
+    // API REQUEST HANDLER FOR COMPREHENSIVE Q&A
     async function fetchAiResponse(prompt, base64Img) {
       let payloadMessages = [];
       let modelToUse = APP_CONFIG.textModel;
@@ -679,12 +641,9 @@
 
       if (base64Img) {
         modelToUse = APP_CONFIG.visionModel;
-        
-        // Include prior text conversation history so vision model retains context
         const priorContext = chatHistory.filter(m => typeof m.content === 'string');
-        
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, an expert vision & text assistant. Analyze uploaded images accurately, answer any questions inside or about the image, and maintain friendly conversation context." },
+          { role: "system", content: "You are SPAR AI, a world-class assistant capable of answering questions on recent events, upcoming global events, world history, science, and analyzing images with high fidelity." },
           ...priorContext,
           {
             role: "user",
@@ -694,12 +653,14 @@
             ]
           }
         ];
-        
         chatHistory.push({ role: "user", content: userPrompt });
       } else {
         chatHistory.push({ role: "user", content: userPrompt });
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, an advanced AI assistant similar to Google Gemini, capable of vision analysis and text creation." },
+          { 
+            role: "system", 
+            content: "You are SPAR AI, a knowledgeable, helpful assistant like Gemini and ChatGPT. You excel at answering questions on recent events, future outlooks, history, mathematics, and complex reasoning." 
+          },
           ...chatHistory
         ];
       }
@@ -718,10 +679,7 @@
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Failed request to API.");
-      }
+      if (!response.ok) throw new Error(data.error?.message || "Failed API request.");
 
       const reply = data.choices[0].message.content;
       chatHistory.push({ role: "assistant", content: reply });
@@ -734,7 +692,6 @@
       const attachedImage = currentBase64Image;
 
       if (!text && !attachedImage) return;
-      if (!deductCredit()) return;
 
       const userMsgDiv = document.createElement('div');
       userMsgDiv.className = 'message user';
@@ -748,14 +705,9 @@
         const textSpan = document.createElement('span');
         textSpan.textContent = text;
         userMsgDiv.appendChild(textSpan);
-      } else if (attachedImage) {
-        const defaultTextSpan = document.createElement('span');
-        defaultTextSpan.textContent = "Analyze this image";
-        userMsgDiv.appendChild(defaultTextSpan);
       }
 
       chatMessages.appendChild(userMsgDiv);
-
       userInput.value = '';
       const imgToProcess = currentBase64Image;
       removeImgBtn.click();
@@ -763,11 +715,9 @@
       const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lowerText = text.toLowerCase();
 
-      // IMAGE GENERATION HANDLER
+      // INLINE IMAGE DRAW TRIGGER
       if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
-        saveHistory(text, 'Image Generation');
         loadingMsg.textContent = "Generating image...";
-
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
         img.className = 'generated-img';
@@ -777,15 +727,10 @@
           loadingMsg.appendChild(img);
           chatMessages.scrollTop = chatMessages.scrollHeight;
         };
-        img.onerror = () => {
-          loadingMsg.textContent = "Failed to generate image. Please try another prompt.";
-        };
         return;
       }
 
-      // TEXT & VISION AI REQUEST
       try {
-        saveHistory(text || "Image Analysis", imgToProcess ? "Vision AI" : "Text AI");
         const reply = await fetchAiResponse(text, imgToProcess);
         loadingMsg.textContent = reply;
       } catch (err) {
@@ -805,13 +750,74 @@
     }
 
     sendBtn.addEventListener('click', handleSend);
-    userInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') handleSend();
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+
+    // ATTACHMENT HANDLERS
+    uploadBtn.addEventListener('click', () => fileUploadInput.click());
+    cameraBtn.addEventListener('click', () => cameraInput.click());
+    fileUploadInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
+    cameraInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
+
+    function handleImageSelect(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        currentBase64Image = event.target.result;
+        previewImage.src = currentBase64Image;
+        imagePreviewBar.classList.add('active');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    removeImgBtn.addEventListener('click', () => {
+      currentBase64Image = null;
+      imagePreviewBar.classList.remove('active');
     });
+
+    // ADMIN MODAL ACTIONS
+    closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
+    saveAdminSettingsBtn.addEventListener('click', () => {
+      const updatedConfig = {
+        ...APP_CONFIG,
+        defaultCredits: parseInt(adminDefaultCredits.value) || DEFAULT_CONFIG.defaultCredits,
+        razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey,
+        proPriceINR: parseFloat(adminProPrice.value) || DEFAULT_CONFIG.proPriceINR,
+        promoCode: adminPromoCode.value.trim().toUpperCase() || DEFAULT_CONFIG.promoCode
+      };
+      saveAdminSettings(updatedConfig);
+      alert("Admin settings updated!");
+      adminModal.classList.remove('active');
+    });
+
+    resetAdminDefaultsBtn.addEventListener('click', () => {
+      saveAdminSettings(DEFAULT_CONFIG);
+      alert("Reset to default settings.");
+    });
+
+    // HISTORY ACTIONS
+    historyBtn.addEventListener('click', () => historyModal.classList.add('active'));
+    closeHistoryModal.addEventListener('click', () => historyModal.classList.remove('active'));
+    closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
+    newChatBtn.addEventListener('click', () => {
+      chatHistory = [];
+      chatMessages.innerHTML = `<div class="message assistant">New session started! Ask me anything.</div>`;
+    });
+
+    // ENVIRONMENT DETECTION
+    function detectEnv() {
+      const ua = navigator.userAgent || "";
+      if (/wv|Android.*Version\/[0-9]\.[0-9]/i.test(ua)) {
+        envBadge.textContent = "Android App";
+      } else if (/Android|iPhone|iPad/i.test(ua)) {
+        envBadge.textContent = "Mobile Web";
+      } else {
+        envBadge.textContent = "Desktop Web";
+      }
+    }
 
     // INITIALIZATION
     detectEnv();
-    updateLiveAdminUI();
+    updateUI();
   </script>
 </body>
 </html>
