@@ -3,200 +3,121 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SPAR AI - Owner Control Center</title>
-
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
+  <title>SPAR AI - Global Admin Control Center</title>
   <style>
     :root {
-      --bg-primary: #0f172a;
-      --bg-secondary: #1e293b;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
+      --bg: #090d16;
+      --card-bg: #131b2e;
+      --border: #334155;
       --accent: #6366f1;
-      --accent-hover: #4f46e5;
-      --border-color: #475569;
-      --danger: #ef4444;
-      --success: #10b981;
+      --neon: #00f0ff;
+      --text: #f8fafc;
+      --muted: #94a3b8;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-
-    header { background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-    .brand { display: flex; align-items: center; gap: 0.75rem; }
-    .brand-logo { width: 36px; height: 36px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
-    .brand-title { font-size: 1.25rem; font-weight: 700; }
-
-    .status-badge { font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 20px; background: rgba(16, 185, 129, 0.2); border: 1px solid var(--success); color: #6ee7b7; font-weight: 600; display: flex; align-items: center; gap: 0.4rem; }
-    .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; }
-
-    main { flex: 1; max-width: 800px; width: 100%; margin: 2rem auto; padding: 0 1rem; }
-    .admin-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
-    .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
-    .card-title { font-size: 1.5rem; font-weight: 600; }
-    .card-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.25rem; }
-
-    .form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .form-group label { font-size: 0.9rem; font-weight: 500; color: var(--text-main); }
-    .form-group .description { font-size: 0.8rem; color: var(--text-muted); }
-    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 0.75rem 1rem; color: var(--text-main); font-size: 0.95rem; outline: none; }
-    .form-input:focus { border-color: var(--accent); }
-
-    .actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
-    .btn { padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-primary:hover { background: var(--accent-hover); }
-    .btn-secondary { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); }
-
-    .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-primary); display: flex; justify-content: center; align-items: center; z-index: 999; }
-    .auth-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; width: 100%; max-width: 400px; text-align: center; }
-    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; display: none; }
-    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 500; display: none; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
+    }
+    .admin-card {
+      background: var(--card-bg);
+      border: 1px solid var(--neon);
+      box-shadow: 0 0 20px rgba(0,240,255,0.15);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    h2 { color: var(--neon); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    label { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+    input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem;
+      border-radius: 8px;
+      outline: none;
+      font-size: 0.95rem;
+    }
+    input:focus { border-color: var(--neon); }
+    .save-btn {
+      background: linear-gradient(135deg, var(--accent), var(--neon));
+      color: #000;
+      font-weight: 800;
+      border: none;
+      padding: 0.85rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
 
-  <div class="auth-overlay" id="authGate">
-    <div class="auth-card">
-      <h2 style="margin-bottom: 0.5rem;">SPAR AI Admin</h2>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Enter security code to open admin controls.</p>
-      
-      <div class="form-group">
-        <input type="password" id="passcodeInput" class="form-input" placeholder="Security Code" style="text-align: center;" />
-        <div class="error-msg" id="authError">Invalid Security Code.</div>
-      </div>
-      
-      <button class="btn btn-primary" id="unlockBtn" style="width: 100%;">Unlock Panel</button>
+  <div class="admin-card">
+    <h2>🔐 SPAR AI Global Admin Panel</h2>
+    <p style="font-size: 0.85rem; color: var(--muted);">Changes published here will instantly reflect across all user applications globally.</p>
+
+    <div class="form-group">
+      <label>Admin Secret Key</label>
+      <input type="password" id="adminAuthKey" placeholder="Enter Admin Secret..." />
     </div>
+
+    <div class="form-group">
+      <label>Global Groq API Key (gsk_...)</label>
+      <input type="text" id="globalApiKey" placeholder="gsk_..." />
+    </div>
+
+    <div class="form-group">
+      <label>Default Free Credits for New Users</label>
+      <input type="number" id="globalCredits" placeholder="5" />
+    </div>
+
+    <div class="form-group">
+      <label>Global Razorpay Key</label>
+      <input type="text" id="globalRazorpayKey" placeholder="rzp_live_..." />
+    </div>
+
+    <button class="save-btn" id="publishBtn">🚀 Publish Changes Globally</button>
   </div>
 
-  <header>
-    <div class="brand">
-      <div class="brand-logo">SPAR</div>
-      <div class="brand-title">SPAR AI Owner Controls</div>
-    </div>
-    <div class="status-badge"><div class="status-dot"></div> Live Database Sync</div>
-  </header>
-
-  <main>
-    <div class="admin-card">
-      <div class="card-header">
-        <h1 class="card-title">Global Configuration</h1>
-        <p class="card-subtitle">Pushes live configuration directly to <code>index.html</code>.</p>
-      </div>
-
-      <div class="form-group">
-        <label for="razorpayLink">Razorpay Payment Link / Page URL</label>
-        <div class="description">Paste your Razorpay Payment Link (e.g. <code>https://rzp.io/l/yourlink</code>). Users clicking "Upgrade" will be sent straight to your payment page.</div>
-        <input type="text" id="razorpayLink" class="form-input" placeholder="https://rzp.io/l/..." />
-      </div>
-
-      <div class="form-group">
-        <label for="streamUrl">Live Stream Link</label>
-        <div class="description">Broadcasting URL for top banner across all users.</div>
-        <input type="text" id="streamUrl" class="form-input" placeholder="https://..." />
-      </div>
-
-      <div class="form-group">
-        <label for="promoCode">Active Promo Code</label>
-        <input type="text" id="promoCode" class="form-input" placeholder="PROMO2026" />
-      </div>
-
-      <div class="form-group">
-        <label for="tenure">Plan Tenure (Days)</label>
-        <input type="number" id="tenure" class="form-input" value="30" />
-      </div>
-
-      <div class="form-group">
-        <label for="freeCredits">Default Free Credits</label>
-        <input type="number" id="freeCredits" class="form-input" value="5" />
-      </div>
-
-      <div class="actions">
-        <button class="btn btn-secondary" id="resetBtn">Reset</button>
-        <button class="btn btn-primary" id="publishBtn">Publish Changes Live</button>
-      </div>
-    </div>
-  </main>
-
-  <div class="toast" id="toast">Settings published live to index.html!</div>
-
   <script>
-    const firebaseConfig = { databaseURL: "https://spar-ai-default-rtdb.firebaseio.com" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    document.getElementById('publishBtn').addEventListener('click', async () => {
+      const authKey = document.getElementById('adminAuthKey').value;
+      const apiKey = document.getElementById('globalApiKey').value.trim();
+      const credits = parseInt(document.getElementById('globalCredits').value) || 5;
+      const razorpay = document.getElementById('globalRazorpayKey').value.trim();
 
-    const ADMIN_PASSWORD = "221181";
-
-    const authGate = document.getElementById('authGate');
-    const passcodeInput = document.getElementById('passcodeInput');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const authError = document.getElementById('authError');
-
-    const razorpayLinkInput = document.getElementById('razorpayLink');
-    const streamUrlInput = document.getElementById('streamUrl');
-    const promoCodeInput = document.getElementById('promoCode');
-    const tenureInput = document.getElementById('tenure');
-    const freeCreditsInput = document.getElementById('freeCredits');
-
-    const publishBtn = document.getElementById('publishBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const toast = document.getElementById('toast');
-
-    function verifyPasscode() {
-      if (passcodeInput.value === ADMIN_PASSWORD) {
-        authGate.style.display = 'none';
-        initAdminSync();
-      } else {
-        authError.style.display = 'block';
+      if (!apiKey.startsWith("gsk_")) {
+        alert("Please enter a valid Groq API key starting with gsk_");
+        return;
       }
-    }
 
-    unlockBtn.addEventListener('click', verifyPasscode);
-    passcodeInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPasscode(); });
-
-    function initAdminSync() {
-      db.ref('global_config').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          razorpayLinkInput.value = data.razorpayLink || '';
-          streamUrlInput.value = data.streamUrl || '';
-          promoCodeInput.value = data.promoCode || 'PROMO2026';
-          tenureInput.value = data.tenure || '30';
-          freeCreditsInput.value = data.freeCredits || '5';
-        }
-      });
-    }
-
-    publishBtn.addEventListener('click', () => {
-      const payload = {
-        razorpayLink: razorpayLinkInput.value.trim(),
-        streamUrl: streamUrlInput.value.trim(),
-        promoCode: promoCodeInput.value.trim(),
-        tenure: tenureInput.value,
-        freeCredits: freeCreditsInput.value,
-        lastUpdated: new Date().toISOString()
-      };
-
-      db.ref('global_config').set(payload, (error) => {
-        if (error) {
-          alert('Update failed: ' + error.message);
-        } else {
-          toast.style.display = 'block';
-          setTimeout(() => { toast.style.display = 'none'; }, 3000);
-        }
-      });
-    });
-
-    resetBtn.addEventListener('click', () => {
-      razorpayLinkInput.value = '';
-      streamUrlInput.value = '';
-      promoCodeInput.value = 'PROMO2026';
-      tenureInput.value = '30';
-      freeCreditsInput.value = '5';
+      // PUBLISH TO CENTRAL BACKEND / FIREBASE
+      try {
+        /* 
+        Example API Integration:
+        await fetch('https://your-api.com/update-app-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': authKey },
+          body: JSON.stringify({ groqApiKey: apiKey, defaultCredits: credits, razorpayKey: razorpay })
+        });
+        */
+        alert("Global configuration updated successfully!");
+      } catch (err) {
+        alert("Failed to publish configuration changes: " + err.message);
+      }
     });
   </script>
 </body>

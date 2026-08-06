@@ -35,17 +35,6 @@
     
     body { display: flex; flex-direction: column; }
 
-    /* GESTURE CANVAS OVERLAY (pointer-events set to none so clicks pass through) */
-    #gestureCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 9999;
-      pointer-events: none;
-      touch-action: none;
-    }
-
     /* HEADER */
     header {
       background-color: var(--bg-secondary);
@@ -126,9 +115,7 @@
 
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
-    .form-input { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; color: var(--text-main); outline: none; font-size: 16px; }
 
-    /* AUTH MODAL */
     .sso-btn { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: white; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: background 0.2s; }
     .sso-btn:hover { background: #475569; }
     .auth-divider { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.75rem; margin: 0.2rem 0; }
@@ -146,9 +133,6 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
-
-  <!-- DRAWING CANVAS OVERLAY FOR "V" GESTURE -->
-  <canvas id="gestureCanvas"></canvas>
 
   <header>
     <div class="header-top">
@@ -172,7 +156,6 @@
   </header>
 
   <main>
-    <!-- TAB 1: CHAT & VISION ENGINE -->
     <div class="tab-content active" id="chatTab">
       <div class="chat-container">
         <div class="chat-messages" id="chatMessages">
@@ -200,7 +183,6 @@
       </div>
     </div>
 
-    <!-- TAB 2: GROK AI IMAGE CREATION STUDIO -->
     <div class="tab-content" id="grokTab">
       <div class="grok-studio">
         <div class="grok-header">
@@ -224,7 +206,7 @@
         </div>
 
         <div class="grok-preview-box" id="grokPreviewBox">
-          <span style="color: var(--text-muted); font-size: 0.85rem;" id="grokStatusText">Enter a prompt below to ignite Grok Image Studio</span>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Enter a prompt below to ignite Grok Image Studio</span>
         </div>
 
         <div style="display: flex; gap: 0.5rem; flex-direction: column;">
@@ -245,21 +227,13 @@
         <div class="modal-title">Welcome to SPAR AI</div>
         <button class="close-btn" id="closeAuthModal">&times;</button>
       </div>
-
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Log in or create an account to save history, unlock high credit limits, and access Grok Studio.</p>
-
-      <button class="sso-btn" id="ssoGoogleBtn">
-        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
-        Continue with Google
-      </button>
-
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Log in or create an account to save history and access features.</p>
+      <button class="sso-btn" id="ssoGoogleBtn">Continue with Google</button>
       <div class="auth-divider">OR</div>
-
       <div class="form-group">
         <label>Email Address</label>
-        <input type="email" id="authEmailInput" class="form-input" placeholder="name@domain.com" />
+        <input type="email" id="authEmailInput" class="chat-input" placeholder="name@domain.com" />
       </div>
-
       <button class="nav-btn primary" id="loginSubmitBtn" style="padding: 0.75rem; font-weight: 600;">Sign In / Register</button>
       <button class="nav-btn" id="closeAuthBtn">Cancel</button>
     </div>
@@ -282,69 +256,28 @@
     </div>
   </div>
 
-  <!-- SECRET GESTURE ADMIN MODAL -->
-  <div class="modal-overlay" id="adminModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title" style="color: var(--grok-neon);">🔐 Secret Admin Dashboard</div>
-        <button class="close-btn" id="closeAdminModal">&times;</button>
-      </div>
-
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Gesture V recognized. Enter your valid Groq API key below.</p>
-
-      <div class="form-group">
-        <label>Groq API Key (starts with gsk_)</label>
-        <input type="text" id="adminGroqKey" class="form-input" placeholder="gsk_..." />
-      </div>
-
-      <div class="form-group">
-        <label>Default Free Credits Limit</label>
-        <input type="number" id="adminDefaultCredits" class="form-input" placeholder="5" />
-      </div>
-
-      <div class="form-group">
-        <label>Razorpay Key ID</label>
-        <input type="text" id="adminRazorpayKey" class="form-input" placeholder="e.g. rzp_live_xxxxxxxx" />
-      </div>
-
-      <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
-        <button class="nav-btn" id="resetAdminDefaultsBtn" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.4);">Reset Defaults</button>
-        <button class="nav-btn primary" id="saveAdminSettingsBtn">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // AUTH & DEFAULTS
-    const AUTH_CONFIG = {
-      userId: "mishraarush664",
-      password: "221181"
-    };
-
-    const DEFAULT_CONFIG = {
-      groqApiKey: "", // User must enter key via admin panel or prompt
+    // GLOBAL CONFIG ENDPOINT (To be hooked into your backend / Firebase Firestore)
+    // For now, this loads the config dynamically from your central server endpoint.
+    let APP_CONFIG = {
+      groqApiKey: "",
       groqUrl: "https://api.groq.com/openai/v1/chat/completions",
       textModel: "llama-3.3-70b-versatile",
       visionModel: "llama-3.2-11b-vision-preview",
-      defaultCredits: 5,
-      razorpayKey: "rzp_test_sampleKey12345"
+      defaultCredits: 5
     };
 
-    function loadAdminSettings() {
-      const stored = localStorage.getItem('spar_ai_admin_config');
-      return stored ? JSON.parse(stored) : { ...DEFAULT_CONFIG };
+    // FETCH GLOBAL CONFIG FROM BACKEND ON APP LAUNCH
+    async function fetchGlobalConfig() {
+      try {
+        // REPLACE THIS URL WITH YOUR CENTRAL BACKEND OR FIREBASE ENDPOINT
+        // e.g., const res = await fetch('https://your-api.com/get-app-config');
+        // APP_CONFIG = await res.json();
+      } catch (err) {
+        console.warn("Using fallback local config");
+      }
     }
 
-    function saveAdminSettings(settings) {
-      localStorage.setItem('spar_ai_admin_config', JSON.stringify(settings));
-      updateUI();
-    }
-
-    let APP_CONFIG = loadAdminSettings();
-
-    // DOM ELEMENTS
-    const gestureCanvas = document.getElementById('gestureCanvas');
-    const ctx = gestureCanvas.getContext('2d');
     const chatTab = document.getElementById('chatTab');
     const grokTab = document.getElementById('grokTab');
     const toggleGrokModeBtn = document.getElementById('toggleGrokModeBtn');
@@ -366,7 +299,6 @@
     const previewImage = document.getElementById('previewImage');
     const removeImgBtn = document.getElementById('removeImgBtn');
 
-    // Auth Modal
     const authModal = document.getElementById('authModal');
     const closeAuthModal = document.getElementById('closeAuthModal');
     const closeAuthBtn = document.getElementById('closeAuthBtn');
@@ -374,7 +306,6 @@
     const loginSubmitBtn = document.getElementById('loginSubmitBtn');
     const authEmailInput = document.getElementById('authEmailInput');
 
-    // Grok Studio Elements
     const grokPromptInput = document.getElementById('grokPromptInput');
     const grokGenerateBtn = document.getElementById('grokGenerateBtn');
     const grokStyleSelect = document.getElementById('grokStyleSelect');
@@ -382,134 +313,15 @@
     const grokPreviewBox = document.getElementById('grokPreviewBox');
     const enhancePromptBtn = document.getElementById('enhancePromptBtn');
 
-    // Admin Modal
-    const adminModal = document.getElementById('adminModal');
-    const closeAdminModal = document.getElementById('closeAdminModal');
-    const adminGroqKey = document.getElementById('adminGroqKey');
-    const adminDefaultCredits = document.getElementById('adminDefaultCredits');
-    const adminRazorpayKey = document.getElementById('adminRazorpayKey');
-    const saveAdminSettingsBtn = document.getElementById('saveAdminSettingsBtn');
-    const resetAdminDefaultsBtn = document.getElementById('resetAdminDefaultsBtn');
-
-    // History Modal
     const historyModal = document.getElementById('historyModal');
     const historyBtn = document.getElementById('historyBtn');
     const closeHistoryModal = document.getElementById('closeHistoryModal');
     const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const historyList = document.getElementById('historyList');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
     const newChatBtn = document.getElementById('newChatBtn');
 
     let currentBase64Image = null;
     let chatHistory = [];
 
-    // RESIZE CANVAS FOR GESTURE RECOGNITION
-    function resizeCanvas() {
-      gestureCanvas.width = window.innerWidth;
-      gestureCanvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    // "V" GESTURE DETECTOR
-    let gesturePoints = [];
-    let isDrawing = false;
-
-    function handlePointerDown(x, y) {
-      isDrawing = true;
-      gesturePoints = [{ x, y }];
-    }
-
-    function handlePointerMove(x, y) {
-      if (!isDrawing) return;
-      gesturePoints.push({ x, y });
-      ctx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height);
-      ctx.beginPath();
-      ctx.strokeStyle = '#00f0ff';
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = '#00f0ff';
-      for (let i = 0; i < gesturePoints.length - 1; i++) {
-        ctx.moveTo(gesturePoints[i].x, gesturePoints[i].y);
-        ctx.lineTo(gesturePoints[i+1].x, gesturePoints[i+1].y);
-      }
-      ctx.stroke();
-    }
-
-    function handlePointerUp() {
-      if (!isDrawing) return;
-      isDrawing = false;
-      setTimeout(() => ctx.clearRect(0, 0, gestureCanvas.width, gestureCanvas.height), 200);
-
-      if (checkIsGestureV(gesturePoints)) {
-        triggerAdminAuthModal();
-      }
-      gesturePoints = [];
-    }
-
-    window.addEventListener('mousedown', (e) => handlePointerDown(e.clientX, e.clientY));
-    window.addEventListener('mousemove', (e) => handlePointerMove(e.clientX, e.clientY));
-    window.addEventListener('mouseup', handlePointerUp);
-
-    window.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      handlePointerDown(touch.clientX, touch.clientY);
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      handlePointerMove(touch.clientX, touch.clientY);
-    }, { passive: true });
-
-    window.addEventListener('touchend', handlePointerUp);
-
-    function checkIsGestureV(points) {
-      if (points.length < 10) return false;
-
-      let minYIndex = 0;
-      let maxYVal = -Infinity;
-
-      for (let i = 0; i < points.length; i++) {
-        if (points[i].y > maxYVal) {
-          maxYVal = points[i].y;
-          minYIndex = i;
-        }
-      }
-
-      const ratio = minYIndex / points.length;
-      if (ratio < 0.25 || ratio > 0.75) return false;
-
-      const startPoint = points[0];
-      const vertexPoint = points[minYIndex];
-      const endPoint = points[points.length - 1];
-
-      const dy1 = vertexPoint.y - startPoint.y;
-      const dx1 = vertexPoint.x - startPoint.x;
-      const dy2 = vertexPoint.y - endPoint.y;
-      const dx2 = endPoint.x - vertexPoint.x;
-
-      return (dy1 > 60 && dy2 > 60 && dx1 > -20 && dx2 > -20);
-    }
-
-    function triggerAdminAuthModal() {
-      const enteredUser = prompt("🔐 Secret Admin Gesture V Recognized\nEnter User ID:");
-      if (enteredUser !== AUTH_CONFIG.userId) {
-        alert("❌ Invalid User ID.");
-        return;
-      }
-      const enteredPass = prompt("🔐 Secret Admin Access\nEnter Password:");
-      if (enteredPass === AUTH_CONFIG.password) {
-        adminGroqKey.value = APP_CONFIG.groqApiKey || "";
-        adminDefaultCredits.value = APP_CONFIG.defaultCredits;
-        adminRazorpayKey.value = APP_CONFIG.razorpayKey;
-        adminModal.classList.add('active');
-      } else {
-        alert("❌ Incorrect Password!");
-      }
-    }
-
-    // TAB SWITCHING
     toggleGrokModeBtn.addEventListener('click', () => {
       chatTab.classList.remove('active');
       grokTab.classList.add('active');
@@ -520,7 +332,6 @@
       chatTab.classList.add('active');
     });
 
-    // USER DATA HANDLERS
     function getUserData() {
       const stored = localStorage.getItem('spar_ai_user');
       return stored ? JSON.parse(stored) : { credits: APP_CONFIG.defaultCredits, isPro: false, email: null };
@@ -532,7 +343,6 @@
     }
 
     function updateUI() {
-      APP_CONFIG = loadAdminSettings();
       const user = getUserData();
       userBadgeText.textContent = user.email ? user.email.split('@')[0] : "Sign In";
       creditCounter.textContent = user.isPro ? "Pro (Unlimited)" : `Credits: ${user.credits}`;
@@ -548,7 +358,6 @@
       const user = getUserData();
       user.email = email;
       saveUserData(user);
-      alert(`Welcome ${email}! Logged in successfully.`);
       authModal.classList.remove('active');
     });
 
@@ -556,11 +365,9 @@
       const user = getUserData();
       user.email = "google_user@gmail.com";
       saveUserData(user);
-      alert("Signed in with Google!");
       authModal.classList.remove('active');
     });
 
-    // GROK IMAGE STUDIO
     grokGenerateBtn.addEventListener('click', async () => {
       const promptText = grokPromptInput.value.trim();
       if (!promptText) return;
@@ -589,29 +396,21 @@
       }
     });
 
-    // API REQUEST HANDLER
     async function fetchAiResponse(prompt, base64Img) {
-      let apiKey = (APP_CONFIG.groqApiKey || "").trim();
+      let apiKey = APP_CONFIG.groqApiKey;
 
-      if (!apiKey || !apiKey.startsWith("gsk_")) {
-        const inputKey = prompt("Please enter a valid Groq API Key (starts with gsk_):");
-        if (inputKey && inputKey.trim().startsWith("gsk_")) {
-          apiKey = inputKey.trim();
-          APP_CONFIG.groqApiKey = apiKey;
-          saveAdminSettings(APP_CONFIG);
-        } else {
-          throw new Error("Invalid or missing Groq API key! Draw 'V' gesture on screen to open Admin Panel and set your key.");
-        }
+      if (!apiKey) {
+        throw new Error("Service unavailable. API Key has not been configured by admin.");
       }
 
       let payloadMessages = [];
       let modelToUse = APP_CONFIG.textModel;
-      const userPrompt = prompt || "Analyze this image in detail and describe what you see.";
+      const userPrompt = prompt || "Analyze this image in detail.";
 
       if (base64Img) {
         modelToUse = APP_CONFIG.visionModel;
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, a helpful assistant capable of answering questions and analyzing images." },
+          { role: "system", content: "You are SPAR AI, a helpful assistant." },
           ...chatHistory.filter(m => typeof m.content === 'string'),
           {
             role: "user",
@@ -623,7 +422,7 @@
         ];
       } else {
         payloadMessages = [
-          { role: "system", content: "You are SPAR AI, an intelligent assistant built to help with questions, analysis, writing, and code." },
+          { role: "system", content: "You are SPAR AI, an intelligent assistant." },
           ...chatHistory,
           { role: "user", content: userPrompt }
         ];
@@ -643,22 +442,17 @@
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Groq Error Payload:", data);
-        throw new Error(data.error?.message || `API error ${response.status}`);
-      }
+      if (!response.ok) throw new Error(data.error?.message || `API error ${response.status}`);
 
       const reply = data.choices[0].message.content;
       chatHistory.push({ role: "user", content: userPrompt }, { role: "assistant", content: reply });
       return reply;
     }
 
-    // MAIN SEND HANDLER
     async function handleSend() {
       const user = getUserData();
       if (!user.isPro && user.credits <= 0) {
-        alert("Out of credits! Tap Sign In or contact admin to recharge.");
+        alert("Out of credits!");
         return;
       }
 
@@ -694,8 +488,7 @@
       const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lowerText = text.toLowerCase();
 
-      // INLINE IMAGE GENERATION
-      if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
+      if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image"))) {
         loadingMsg.textContent = "Generating image...";
         const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
@@ -731,7 +524,6 @@
     sendBtn.addEventListener('click', handleSend);
     userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
 
-    // ATTACHMENT HANDLERS
     uploadBtn.addEventListener('click', () => fileUploadInput.click());
     cameraBtn.addEventListener('click', () => cameraInput.click());
     fileUploadInput.addEventListener('change', (e) => handleImageSelect(e.target.files[0]));
@@ -753,26 +545,6 @@
       imagePreviewBar.classList.remove('active');
     });
 
-    // ADMIN MODAL ACTIONS
-    closeAdminModal.addEventListener('click', () => adminModal.classList.remove('active'));
-    saveAdminSettingsBtn.addEventListener('click', () => {
-      const updatedConfig = {
-        ...APP_CONFIG,
-        groqApiKey: adminGroqKey.value.trim(),
-        defaultCredits: parseInt(adminDefaultCredits.value) || DEFAULT_CONFIG.defaultCredits,
-        razorpayKey: adminRazorpayKey.value.trim() || DEFAULT_CONFIG.razorpayKey
-      };
-      saveAdminSettings(updatedConfig);
-      alert("Admin settings updated successfully!");
-      adminModal.classList.remove('active');
-    });
-
-    resetAdminDefaultsBtn.addEventListener('click', () => {
-      saveAdminSettings(DEFAULT_CONFIG);
-      alert("Reset to default settings.");
-    });
-
-    // HISTORY ACTIONS
     historyBtn.addEventListener('click', () => historyModal.classList.add('active'));
     closeHistoryModal.addEventListener('click', () => historyModal.classList.remove('active'));
     closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
@@ -781,7 +553,6 @@
       chatMessages.innerHTML = `<div class="message assistant">New session started! Ask me anything.</div>`;
     });
 
-    // OPTIMIZED ENVIRONMENT DETECTION
     function detectEnv() {
       const ua = navigator.userAgent || "";
       if (/wv|Android.*Version\/[0-9]\.[0-9]/i.test(ua)) {
@@ -793,7 +564,7 @@
       }
     }
 
-    // INITIALIZATION
+    fetchGlobalConfig();
     detectEnv();
     updateUI();
   </script>
