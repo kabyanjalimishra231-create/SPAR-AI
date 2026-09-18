@@ -64,6 +64,7 @@
     .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.08); }
     .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
     .nav-btn.grok-mode { background: linear-gradient(90deg, #111827, #0f172a); border-color: var(--grok-neon); color: var(--grok-neon); font-weight: 700; box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+    .nav-btn.active-voice { background: var(--success); color: white; border-color: transparent; }
 
     /* MAIN CONTAINER & TABS */
     main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; z-index: 100; }
@@ -74,10 +75,14 @@
     .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
     .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 0.85rem; user-select: text; }
 
-    .message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; }
+    .message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; position: relative; }
     .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
     .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
     .message.system-error { align-self: center; background-color: #451a1a; color: #fca5a5; border: 1px solid var(--danger); font-size: 0.85rem; }
+
+    .msg-actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; justify-content: flex-end; }
+    .speaker-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; cursor: pointer; }
+    .speaker-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.15); }
 
     .preview-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 6px; display: block; border: 1px solid var(--border-color); }
     .generated-img { width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
@@ -101,7 +106,14 @@
     .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; user-select: text; }
     .chat-input:focus { border-color: var(--accent); }
 
-    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; transition: all 0.2s; }
+    .action-icon-btn.recording { background: #ef4444; color: white; border-color: #ef4444; animation: pulse 1.2s infinite; }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
 
     .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
     .send-btn.grok-btn { background: linear-gradient(135deg, #00f0ff, #3b82f6); color: black; font-weight: 800; }
@@ -148,6 +160,7 @@
         <div class="credit-badge" id="creditCounter">Credits: Syncing...</div>
       </div>
       <div class="nav-actions-group">
+        <button class="nav-btn" id="voiceToggleBtn" title="Toggle Voice Response">🔇 Voice: OFF</button>
         <button class="nav-btn grok-mode" id="toggleGrokModeBtn">⚡ Grok Studio</button>
         <button class="nav-btn" id="openSubModalBtn">💎 Upgrade</button>
         <button class="nav-btn" id="historyBtn">📜 History</button>
@@ -175,10 +188,11 @@
           <input type="file" id="fileUploadInput" accept="image/*" style="display:none;" />
           <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
 
+          <button class="action-icon-btn" id="micBtn" title="Voice Search">🎤</button>
           <button class="action-icon-btn" id="uploadBtn" title="Upload Image">📁</button>
           <button class="action-icon-btn" id="cameraBtn" title="Capture Image">📷</button>
 
-          <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI or type 'draw...'..." />
+          <input type="text" id="userInput" class="chat-input" placeholder="Ask SPAR AI or tap 🎤 to speak..." />
           <button class="send-btn" id="sendBtn">Send</button>
         </div>
       </div>
@@ -319,6 +333,9 @@
     const openAuthModalBtn = document.getElementById('openAuthModalBtn');
     const envBadge = document.getElementById('env-badge');
 
+    const micBtn = document.getElementById('micBtn');
+    const voiceToggleBtn = document.getElementById('voiceToggleBtn');
+
     const fileUploadInput = document.getElementById('fileUploadInput');
     const cameraInput = document.getElementById('cameraInput');
     const uploadBtn = document.getElementById('uploadBtn');
@@ -356,6 +373,78 @@
 
     let currentBase64Image = null;
     let chatHistory = [];
+    let isVoiceAnswerEnabled = false;
+    let recognition = null;
+    let isListening = false;
+
+    // SPEECH RECOGNITION (VOICE SEARCH) SETUP
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isListening = true;
+        micBtn.classList.add('recording');
+        userInput.placeholder = "Listening...";
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = Array.from(event.results)
+          .map(result => result[0].transcript)
+          .join('');
+        userInput.value = transcript;
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech Recognition Error:", event.error);
+        stopListening();
+      };
+
+      recognition.onend = () => {
+        stopListening();
+      };
+    } else {
+      micBtn.style.display = 'none';
+    }
+
+    function stopListening() {
+      isListening = false;
+      micBtn.classList.remove('recording');
+      userInput.placeholder = "Ask SPAR AI or tap 🎤 to speak...";
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (!recognition) return alert("Voice input is not supported on this browser.");
+      if (isListening) {
+        recognition.stop();
+      } else {
+        recognition.start();
+      }
+    });
+
+    // SPEECH SYNTHESIS (VOICE ANSWER) SETUP
+    voiceToggleBtn.addEventListener('click', () => {
+      isVoiceAnswerEnabled = !isVoiceAnswerEnabled;
+      voiceToggleBtn.classList.toggle('active-voice', isVoiceAnswerEnabled);
+      voiceToggleBtn.textContent = isVoiceAnswerEnabled ? "🔊 Voice: ON" : "🔇 Voice: OFF";
+      if (!isVoiceAnswerEnabled && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    });
+
+    function speakText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel(); // Stop ongoing speech
+
+      const cleanedText = text.replace(/<[^>]*>/g, '').replace(/[*_#`~]/g, '');
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      window.speechSynthesis.speak(utterance);
+    }
 
     // AUTOMATIC LIVE MODEL DISCOVERY FROM GROQ API
     async function refreshActiveModels() {
@@ -502,6 +591,7 @@
       img.onload = () => {
         grokPreviewBox.innerHTML = '';
         grokPreviewBox.appendChild(img);
+        if (isVoiceAnswerEnabled) speakText("Your Grok image has been generated.");
       };
       img.onerror = () => {
         grokPreviewBox.innerHTML = `<span style="color: var(--danger);">Failed to render image. Please try again.</span>`;
@@ -565,7 +655,6 @@
 
           const data = await response.json();
           if (!response.ok) {
-            // Skip decommissioned models automatically
             if (data.error?.message?.includes("decommissioned") || response.status === 404) {
               console.warn(`Model ${model} is decommissioned, skipping...`);
               continue;
@@ -636,13 +725,28 @@
           loadingMsg.innerHTML = `<p>Here is your generated image:</p>`;
           loadingMsg.appendChild(img);
           chatMessages.scrollTop = chatMessages.scrollHeight;
+          if (isVoiceAnswerEnabled) speakText("Here is your generated image.");
         };
         return;
       }
 
       try {
         const reply = await fetchAiResponse(text, imgToProcess);
-        loadingMsg.textContent = reply;
+        loadingMsg.innerHTML = reply;
+        
+        // Add manual listen button on assistant response
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'msg-actions';
+        const speakerBtn = document.createElement('button');
+        speakerBtn.className = 'speaker-btn';
+        speakerBtn.textContent = '🔊 Read Aloud';
+        speakerBtn.onclick = () => speakText(reply);
+        actionsDiv.appendChild(speakerBtn);
+        loadingMsg.appendChild(actionsDiv);
+
+        if (isVoiceAnswerEnabled) {
+          speakText(reply);
+        }
       } catch (err) {
         loadingMsg.className = "message system-error";
         loadingMsg.textContent = `Error: ${err.message}`;
@@ -688,6 +792,7 @@
     closeHistoryBtn.addEventListener('click', () => historyModal.classList.remove('active'));
     newChatBtn.addEventListener('click', () => {
       chatHistory = [];
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
       chatMessages.innerHTML = `<div class="message assistant">New session started! Ask me anything.</div>`;
     });
 
