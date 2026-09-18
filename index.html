@@ -3,19 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>SPAR AI - NextGen Studio</title>
+  <title>SPAR AI - NextGen 3D Studio</title>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     :root {
-      --bg-primary: #090d16;
-      --bg-secondary: #131b2e;
-      --bg-card: #1e293b;
+      --bg-primary: #070a12;
+      --bg-secondary: #0f1629;
+      --bg-card: #182238;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --accent: #6366f1;
       --accent-hover: #4f46e5;
       --grok-neon: #00f0ff;
-      --border-color: #334155;
+      --grok-glow: rgba(0, 240, 255, 0.35);
+      --border-color: #2e3d5a;
+      --border-glow: rgba(99, 102, 241, 0.3);
       --danger: #ef4444;
       --success: #10b981;
     }
@@ -38,7 +40,8 @@
 
     /* HEADER */
     header {
-      background-color: var(--bg-secondary);
+      background: linear-gradient(180deg, rgba(15, 22, 41, 0.95), rgba(7, 10, 18, 0.85));
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border-color);
       padding: 0.75rem 1rem;
       padding-top: calc(0.75rem + env(safe-area-inset-top));
@@ -49,98 +52,117 @@
       z-index: 100;
     }
     .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-    .brand { display: flex; align-items: center; gap: 0.5rem; user-select: none; cursor: pointer; }
-    .brand-logo { width: 34px; height: 34px; background: linear-gradient(135deg, var(--accent), var(--grok-neon)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 0.9rem; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
-    .brand-title { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em; }
+    .brand { display: flex; align-items: center; gap: 0.6rem; user-select: none; cursor: pointer; }
+    .brand-logo { 
+      width: 38px; height: 38px; 
+      background: linear-gradient(135deg, var(--accent), var(--grok-neon)); 
+      border-radius: 12px; 
+      display: flex; align-items: center; justify-content: center; 
+      font-weight: 900; color: white; font-size: 0.95rem; 
+      box-shadow: 0 0 16px var(--grok-glow); 
+    }
+    .brand-title { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(90deg, #ffffff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #1e293b; color: #94a3b8; font-weight: 600; border: 1px solid var(--border-color); }
+    .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; background: #182238; color: #94a3b8; font-weight: 600; border: 1px solid var(--border-color); }
 
     nav { display: flex; gap: 0.4rem; align-items: center; justify-content: space-between; flex-wrap: wrap; width: 100%; }
     .nav-status-group, .nav-actions-group { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
-    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 20px; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
-    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.6rem; border-radius: 20px; border: 1px solid var(--border-color); cursor: pointer; }
+    .credit-badge { font-size: 0.75rem; padding: 0.25rem 0.65rem; border-radius: 20px; background: rgba(99, 102, 241, 0.15); border: 1px solid var(--accent); color: #a5b4fc; font-weight: 600; white-space: nowrap; }
+    .user-badge { font-size: 0.75rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 0.3rem; background: var(--bg-card); padding: 0.25rem 0.65rem; border-radius: 20px; border: 1px solid var(--border-color); cursor: pointer; }
     
-    .nav-btn { background: transparent; color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.4rem 0.6rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 500; white-space: nowrap; transition: all 0.2s; }
-    .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.08); }
-    .nav-btn.primary { background: var(--accent); color: white; border-color: transparent; }
-    .nav-btn.grok-mode { background: linear-gradient(90deg, #111827, #0f172a); border-color: var(--grok-neon); color: var(--grok-neon); font-weight: 700; box-shadow: 0 0 10px rgba(0,240,255,0.2); }
+    .nav-btn { background: rgba(255, 255, 255, 0.03); color: var(--text-muted); border: 1px solid var(--border-color); padding: 0.45rem 0.75rem; border-radius: 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600; white-space: nowrap; transition: all 0.25s ease; }
+    .nav-btn:hover { color: var(--text-main); background: rgba(255, 255, 255, 0.1); border-color: rgba(255,255,255,0.2); }
+    .nav-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+    .nav-btn.grok-mode { background: linear-gradient(135deg, #091322, #0d1e36); border-color: var(--grok-neon); color: var(--grok-neon); font-weight: 800; box-shadow: 0 0 14px var(--grok-glow); }
     .nav-btn.active-voice { background: var(--success); color: white; border-color: transparent; }
 
     /* MAIN CONTAINER & TABS */
-    main { flex: 1; max-width: 900px; width: 100%; margin: 0 auto; padding: 0.5rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; z-index: 100; }
+    main { flex: 1; max-width: 960px; width: 100%; margin: 0 auto; padding: 0.75rem; display: flex; flex-direction: column; min-height: 0; overflow: hidden; z-index: 100; }
     .tab-content { display: none; flex: 1; flex-direction: column; min-height: 0; height: 100%; }
     .tab-content.active { display: flex; }
 
     /* CHAT CONTAINER */
-    .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 12px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
-    .chat-messages { flex: 1; padding: 1rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 0.85rem; user-select: text; }
+    .chat-container { background-color: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .chat-messages { flex: 1; padding: 1.25rem; overflow-y: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; gap: 1rem; user-select: text; }
 
-    .message { max-width: 85%; padding: 0.75rem 1rem; border-radius: 12px; line-height: 1.5; font-size: 0.92rem; white-space: pre-wrap; word-break: break-word; position: relative; }
-    .message.user { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 2px; }
-    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 2px; }
+    .message { max-width: 85%; padding: 0.85rem 1.1rem; border-radius: 14px; line-height: 1.55; font-size: 0.94rem; white-space: pre-wrap; word-break: break-word; position: relative; }
+    .message.user { align-self: flex-end; background: linear-gradient(135deg, #4f46e5, #6366f1); color: white; border-bottom-right-radius: 3px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25); }
+    .message.assistant { align-self: flex-start; background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); border-bottom-left-radius: 3px; }
     .message.system-error { align-self: center; background-color: #451a1a; color: #fca5a5; border: 1px solid var(--danger); font-size: 0.85rem; }
 
-    .msg-actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; justify-content: flex-end; }
-    .speaker-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; cursor: pointer; }
-    .speaker-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.15); }
+    .msg-actions { display: flex; gap: 0.4rem; margin-top: 0.6rem; justify-content: flex-end; }
+    .speaker-btn { background: rgba(255,255,255,0.06); border: 1px solid var(--border-color); color: var(--text-muted); border-radius: 6px; padding: 3px 8px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; }
+    .speaker-btn:hover { color: var(--text-main); background: rgba(255,255,255,0.18); }
 
-    .preview-img { max-width: 100%; max-height: 200px; border-radius: 8px; margin-bottom: 6px; display: block; border: 1px solid var(--border-color); }
-    .generated-img { width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid var(--border-color); display: block; }
+    .preview-img { max-width: 100%; max-height: 220px; border-radius: 10px; margin-bottom: 8px; display: block; border: 1px solid var(--border-color); }
+    .generated-img { width: 100%; border-radius: 12px; margin-top: 10px; border: 1px solid var(--border-color); display: block; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
 
-    /* GROK STUDIO DESIGN */
-    .grok-studio { background: #050811; border: 1px solid var(--grok-neon); border-radius: 12px; padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; }
-    .grok-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,240,255,0.2); padding-bottom: 0.5rem; }
-    .grok-title { color: var(--grok-neon); font-weight: 800; font-size: 1.1rem; letter-spacing: 1px; display: flex; align-items: center; gap: 0.5rem; }
-    .grok-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
-    .grok-select { background: #0f172a; border: 1px solid var(--border-color); color: white; padding: 0.5rem; border-radius: 8px; font-size: 0.8rem; outline: none; }
-    .grok-preview-box { flex: 1; background: #02040a; border: 1px dashed rgba(0,240,255,0.3); border-radius: 10px; min-height: 220px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+    /* ADVANCED GROK STUDIO DESIGN */
+    .grok-studio { background: linear-gradient(160deg, #030712, #0b1329); border: 1px solid var(--grok-neon); border-radius: 16px; padding: 1.2rem; flex: 1; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; box-shadow: 0 0 25px rgba(0, 240, 255, 0.15); }
+    .grok-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,240,255,0.25); padding-bottom: 0.75rem; }
+    .grok-title { color: var(--grok-neon); font-weight: 800; font-size: 1.2rem; letter-spacing: 1px; display: flex; align-items: center; gap: 0.5rem; text-shadow: 0 0 10px var(--grok-glow); }
+    
+    .grok-grid-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.75rem; }
+    .grok-field { display: flex; flex-direction: column; gap: 0.3rem; }
+    .grok-label { font-size: 0.75rem; color: var(--grok-neon); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .grok-select { background: #0b1426; border: 1px solid rgba(0, 240, 255, 0.3); color: white; padding: 0.6rem; border-radius: 10px; font-size: 0.82rem; outline: none; transition: 0.2s; }
+    .grok-select:focus { border-color: var(--grok-neon); box-shadow: 0 0 8px var(--grok-glow); }
+
+    .grok-quick-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.2rem; }
+    .tag-btn { background: rgba(0, 240, 255, 0.08); border: 1px solid rgba(0, 240, 255, 0.25); color: #7dd3fc; border-radius: 6px; padding: 0.25rem 0.55rem; font-size: 0.72rem; cursor: pointer; transition: 0.2s; font-weight: 600; }
+    .tag-btn:hover { background: rgba(0, 240, 255, 0.2); color: white; }
+
+    .grok-preview-box { flex: 1; background: #02050e; border: 1px dashed rgba(0,240,255,0.35); border-radius: 12px; min-height: 240px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
     .grok-preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
 
     /* INPUT BAR */
-    .image-preview-bar { display: none; padding: 0.5rem; background: var(--bg-primary); border-top: 1px solid var(--border-color); align-items: center; gap: 0.5rem; }
+    .image-preview-bar { display: none; padding: 0.6rem; background: var(--bg-primary); border-top: 1px solid var(--border-color); align-items: center; gap: 0.5rem; }
     .image-preview-bar.active { display: flex; }
-    .preview-thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; }
-    .remove-img-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+    .preview-thumb { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; }
+    .remove-img-btn { background: var(--danger); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
 
-    .chat-input-area { padding: 0.65rem; padding-bottom: calc(0.65rem + env(safe-area-inset-bottom)); background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.4rem; align-items: center; }
-    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.7rem 0.85rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; user-select: text; }
-    .chat-input:focus { border-color: var(--accent); }
+    .chat-input-area { padding: 0.75rem; padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); display: flex; gap: 0.5rem; align-items: center; }
+    .chat-input { flex: 1; background-color: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 10px; padding: 0.75rem 0.95rem; color: var(--text-main); outline: none; font-size: 16px; min-width: 0; user-select: text; transition: 0.2s; }
+    .chat-input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
 
-    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 8px; padding: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; transition: all 0.2s; }
+    .action-icon-btn { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-main); border-radius: 10px; padding: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; transition: all 0.2s; }
+    .action-icon-btn:hover { background: rgba(255, 255, 255, 0.1); }
     .action-icon-btn.recording { background: #ef4444; color: white; border-color: #ef4444; animation: pulse 1.2s infinite; }
 
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+      70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
 
-    .send-btn { background-color: var(--accent); color: white; border: none; padding: 0.7rem 1.1rem; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; flex-shrink: 0; }
-    .send-btn.grok-btn { background: linear-gradient(135deg, #00f0ff, #3b82f6); color: black; font-weight: 800; }
+    .send-btn { background: linear-gradient(135deg, var(--accent), var(--accent-hover)); color: white; border: none; padding: 0.75rem 1.25rem; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.92rem; flex-shrink: 0; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: 0.2s; }
+    .send-btn:hover { opacity: 0.95; transform: translateY(-1px); }
+    .send-btn.grok-btn { background: linear-gradient(135deg, #00f0ff, #3b82f6); color: #030712; font-weight: 900; box-shadow: 0 0 15px var(--grok-glow); }
 
     /* MODAL SYSTEM */
-    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px); z-index: 10000; justify-content: center; align-items: center; padding: 0.75rem; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center; padding: 0.75rem; }
     .modal-overlay.active { display: flex; }
-    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; width: 100%; max-width: 440px; padding: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); max-height: 90dvh; display: flex; flex-direction: column; overflow-y: auto; gap: 1.2rem; user-select: text; }
+    .modal-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 440px; padding: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-height: 90dvh; display: flex; flex-direction: column; overflow-y: auto; gap: 1.2rem; user-select: text; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
-    .modal-title { font-size: 1.2rem; font-weight: 700; }
+    .modal-title { font-size: 1.25rem; font-weight: 800; }
     .close-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; }
 
     .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
     .form-group label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
 
-    .sso-btn { width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-card); color: white; font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: background 0.2s; }
-    .sso-btn:hover { background: #475569; }
+    .sso-btn { width: 100%; padding: 0.8rem; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-card); color: white; font-weight: 600; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; gap: 0.6rem; cursor: pointer; transition: background 0.2s; }
+    .sso-btn:hover { background: #334155; }
     .auth-divider { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); font-size: 0.75rem; margin: 0.2rem 0; }
     .auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--border-color); }
 
     .history-list { overflow-y: auto; max-height: 250px; display: flex; flex-direction: column; gap: 0.6rem; }
 
     @media (min-width: 640px) {
-      header { padding: 0.75rem 1.5rem; flex-direction: row; justify-content: space-between; }
+      header { padding: 0.85rem 1.75rem; flex-direction: row; justify-content: space-between; }
       header .header-top { width: auto; }
       nav { width: auto; justify-content: flex-end; }
-      main { padding: 1rem; }
+      main { padding: 1.25rem; }
     }
   </style>
 </head>
@@ -201,35 +223,75 @@
     <div class="tab-content" id="grokTab">
       <div class="grok-studio">
         <div class="grok-header">
-          <div class="grok-title">⚡ GROK IMAGE LAB</div>
+          <div class="grok-title">⚡ GROK 3D & GRAPHICS LAB</div>
           <button class="nav-btn" id="exitGrokBtn">← Back to Chat</button>
         </div>
 
-        <div class="grok-controls">
-          <select id="grokStyleSelect" class="grok-select">
-            <option value="cinematic dark moody lighting">Style: Cinematic</option>
-            <option value="photorealistic 8k highly detailed">Style: Photorealistic</option>
-            <option value="cyberpunk neon futuristic aesthetics">Style: Cyberpunk</option>
-            <option value="anime vibrant render">Style: Anime</option>
-            <option value="surreal dark fantasy art">Style: Dark Fantasy</option>
-          </select>
-          <select id="grokRatioSelect" class="grok-select">
-            <option value="1024x1024">Aspect: Square (1:1)</option>
-            <option value="1280x720">Aspect: Landscape (16:9)</option>
-            <option value="720x1280">Aspect: Portrait (9:16)</option>
-          </select>
+        <!-- EXTENDED CONTROLS GRID -->
+        <div class="grok-grid-container">
+          <div class="grok-field">
+            <span class="grok-label">Art & Render Style</span>
+            <select id="grokStyleSelect" class="grok-select">
+              <option value="3D CGI character render, Pixar style, Unreal Engine 5 render, highly detailed model">3D CGI Render (Pixar/Disney)</option>
+              <option value="3D realistic render, Unreal Engine 5, Octane Render, 8K hyperdetailed physics">3D Unreal Engine 5 Render</option>
+              <option value="3D isometric game asset, Octane render, vibrant neon materials">3D Isometric Game Asset</option>
+              <option value="photorealistic 8k photo, shot on 35mm lens, realistic textures, highly detailed">Photorealistic 8K Ultra</option>
+              <option value="cyberpunk neon futuristic aesthetics, ray tracing reflections, highly detailed">Cyberpunk Neon</option>
+              <option value="anime vibrant render, Studio Ghibli inspired, high quality artwork">Vibrant Anime Art</option>
+              <option value="surreal dark fantasy art, dark moody lighting, cinematic masterpiece">Dark Fantasy Masterpiece</option>
+              <option value="digital oil painting, concept art, rich textures, artstation trending">Digital Concept Painting</option>
+              <option value="3D vector icon, clean glassy materials, gradient finish, minimal style">3D Glass Vector Icon</option>
+            </select>
+          </div>
+
+          <div class="grok-field">
+            <span class="grok-label">Quality & Resolution</span>
+            <select id="grokQualitySelect" class="grok-select">
+              <option value="masterpiece quality, 8k resolution, extreme details, ultra sharp focus">8K Masterpiece (Highest)</option>
+              <option value="4k resolution, high detailed textures, sharp clarity">4K Ultra Detail</option>
+              <option value="hd high quality render, crisp textures">HD Standard Quality</option>
+            </select>
+          </div>
+
+          <div class="grok-field">
+            <span class="grok-label">Lighting FX</span>
+            <select id="grokLightingSelect" class="grok-select">
+              <option value="ray-traced global illumination, volumetric studio lighting, dramatic glow">Ray-Traced Studio Light</option>
+              <option value="cinematic golden hour sun lighting, soft lens flare, dramatic shadows">Cinematic Golden Hour</option>
+              <option value="glowing vibrant neon rim lighting, dark high contrast background">Neon Rim Glow</option>
+              <option value="soft ambient light, diffused studio softbox, clean white reflections">Softbox Studio</option>
+            </select>
+          </div>
+
+          <div class="grok-field">
+            <span class="grok-label">Camera & Aspect Ratio</span>
+            <select id="grokRatioSelect" class="grok-select">
+              <option value="1024x1024">Square (1:1)</option>
+              <option value="1280x720">Landscape Wide (16:9)</option>
+              <option value="720x1280">Portrait Mobile (9:16)</option>
+              <option value="1280x540">Ultrawide Cinematic (21:9)</option>
+            </select>
+          </div>
         </div>
 
         <div class="grok-preview-box" id="grokPreviewBox">
-          <span style="color: var(--text-muted); font-size: 0.85rem;">Enter a prompt below to ignite Grok Image Studio</span>
+          <span style="color: var(--text-muted); font-size: 0.85rem;">Enter prompt below & trigger Grok 3D Render</span>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; flex-direction: column;">
-          <div style="display: flex; gap: 0.4rem;">
-            <input type="text" id="grokPromptInput" class="chat-input" style="border-color: rgba(0,240,255,0.4);" placeholder="Describe the image you want Grok to generate..." />
-            <button class="send-btn grok-btn" id="grokGenerateBtn">Generate</button>
+        <div style="display: flex; gap: 0.6rem; flex-direction: column;">
+          <div class="grok-quick-tags">
+            <span style="font-size:0.7rem; color: var(--text-muted); align-self: center;">Quick Enhancers:</span>
+            <button class="tag-btn" onclick="addTag('3D character model, Octane render')">+ 3D Model</button>
+            <button class="tag-btn" onclick="addTag('cyberpunk mechanical cyborg')">+ Cyber Cyborg</button>
+            <button class="tag-btn" onclick="addTag('futuristic sci-fi vehicle, hyper detailed')">+ Sci-Fi Vehicle</button>
+            <button class="tag-btn" onclick="addTag('fantasy creature, magical glowing aura')">+ Fantasy Creature</button>
           </div>
-          <button class="nav-btn" id="enhancePromptBtn" style="color: var(--grok-neon); border-color: rgba(0,240,255,0.3); font-size: 0.75rem;">✨ Enhance Prompt with AI</button>
+
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="grokPromptInput" class="chat-input" style="border-color: rgba(0,240,255,0.4);" placeholder="Describe the 3D scene, character, or graphic you want Grok to create..." />
+            <button class="send-btn grok-btn" id="grokGenerateBtn">Generate 3D</button>
+          </div>
+          <button class="nav-btn" id="enhancePromptBtn" style="color: var(--grok-neon); border-color: rgba(0,240,255,0.3); font-size: 0.75rem;">✨ Enhance Prompt with AI Ultra Boost</button>
         </div>
       </div>
     </div>
@@ -361,15 +423,11 @@
     const grokPromptInput = document.getElementById('grokPromptInput');
     const grokGenerateBtn = document.getElementById('grokGenerateBtn');
     const grokStyleSelect = document.getElementById('grokStyleSelect');
+    const grokQualitySelect = document.getElementById('grokQualitySelect');
+    const grokLightingSelect = document.getElementById('grokLightingSelect');
     const grokRatioSelect = document.getElementById('grokRatioSelect');
     const grokPreviewBox = document.getElementById('grokPreviewBox');
     const enhancePromptBtn = document.getElementById('enhancePromptBtn');
-
-    const historyModal = document.getElementById('historyModal');
-    const historyBtn = document.getElementById('historyBtn');
-    const closeHistoryModal = document.getElementById('closeHistoryModal');
-    const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-    const newChatBtn = document.getElementById('newChatBtn');
 
     let currentBase64Image = null;
     let chatHistory = [];
@@ -377,7 +435,16 @@
     let recognition = null;
     let isListening = false;
 
-    // SPEECH RECOGNITION (VOICE SEARCH) SETUP
+    // QUICK TAG ENHANCER FUNCTION
+    window.addTag = function(tagText) {
+      if (grokPromptInput.value.trim().length > 0) {
+        grokPromptInput.value += `, ${tagText}`;
+      } else {
+        grokPromptInput.value = tagText;
+      }
+    };
+
+    // SPEECH RECOGNITION SETUP
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
@@ -425,7 +492,7 @@
       }
     });
 
-    // SPEECH SYNTHESIS (VOICE ANSWER) SETUP
+    // SPEECH SYNTHESIS SETUP
     voiceToggleBtn.addEventListener('click', () => {
       isVoiceAnswerEnabled = !isVoiceAnswerEnabled;
       voiceToggleBtn.classList.toggle('active-voice', isVoiceAnswerEnabled);
@@ -437,7 +504,7 @@
 
     function speakText(text) {
       if (!('speechSynthesis' in window)) return;
-      window.speechSynthesis.cancel(); // Stop ongoing speech
+      window.speechSynthesis.cancel();
 
       const cleanedText = text.replace(/<[^>]*>/g, '').replace(/[*_#`~]/g, '');
       const utterance = new SpeechSynthesisUtterance(cleanedText);
@@ -446,7 +513,7 @@
       window.speechSynthesis.speak(utterance);
     }
 
-    // AUTOMATIC LIVE MODEL DISCOVERY FROM GROQ API
+    // AUTOMATIC LIVE MODEL DISCOVERY
     async function refreshActiveModels() {
       if (!GLOBAL_CONFIG.groqApiKey) return;
       try {
@@ -468,7 +535,7 @@
       }
     }
 
-    // FIRESTORE REALTIME CONFIG SYNC
+    // FIRESTORE CONFIG SYNC
     onSnapshot(doc(db, "app_config", "settings"), (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -576,34 +643,62 @@
       rzp.open();
     });
 
+    // HIGH QUALITY GROK GENERATOR
     grokGenerateBtn.addEventListener('click', async () => {
       const promptText = grokPromptInput.value.trim();
       if (!promptText) return;
 
       const style = grokStyleSelect.value;
+      const quality = grokQualitySelect.value;
+      const lighting = grokLightingSelect.value;
       const ratio = grokRatioSelect.value.split('x');
-      grokPreviewBox.innerHTML = `<span style="color: var(--grok-neon);">⚡ Grok is rendering your vision...</span>`;
 
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText + ', ' + style)}?width=${ratio[0]}&height=${ratio[1]}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+      grokPreviewBox.innerHTML = `<span style="color: var(--grok-neon); text-align: center;">⚡ Grok Engine Rendering 3D Scene...<br/><small style="color: #94a3b8;">Applying Octane Physics & Shader Textures</small></span>`;
+
+      // Synthesize high precision prompt
+      const fullPrompt = `${promptText}, ${style}, ${lighting}, ${quality}`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${ratio[0]}&height=${ratio[1]}&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
 
       const img = document.createElement('img');
       img.src = imageUrl;
       img.onload = () => {
         grokPreviewBox.innerHTML = '';
         grokPreviewBox.appendChild(img);
-        if (isVoiceAnswerEnabled) speakText("Your Grok image has been generated.");
+        if (isVoiceAnswerEnabled) speakText("Your high quality 3D Grok image has been generated.");
       };
       img.onerror = () => {
-        grokPreviewBox.innerHTML = `<span style="color: var(--danger);">Failed to render image. Please try again.</span>`;
+        grokPreviewBox.innerHTML = `<span style="color: var(--danger);">Failed to render high quality image. Please try again.</span>`;
       };
     });
 
     enhancePromptBtn.addEventListener('click', () => {
       const current = grokPromptInput.value.trim();
       if (current) {
-        grokPromptInput.value = `hyper-detailed futuristic cinematic masterwork of ${current}, highly detailed 8k rendering, dramatic lighting`;
+        grokPromptInput.value = `hyper-realistic 3D CGI masterpiece of ${current}, Unreal Engine 5 render, ray tracing reflections, Octane render 8k, photorealistic textures, dramatic volumetric studio lighting`;
       }
     });
+
+    // DUCKDUCKGO WEB SEARCH
+    async function fetchWebSearch(query) {
+      try {
+        const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`);
+        const data = await res.json();
+        
+        let searchContext = "";
+        if (data.AbstractText) {
+          searchContext += data.AbstractText + "\n";
+        }
+        if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+          data.RelatedTopics.slice(0, 4).forEach(item => {
+            if (item.Text) searchContext += `- ${item.Text}\n`;
+          });
+        }
+        return searchContext;
+      } catch (err) {
+        console.warn("Web search lookup omitted:", err);
+        return "";
+      }
+    }
 
     async function fetchAiResponse(prompt, base64Img) {
       if (!GLOBAL_CONFIG.groqApiKey) {
@@ -611,6 +706,17 @@
       }
 
       const userPrompt = prompt || "Analyze this image in detail.";
+      let liveContext = "";
+
+      if (!base64Img && prompt) {
+        liveContext = await fetchWebSearch(prompt);
+      }
+
+      const systemMessage = {
+        role: "system",
+        content: `${SYSTEM_FOUNDER_PROMPT} Current Year: 2026. Use the following real-time web context if relevant: ${liveContext}`
+      };
+
       let lastErr = null;
 
       const modelsToTry = base64Img 
@@ -622,7 +728,7 @@
           let payloadMessages = [];
           if (base64Img) {
             payloadMessages = [
-              { role: "system", content: SYSTEM_FOUNDER_PROMPT },
+              systemMessage,
               ...chatHistory.filter(m => typeof m.content === 'string'),
               {
                 role: "user",
@@ -634,7 +740,7 @@
             ];
           } else {
             payloadMessages = [
-              { role: "system", content: SYSTEM_FOUNDER_PROMPT },
+              systemMessage,
               ...chatHistory,
               { role: "user", content: userPrompt }
             ];
@@ -715,14 +821,14 @@
       const loadingMsg = appendMessage("Thinking...", 'assistant');
       const lowerText = text.toLowerCase();
 
-      if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image"))) {
-        loadingMsg.textContent = "Generating image...";
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
+      if (!imgToProcess && (lowerText.startsWith("draw") || lowerText.startsWith("create image") || lowerText.startsWith("generate image"))) {
+        loadingMsg.textContent = "Rendering image...";
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text + ', high quality 8k render') }?width=800&height=600&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
         const img = document.createElement('img');
         img.className = 'generated-img';
         img.src = imageUrl;
         img.onload = () => {
-          loadingMsg.innerHTML = `<p>Here is your generated image:</p>`;
+          loadingMsg.innerHTML = `<p>Here is your generated graphic:</p>`;
           loadingMsg.appendChild(img);
           chatMessages.scrollTop = chatMessages.scrollHeight;
           if (isVoiceAnswerEnabled) speakText("Here is your generated image.");
@@ -734,7 +840,6 @@
         const reply = await fetchAiResponse(text, imgToProcess);
         loadingMsg.innerHTML = reply;
         
-        // Add manual listen button on assistant response
         const actionsDiv = document.createElement('div');
         actionsDiv.className = 'msg-actions';
         const speakerBtn = document.createElement('button');
